@@ -2,10 +2,53 @@
 import React from 'react';
 import { StockNews, PricingPlan } from './types';
 
-export const Logo = ({ className = "w-10 h-10" }: { className?: string }) => (
-  <div className={`${className} bg-[#1fa84f] rounded-lg flex items-center justify-center font-bold text-slate-900`}>
-    S
-  </div>
+export const Logo = ({ className = "h-10", textColor = "white" }: { className?: string, textColor?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 330 120"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+  >
+    {/* Red zig-zag graph */}
+    <polyline
+      points="9,85 30,60 45,89 55,40 75,60 75,85"
+      fill="none"
+      stroke="#AF0002"
+      strokeWidth="10"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+
+    {/* Green arrow shaft */}
+    <line
+      x1="90"
+      y1="85"
+      x2="90"
+      y2="30"
+      stroke="#1FA84F"
+      strokeWidth="10"
+      strokeLinecap="round"
+    />
+
+    {/* Green arrow head */}
+    <polygon
+      points="95,15 75,30 105,32"
+      fill="#1FA84F"
+    />
+
+    {/* Brand name */}
+    <text
+      x="100"
+      y="82"
+      fontSize="52"
+      fontWeight="500"
+      letterSpacing="0.2"
+      fill={textColor}
+      fontFamily="'Inter', 'Noto Sans Devanagari', Arial, sans-serif"
+    >
+      stockमंच
+    </text>
+  </svg>
 );
 
 export const MOCK_NEWS: StockNews[] = [

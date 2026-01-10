@@ -27,12 +27,14 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing }) => {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-      isScrolled ? 'py-4 glass border-b shadow-2xl shadow-black/20' : 'py-6 bg-transparent'
+      isScrolled ? 'py-3 glass border-b shadow-2xl shadow-black/20' : 'py-5 bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <Logo className="w-8 h-8" />
-          <span className="text-2xl font-black text-white tracking-tighter italic uppercase">STOCKMANCH</span>
+        <div 
+          className="flex items-center cursor-pointer" 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          <Logo className="h-10 w-auto" />
         </div>
 
         <div className="hidden md:flex items-center space-x-10 text-sm font-semibold text-slate-400">
