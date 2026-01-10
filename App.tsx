@@ -79,7 +79,6 @@ const App: React.FC = () => {
       <main>
         <Hero onOpenPricing={() => scrollToSection('pricing')} />
 
-        {/* Reverted Features Section to Original Detailed Version */}
         <section id="features" className="py-24 bg-[#0b0f1a]">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
@@ -89,11 +88,11 @@ const App: React.FC = () => {
               <p className="text-slate-400 text-xl font-medium max-w-2xl mx-auto opacity-80">Powerful features designed to give you the ultimate edge in the stock market.</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
               {[
                 {
                   title: "Instant Alerts",
-                  desc: "Receive real-time stock market news and price alerts directly to your phone via Telegram, SMS, or app notification.",
+                  desc: "Receive real-time stock market news and price alerts delivered exclusively via our Telegram channel for maximum speed and accessibility.",
                   icon: (
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -102,7 +101,7 @@ const App: React.FC = () => {
                 },
                 {
                   title: "Live Dashboard",
-                  desc: "Access our comprehensive terminal to track market trends, view detailed analytics, and manage your watchlist in real-time.",
+                  desc: "An institutional-grade terminal featuring real-time news updates, historical archive access, and advanced news filtering for professional analysis.",
                   icon: (
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -111,7 +110,7 @@ const App: React.FC = () => {
                 },
                 {
                   title: "24/7 Monitoring",
-                  desc: "Our automated systems monitor every exchange announcement around the clock so you never miss a corporate action.",
+                  desc: "Our automated systems monitor every exchange announcement around the clock so you never miss a corporate action or regulatory filing.",
                   icon: (
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -120,7 +119,7 @@ const App: React.FC = () => {
                 },
                 {
                   title: "Mobile First",
-                  desc: "Optimized for high-speed delivery to mobile devices. Get alerts and access the terminal from anywhere on the planet.",
+                  desc: "Optimized for high-speed delivery to mobile devices. Get alerts and access your terminal from anywhere on the planet without latency.",
                   icon: (
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -128,17 +127,8 @@ const App: React.FC = () => {
                   )
                 },
                 {
-                  title: "Secure & Reliable",
-                  desc: "Enterprise-grade infrastructure ensures 99.9% uptime and zero missed alerts for your mission-critical trades.",
-                  icon: (
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  )
-                },
-                {
                   title: "AI Analysis",
-                  desc: "Every news piece is instantly analyzed by our proprietary AI for sentiment impact and historical significance.",
+                  desc: "Every news piece is instantly processed by our proprietary AI for sentiment impact, identifying bullish or bearish trends in seconds.",
                   icon: (
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -163,7 +153,7 @@ const App: React.FC = () => {
         <section id="pricing" className="py-24 bg-[#0b0f1a]">
           <div className="max-w-7xl mx-auto px-6 text-center">
             <h2 className="text-5xl font-black text-white mb-6 uppercase tracking-tighter">
-              Professional <span className="text-[#1fa84f]">Access</span>
+              Pricing & <span className="text-[#1fa84f]">Plans</span>
             </h2>
             <p className="text-slate-400 mb-20 text-lg font-medium">Choose the tier that powers your trading strategy.</p>
             
@@ -209,7 +199,7 @@ const App: React.FC = () => {
                     disabled={isJoining}
                     className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest transition-all ${
                       isActive 
-                        ? 'bg-[#1fa84f] text-slate-950 hover:bg-[#1fa84f]/90 shadow-2xl shadow-[#1fa84f]/20' 
+                        ? 'bg-[#1fa84f] text-slate-900 hover:bg-[#1fa84f]/90 shadow-2xl shadow-[#1fa84f]/20' 
                         : 'bg-slate-800 text-slate-400 hover:text-white border border-white/5'
                     } ${isJoining ? 'animate-pulse cursor-wait' : ''}`}
                   >
@@ -270,7 +260,7 @@ const App: React.FC = () => {
               <ul className="space-y-4 text-sm text-slate-500 font-medium">
                 <li><button onClick={() => scrollToSection('features')} className="hover:text-[#1fa84f] transition-colors">Core Features</button></li>
                 <li><button onClick={() => scrollToSection('dashboard')} className="hover:text-[#1fa84f] transition-colors">Terminal Demo</button></li>
-                <li><button onClick={() => setIsPricingOpen(true)} className="hover:text-[#1fa84f] transition-colors">Subscription Plans</button></li>
+                <li><button onClick={() => scrollToSection('pricing')} className="hover:text-[#1fa84f] transition-colors">Subscription Plans</button></li>
                 <li><button onClick={() => scrollToSection('alerts')} className="hover:text-[#1fa84f] transition-colors">Alert Dispatch</button></li>
               </ul>
             </div>
@@ -282,7 +272,6 @@ const App: React.FC = () => {
                 <li><button onClick={() => openLegal('privacy')} className="hover:text-[#1fa84f] transition-colors">Privacy Charter</button></li>
                 <li><button onClick={() => openLegal('terms')} className="hover:text-[#1fa84f] transition-colors">Terms of Usage</button></li>
                 <li><button onClick={() => openLegal('regulatory')} className="hover:text-[#1fa84f] transition-colors">Regulatory Policy</button></li>
-                <li><a href="#" className="hover:text-[#1fa84f] transition-colors">Cookie Policy</a></li>
               </ul>
             </div>
 
@@ -305,10 +294,6 @@ const App: React.FC = () => {
           <div className="pt-12 border-t border-white/5 text-center flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-[10px] text-slate-700 font-mono tracking-widest uppercase">
               © 2026 StockManch | Terminal Build v4.2.1 | Secure Enterprise System
-            </div>
-            <div className="flex space-x-8 text-[10px] text-slate-600 font-black uppercase tracking-[0.2em]">
-              <span className="flex items-center"><div className="w-1 h-1 bg-emerald-500 rounded-full mr-2"></div> NSE Live</span>
-              <span className="flex items-center"><div className="w-1 h-1 bg-emerald-500 rounded-full mr-2"></div> BSE Connected</span>
             </div>
           </div>
         </div>

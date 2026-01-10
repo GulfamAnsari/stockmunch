@@ -101,7 +101,7 @@ const AlertShowcase: React.FC = () => {
                     <div className="bg-[#182533] rounded-xl overflow-hidden border border-white/5">
                       <div className="aspect-square bg-white flex items-center justify-center p-8">
                         <img 
-                          src="/images/railtel.png" 
+                          src="images/railtel.png" 
                           alt="RailTel" 
                           className="max-w-full max-h-full object-contain" 
                         />
