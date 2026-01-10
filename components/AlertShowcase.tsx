@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 const AlertShowcase: React.FC = () => {
@@ -100,11 +101,11 @@ const AlertShowcase: React.FC = () => {
                     <div className="bg-[#182533] rounded-xl overflow-hidden border border-white/5">
                       <div className="aspect-square bg-white flex items-center justify-center p-8">
                         <img 
-                          src="/public/images/dump/placeholder.txt" 
+                          src="public/images/railtel.png" 
                           alt="RailTel" 
                           className="max-w-full max-h-full object-contain"
                           onError={(e) => {
-                            // Fallback if the dump placeholder isn't an actual image
+                            // Fallback if the image doesn't exist
                             (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/white/0b0f1a?text=RailTel+News';
                           }}
                         />
