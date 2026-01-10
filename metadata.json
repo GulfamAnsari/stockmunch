@@ -1,0 +1,8 @@
+{
+  "name": "StockMunch - Realtime Stock Market News Alerts",
+  "description": "StockManch provides on-time stock market alerts and an advanced news dashboard to help investors stay ahead of the curve.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
