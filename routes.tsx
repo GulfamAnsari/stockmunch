@@ -7,12 +7,12 @@ import TermsOfUsage from './pages/TermsOfUsage';
 import RegulatoryPolicy from './pages/RegulatoryPolicy';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
-import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import { PRICING_PLANS } from './constants';
 
 interface AppRoutesProps {
   onOpenPricing: () => void;
+  onScrollToSection: (id: string) => void;
   hoveredPlanId: string | null;
   setHoveredPlanId: (id: string | null) => void;
   journeyStep: Record<string, boolean>;
@@ -21,6 +21,7 @@ interface AppRoutesProps {
 
 const AppRoutes: React.FC<AppRoutesProps> = ({
   onOpenPricing,
+  onScrollToSection,
   hoveredPlanId,
   setHoveredPlanId,
   journeyStep,
@@ -33,6 +34,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
         element={
           <Home 
             onOpenPricing={onOpenPricing}
+            onScrollToSection={onScrollToSection}
             hoveredPlanId={hoveredPlanId}
             setHoveredPlanId={setHoveredPlanId}
             journeyStep={journeyStep}
@@ -46,7 +48,6 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
       <Route path="/privacy" element={<PrivacyCharter />} />
       <Route path="/terms" element={<TermsOfUsage />} />
       <Route path="/regulatory" element={<RegulatoryPolicy />} />
-      <Route path="/login" element={<Login />} />
       <Route path="/dashboard" element={<Dashboard />} />
     </Routes>
   );

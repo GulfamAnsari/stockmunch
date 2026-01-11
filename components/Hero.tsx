@@ -1,20 +1,12 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface HeroProps {
   onOpenPricing: () => void;
+  onScrollToSection: (id: string) => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ onOpenPricing }) => {
-  const navigate = useNavigate();
-
-  const scrollToSection = (e: React.MouseEvent, id: string) => {
-    e.preventDefault();
-    const element = document.getElementById(id);
-    if (element) element.scrollIntoView({ behavior: 'smooth' });
-  };
-
+const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-20">
       <div className="absolute inset-0 -z-10 bg-[#0b0f1a]">
@@ -57,19 +49,21 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing }) => {
           </button>
           
           <button 
-            onClick={() => navigate('/login')}
-            className="w-full sm:w-auto px-8 py-5 bg-transparent hover:bg-emerald-500/5 text-emerald-500 font-bold rounded-xl border border-emerald-500/50 transition-all flex items-center justify-center"
+            onClick={() => onScrollToSection('alerts')}
+            className="w-full sm:w-auto px-8 py-5 bg-transparent hover:bg-emerald-500/5 text-emerald-500 font-bold rounded-xl border border-emerald-500/50 transition-all flex items-center justify-center group"
           >
-            Institutional Login
+            Showcase Alerts
+            <svg className="w-4 h-4 ml-2 group-hover:translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
           </button>
 
-          <a 
-            href="#dashboard" 
-            onClick={(e) => scrollToSection(e, 'dashboard')}
+          <button 
+            onClick={() => onScrollToSection('dashboard')}
             className="w-full sm:w-auto px-8 py-5 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 font-bold rounded-xl border border-sky-500/30 transition-all flex items-center justify-center"
           >
             Terminal Preview
-          </a>
+          </button>
         </div>
 
         <div className="mt-24 flex justify-center animate-in fade-in slide-in-from-bottom-12 duration-700 delay-500">

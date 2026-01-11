@@ -1,12 +1,10 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import Hero from '../components/Hero';
 import Terminal from '../components/Terminal';
 import AlertShowcase from '../components/AlertShowcase';
 import { FAQ_DATA } from '../constants';
 
-// @google/genai fix: Using React.FC to properly handle the 'key' prop in list rendering
 const FAQItem: React.FC<{ question: string, answer: string }> = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
@@ -32,6 +30,7 @@ const FAQItem: React.FC<{ question: string, answer: string }> = ({ question, ans
 
 interface HomeProps {
   onOpenPricing: () => void;
+  onScrollToSection: (id: string) => void;
   hoveredPlanId: string | null;
   setHoveredPlanId: (id: string | null) => void;
   journeyStep: Record<string, boolean>;
@@ -41,6 +40,7 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ 
   onOpenPricing, 
+  onScrollToSection,
   hoveredPlanId, 
   setHoveredPlanId, 
   journeyStep, 
@@ -49,7 +49,10 @@ const Home: React.FC<HomeProps> = ({
 }) => {
   return (
     <>
-      <Hero onOpenPricing={onOpenPricing} />
+      <Hero 
+        onOpenPricing={onOpenPricing} 
+        onScrollToSection={onScrollToSection}
+      />
 
       <section id="features" className="py-24 bg-[#0b0f1a]">
         <div className="max-w-7xl mx-auto px-6">
@@ -153,7 +156,7 @@ const Home: React.FC<HomeProps> = ({
                   </div>
                   
                   {isActive && (
-                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-[#1fa84f] text-slate-950 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl animate-in fade-in slide-in-from-bottom-2">
+                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-[#1fa84f] text-slate-900 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl animate-in fade-in slide-in-from-bottom-2">
                       {hoveredPlanId ? 'Selected' : 'Best Value'}
                     </div>
                   )}
@@ -205,7 +208,6 @@ const Home: React.FC<HomeProps> = ({
         </div>
       </section>
 
-      {/* Terminal Showcase Section on Landing Page - High Fidelity Preview */}
       <section id="dashboard" className="py-24 bg-[#0b0f1a] border-t border-white/5">
          <div className="max-w-[1500px] mx-auto px-6 relative">
             <div className="mb-12 text-center">

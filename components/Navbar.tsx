@@ -5,10 +5,11 @@ import { Logo } from '../constants';
 
 interface NavbarProps {
   onOpenPricing: () => void;
+  onOpenLogin: () => void;
   onNavigateHome: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onNavigateHome }) => {
+const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onOpenLogin, onNavigateHome }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,9 +36,8 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onNavigateHome }) => {
     }
   };
 
-  // Do not show common Navbar on Dashboard and Login pages for a cleaner immersive experience
-  const isDashboardOrLogin = location.pathname === '/dashboard' || location.pathname === '/login';
-  if (isDashboardOrLogin) return null;
+  const isDashboard = location.pathname === '/dashboard';
+  if (isDashboard) return null;
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
@@ -57,15 +57,15 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onNavigateHome }) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Link 
-            to="/login"
+          <button 
+            onClick={onOpenLogin}
             className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center group"
           >
-            Terminal Login
+            Login
             <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-          </Link>
+          </button>
         </div>
       </div>
     </nav>

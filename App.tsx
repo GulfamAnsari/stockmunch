@@ -1,25 +1,28 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import AppRoutes from './routes';
 import PricingModal from './components/PricingModal';
 import TrialFlowModal from './components/TrialFlowModal';
+import LoginModal from './components/LoginModal';
 import { Logo, PRICING_PLANS } from './constants';
 
 const App: React.FC = () => {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string>('');
   const [hoveredPlanId, setHoveredPlanId] = useState<string | null>(null);
   const [journeyStep, setJourneyStep] = useState<Record<string, boolean>>({});
+  
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleStartJourney = (id: string) => {
     const plan = PRICING_PLANS.find(p => p.id === id);
     setSelectedPlan(plan?.name || 'Pro');
     setIsTrialModalOpen(true);
-    // Track attempt
     setJourneyStep(prev => ({ ...prev, [id]: true }));
     setTimeout(() => {
       setJourneyStep(prev => ({ ...prev, [id]: false }));
@@ -27,15 +30,20 @@ const App: React.FC = () => {
   };
 
   const scrollToSection = (id: string) => {
-    if (window.location.hash !== '#/') {
+    if (location.pathname !== '/') {
       navigate('/');
+      // Allow route transition to complete before searching for DOM element
       setTimeout(() => {
         const element = document.getElementById(id);
-        if (element) element.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 150);
     } else {
       const element = document.getElementById(id);
-      if (element) element.scrollIntoView({ behavior: 'smooth' });
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
@@ -61,12 +69,14 @@ const App: React.FC = () => {
     <div className="min-h-screen selection:bg-[#1fa84f]/30">
       <Navbar 
         onOpenPricing={() => scrollToSection('pricing')} 
+        onOpenLogin={() => setIsLoginModalOpen(true)}
         onNavigateHome={() => navigate('/')}
       />
       
       <main>
         <AppRoutes 
           onOpenPricing={() => scrollToSection('pricing')}
+          onScrollToSection={scrollToSection}
           hoveredPlanId={hoveredPlanId}
           setHoveredPlanId={setHoveredPlanId}
           journeyStep={journeyStep}
@@ -75,7 +85,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className="bg-[#0b0f1a] pt-24 pb-16 border-t border-white/5">
-        <div className="max-w-7xl auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
             {/* Branding Column */}
             <div className="space-y-8">
@@ -161,6 +171,7 @@ const App: React.FC = () => {
 
       <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} onSelectPlan={handleStartJourney} />
       <TrialFlowModal isOpen={isTrialModalOpen} onClose={() => setIsTrialModalOpen(false)} planName={selectedPlan} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </div>
   );
 };
