@@ -147,10 +147,18 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                         maxLength={1}
                         className="w-full h-16 bg-slate-900/50 border border-white/10 rounded-xl text-center text-2xl font-black text-emerald-500 focus:outline-none focus:border-emerald-500 transition-all"
                         placeholder="•"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Backspace' && !e.currentTarget.value && i > 0) {
+                            (e.currentTarget.previousElementSibling as HTMLInputElement)?.focus();
+                          }
+                        }}
                         onChange={(e) => {
-                          if(e.target.value && i < 5) (e.target.nextSibling as HTMLInputElement)?.focus();
+                          const val = e.target.value;
+                          if (val && i < 5) {
+                            (e.currentTarget.nextElementSibling as HTMLInputElement)?.focus();
+                          }
                           const newOtp = formData.otp.split('');
-                          newOtp[i] = e.target.value;
+                          newOtp[i] = val;
                           setFormData({...formData, otp: newOtp.join('')});
                         }}
                       />

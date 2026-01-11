@@ -104,7 +104,22 @@ const Login: React.FC = () => {
               <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1 text-center block">Enter 6-Digit Code</label>
               <div className="flex justify-between gap-2">
                 {Array(6).fill(0).map((_, i) => (
-                  <input key={i} maxLength={1} required className="w-12 h-14 bg-slate-950/50 border border-white/5 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500" />
+                  <input 
+                    key={i} 
+                    maxLength={1} 
+                    required 
+                    className="w-12 h-14 bg-slate-950/50 border border-white/5 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500" 
+                    onKeyDown={(e) => {
+                      if (e.key === 'Backspace' && !e.currentTarget.value && i > 0) {
+                        (e.currentTarget.previousElementSibling as HTMLInputElement)?.focus();
+                      }
+                    }}
+                    onChange={(e) => {
+                      if (e.target.value && i < 5) {
+                        (e.currentTarget.nextElementSibling as HTMLInputElement)?.focus();
+                      }
+                    }}
+                  />
                 ))}
               </div>
             </div>

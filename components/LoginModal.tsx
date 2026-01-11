@@ -125,6 +125,16 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                       required 
                       className="w-full h-14 bg-slate-950/50 border border-white/10 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 shadow-inner" 
                       placeholder="•"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Backspace' && !e.currentTarget.value && i > 0) {
+                          (e.currentTarget.previousElementSibling as HTMLInputElement)?.focus();
+                        }
+                      }}
+                      onChange={(e) => {
+                        if (e.target.value && i < 5) {
+                          (e.currentTarget.nextElementSibling as HTMLInputElement)?.focus();
+                        }
+                      }}
                     />
                   ))}
                 </div>

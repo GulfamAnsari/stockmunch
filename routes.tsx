@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import PrivacyCharter from './pages/PrivacyCharter';
 import TermsOfUsage from './pages/TermsOfUsage';
@@ -8,6 +8,7 @@ import RegulatoryPolicy from './pages/RegulatoryPolicy';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
 import { PRICING_PLANS } from './constants';
 
 interface AppRoutesProps {
@@ -48,7 +49,9 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
       <Route path="/privacy" element={<PrivacyCharter />} />
       <Route path="/terms" element={<TermsOfUsage />} />
       <Route path="/regulatory" element={<RegulatoryPolicy />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
