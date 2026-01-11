@@ -31,7 +31,8 @@ const TickerTape = () => {
   );
 };
 
-const NewsCard = ({ news, onAddToWatchlist }: { news: StockNews, onAddToWatchlist: (symbol: string) => void }) => {
+// @google/genai fix: Using React.FC to properly handle the 'key' prop in list rendering
+const NewsCard: React.FC<{ news: StockNews, onAddToWatchlist?: (symbol: string) => void }> = ({ news, onAddToWatchlist }) => {
   const getSentimentStyles = (sentiment: string) => {
     switch (sentiment) {
       case 'bullish':
@@ -81,12 +82,16 @@ const NewsCard = ({ news, onAddToWatchlist }: { news: StockNews, onAddToWatchlis
         </div>
 
         <footer className="mt-auto pt-3 flex items-center justify-between border-t border-white/5">
-          <button 
-            onClick={() => onAddToWatchlist(news.symbol)}
-            className="px-2 py-1 bg-white/5 hover:bg-emerald-500/10 hover:text-emerald-500 border border-white/10 rounded-md text-[8px] font-black uppercase tracking-widest transition-all"
-          >
-            + Watchlist
-          </button>
+          {onAddToWatchlist ? (
+            <button 
+              onClick={() => onAddToWatchlist(news.symbol)}
+              className="px-2 py-1 bg-white/5 hover:bg-emerald-500/10 hover:text-emerald-500 border border-white/10 rounded-md text-[8px] font-black uppercase tracking-widest transition-all"
+            >
+              + Watchlist
+            </button>
+          ) : (
+             <div className="w-4 h-4" />
+          )}
           <div className="flex items-center space-x-1">
             <span className="text-[8px] text-slate-600 uppercase font-bold mr-2">{news.source}</span>
             <button className="p-1.5 text-slate-600 hover:text-white hover:bg-slate-800 rounded transition-all">
@@ -115,8 +120,10 @@ const Terminal: React.FC = () => {
 
   return (
     <div className="w-full">
+      {/* Institutional Terminal Frame Showcase */}
       <section className="relative rounded-2xl overflow-hidden bg-[#0b0f1a] border border-white/10 shadow-[0_32px_80px_-16px_rgba(0,0,0,0.6)] animate-in fade-in slide-in-from-bottom-8 duration-1000">
         
+        {/* Terminal Window Header */}
         <header className="bg-[#161b27] border-b border-white/10 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="flex space-x-1.5">
@@ -148,9 +155,11 @@ const Terminal: React.FC = () => {
           </div>
         </header>
 
+        {/* Real-time Ticker Tape Component */}
         <TickerTape />
 
         <div className="p-8">
+          {/* Main Dashboard Filters & Search */}
           <nav className="flex flex-wrap items-center gap-4 mb-8">
             <div className="flex bg-slate-900/80 rounded-xl p-1 border border-white/5 shadow-inner">
               <button 
@@ -195,13 +204,19 @@ const Terminal: React.FC = () => {
             </div>
           </nav>
 
+          {/* Institutional Grid Layout - High Density */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {(activeTab === 'feeds' ? MOCK_NEWS : MOCK_NEWS.filter(n => watchlist.includes(n.symbol))).map((news) => (
               <NewsCard key={news.id} news={news} onAddToWatchlist={handleAddToWatchlist} />
             ))}
+            {/* Adding more cards to show the high-density terminal look for the preview */}
+            {activeTab === 'feeds' && MOCK_NEWS.map((news) => (
+              <NewsCard key={`fill-${news.id}`} news={{...news, id: `fill-${news.id}`, symbol: news.id === '1' ? 'TCS' : 'RELIANCE'}} onAddToWatchlist={handleAddToWatchlist} />
+            ))}
           </div>
         </div>
 
+        {/* Terminal Status Footer */}
         <footer className="bg-[#161b27] border-t border-white/10 px-8 py-3 flex items-center justify-between text-[9px] font-mono text-slate-600 tracking-wider">
            <div className="flex items-center space-x-8">
               <div className="flex items-center space-x-2">

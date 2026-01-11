@@ -6,7 +6,8 @@ import Terminal from '../components/Terminal';
 import AlertShowcase from '../components/AlertShowcase';
 import { FAQ_DATA } from '../constants';
 
-const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
+// @google/genai fix: Using React.FC to properly handle the 'key' prop in list rendering
+const FAQItem: React.FC<{ question: string, answer: string }> = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="border-b border-white/5 last:border-0">
