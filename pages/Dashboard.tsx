@@ -16,7 +16,7 @@ const Dashboard: React.FC = () => {
     email: 'harsh@terminal.com',
     planId: 'alerts-only',
     planName: 'Alerts Only',
-    hasDashboardAccess: false, // User only has the alerts plan
+    hasDashboardAccess: true, // User only has the alerts plan
     joinedAt: '12 Jan 2026'
   });
 
