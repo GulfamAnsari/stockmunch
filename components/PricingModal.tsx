@@ -6,9 +6,10 @@ import { PricingPlan } from '../types';
 interface PricingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSelectPlan: (id: string) => void;
 }
 
-const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
+const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onSelectPlan }) => {
   if (!isOpen) return null;
 
   return (
@@ -54,14 +55,19 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
                 <ul className="space-y-4 mb-8 flex-1">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start text-sm text-slate-300">
-                      <svg className="w-5 h-5 text-emerald-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className={`w-5 h-5 ${feature.includes('Trial') ? 'text-sky-400' : 'text-emerald-500'} mr-2 flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                       {feature}
                     </li>
                   ))}
                 </ul>
-                <button className={`w-full py-4 rounded-xl font-bold transition-all ${
+                <button 
+                  onClick={() => {
+                    onClose();
+                    onSelectPlan(plan.id);
+                  }}
+                  className={`w-full py-4 rounded-xl font-bold transition-all ${
                   plan.popular 
                     ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-900 shadow-lg shadow-emerald-500/25' 
                     : 'bg-white/10 hover:bg-white/20 text-white'

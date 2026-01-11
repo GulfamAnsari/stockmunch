@@ -156,9 +156,9 @@ export const PRICING_PLANS: PricingPlan[] = [
     price: 150,
     features: [
       '30-Day Free Trial',
-      'Real-time stock alerts',
-      'Telegram notification',
-      'Breaking news updates',
+      'Real-time Telegram alerts',
+      'Custom Alert Keywords',
+      'Instant Market Dispatch',
       'Email support'
     ],
     cta: 'Start Free Trial'
@@ -169,11 +169,11 @@ export const PRICING_PLANS: PricingPlan[] = [
     price: 150,
     features: [
       '30-Day Free Trial',
-      'Full dashboard access',
-      'Real time stock news updates',
-      'Historical data search',
-      'Email support',
-      'Advance filtering of news'
+      'Full Terminal access',
+      'Personal Watchlist',
+      'Historical archive (2 years)',
+      'Advanced News Filtering',
+      'Institutional Charting'
     ],
     cta: 'Start Free Trial'
   },
@@ -183,14 +183,12 @@ export const PRICING_PLANS: PricingPlan[] = [
     price: 250,
     features: [
       '30-Day Free Trial',
-      'Real-time stock alerts',
-      'Telegram notification',
-      'Breaking news updates',
-      'Full dashboard access',
-      'Real time stock news updates',
-      'Historical data search',
-      'Email support',
-      'Advance filtering of news'
+      'Real-time Telegram alerts',
+      'Full Terminal access',
+      'Personal Watchlist Pro',
+      'Sentiment Analysis AI',
+      'Priority Alert Dispatch',
+      'Unlimited Watchlist Slots'
     ],
     cta: 'Start Free Trial',
     popular: true
@@ -203,12 +201,12 @@ export const FAQ_DATA = [
     answer: "Our system is designed for near-instant delivery. Most alerts are processed and delivered within 50ms of the news break."
   },
   {
-    question: "Can I customize which stocks I get alerts for?",
-    answer: "Yes, our dashboard allows you to create custom watchlists and set specific criteria for alerts on any stock in our covered indices."
+    question: "When is WhatsApp integration coming?",
+    answer: "We are currently in the final testing phase of our WhatsApp API integration. It will be rolled out to all 'Alerts' subscribers within the next few weeks at no extra cost."
   },
   {
-    question: "What payment methods do you accept?",
-    answer: "We accept all major credit/debit cards, UPI, and net banking via our secure payment gateway."
+    question: "What is the Personal Watchlist?",
+    answer: "The Watchlist allows you to pin specific stocks to your terminal. You'll receive prioritized alerts and a dedicated news feed for only those companies."
   },
   {
     question: "Is there a free trial available?",
@@ -217,9 +215,5 @@ export const FAQ_DATA = [
   {
     question: "Can I cancel my subscription anytime?",
     answer: "Yes. You can cancel your subscription from your account settings at any time. If you are in the trial period, you won't be charged."
-  },
-  {
-    question: "How do I access the dashboard?",
-    answer: "Once you start your trial or subscribe, you can log in directly on StockManch.com to access your terminal."
   }
 ];

@@ -4,20 +4,26 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import AppRoutes from './routes';
 import PricingModal from './components/PricingModal';
-import { Logo } from './constants';
+import TrialFlowModal from './components/TrialFlowModal';
+import { Logo, PRICING_PLANS } from './constants';
 
 const App: React.FC = () => {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
+  const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string>('');
   const [hoveredPlanId, setHoveredPlanId] = useState<string | null>(null);
   const [journeyStep, setJourneyStep] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
 
   const handleStartJourney = (id: string) => {
+    const plan = PRICING_PLANS.find(p => p.id === id);
+    setSelectedPlan(plan?.name || 'Pro');
+    setIsTrialModalOpen(true);
+    // Track attempt
     setJourneyStep(prev => ({ ...prev, [id]: true }));
     setTimeout(() => {
       setJourneyStep(prev => ({ ...prev, [id]: false }));
-      alert(`Initiating your Next Journey for the ${id.replace('-', ' ')} plan! Redirecting to secure checkout...`);
-    }, 1500);
+    }, 500);
   };
 
   const scrollToSection = (id: string) => {
@@ -149,7 +155,8 @@ const App: React.FC = () => {
         </div>
       </footer>
 
-      <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} />
+      <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} onSelectPlan={handleStartJourney} />
+      <TrialFlowModal isOpen={isTrialModalOpen} onClose={() => setIsTrialModalOpen(false)} planName={selectedPlan} />
     </div>
   );
 };
