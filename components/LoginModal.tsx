@@ -110,7 +110,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin"></div>
-                ) : (method === 'OTP' ? 'Dispatch OTP' : 'System Login')}
+                ) : (method === 'OTP' ? 'Send OTP' : 'System Login')}
               </button>
             </form>
           ) : (
