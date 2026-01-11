@@ -131,10 +131,13 @@ const MarketTerminal: React.FC = () => {
   const [activeTab, setActiveTab] = useState('ALL FEEDS');
   const [news, setNews] = useState<StockNews[]>([]);
   const [loading, setLoading] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(false); // Changed to false initially
   const [sortOrder, setSortOrder] = useState<'TIME' | 'SENTIMENT' | 'CHANGE'>('TIME');
+  const [sentimentFilter, setSentimentFilter] = useState<'ALL' | 'BULLISH' | 'BEARISH'>('ALL');
+  const [timeRange, setTimeRange] = useState({ from: 0, to: 24 });
   const [watchlist, setWatchlist] = useState<any[]>([]);
   const [activeQuote, setActiveQuote] = useState<{symbol: string, price?: number, change?: number} | null>(null);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   const [fromDateInput, setFromDateInput] = useState('2026-01-11');
   const [toDateInput, setToDateInput] = useState('2026-01-12');
@@ -145,6 +148,7 @@ const MarketTerminal: React.FC = () => {
   }, []);
 
   const fetchNews = useCallback(async () => {
+    if (activeTab === 'WATCHLIST') return; 
     setLoading(true);
     try {
       const toApiDate = (d: string) => {
@@ -168,8 +172,9 @@ const MarketTerminal: React.FC = () => {
             content: item.data.body || '',
             timestamp: new Date(item.publishedAt).toLocaleString('en-IN', { 
               day: '2-digit', month: 'short', year: 'numeric', 
-              hour: '2-digit', minute: '2-digit', hour12: true 
+              hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
             }),
+            rawPublishedAt: item.publishedAt,
             priceChange: (Math.random() * 4 - 2), 
             sentiment: item.machineLearningSentiments?.label === 'negative' ? 'bearish' : 
                        item.machineLearningSentiments?.label === 'positive' ? 'bullish' : 'neutral',
@@ -187,7 +192,7 @@ const MarketTerminal: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [fromDateInput, toDateInput]);
+  }, [fromDateInput, toDateInput, activeTab]);
 
   useEffect(() => {
     fetchNews();
@@ -195,11 +200,11 @@ const MarketTerminal: React.FC = () => {
 
   useEffect(() => {
     let interval: number | undefined;
-    if (autoRefresh && !loading) {
+    if (autoRefresh && !loading && activeTab !== 'WATCHLIST') {
       interval = window.setInterval(fetchNews, 10000);
     }
     return () => clearInterval(interval);
-  }, [autoRefresh, loading, fetchNews]);
+  }, [autoRefresh, loading, fetchNews, activeTab]);
 
   const fetchPrice = async (symbol: string, bseCode?: string) => {
     try {
@@ -223,7 +228,6 @@ const MarketTerminal: React.FC = () => {
     const newWatchlist = [item, ...watchlist.filter(w => w.id !== item.id)];
     setWatchlist(newWatchlist);
     localStorage.setItem('stockmanch_watchlist', JSON.stringify(newWatchlist));
-    alert(`${item.symbol} categorized as ${item.userSentiment} and synced to watchlist node.`);
   };
 
   const removeFromWatchlist = (id: string) => {
@@ -244,8 +248,17 @@ const MarketTerminal: React.FC = () => {
       );
     }
 
+    if (sentimentFilter !== 'ALL') {
+      list = list.filter(n => n.sentiment.toUpperCase() === sentimentFilter);
+    }
+
+    list = list.filter(n => {
+      const hour = new Date(n.rawPublishedAt).getHours();
+      return hour >= timeRange.from && hour <= timeRange.to;
+    });
+
     if (sortOrder === 'TIME') {
-      list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      list.sort((a, b) => new Date(b.rawPublishedAt).getTime() - new Date(a.rawPublishedAt).getTime());
     } else if (sortOrder === 'SENTIMENT') {
       list.sort((a, b) => b.sentimentScore - a.sentimentScore);
     } else if (sortOrder === 'CHANGE') {
@@ -253,155 +266,181 @@ const MarketTerminal: React.FC = () => {
     }
 
     return list;
-  }, [news, watchlist, activeTab, searchTerm, sortOrder]);
+  }, [news, watchlist, activeTab, searchTerm, sortOrder, sentimentFilter, timeRange]);
 
   const copyAllTitles = () => {
     const content = processedNews.map(n => `${n.timestamp} | ${n.symbol} | ${n.title}`).join('\n');
     navigator.clipboard.writeText(content);
-    alert(`Station: ${processedNews.length} dispatch titles copied to clipboard.`);
+    alert(`Station: ${processedNews.length} dispatch titles copied.`);
   };
 
-  return (
-    <div className="w-full flex flex-col bg-[#0b0f1a] animate-in fade-in duration-700">
-      
-      {/* Terminal Status & Quick Controls */}
-      <div className="px-2 py-4 flex flex-wrap items-center justify-between gap-6 border-b border-white/10 mb-8 bg-black/5">
-        <div className="flex items-center space-x-6">
-          <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/5 shadow-inner">
-            {['ALL FEEDS', 'WATCHLIST'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all ${activeTab === tab ? 'bg-emerald-600 text-slate-950 shadow-lg' : 'text-slate-500 hover:text-white'}`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+  const isWatchlist = activeTab === 'WATCHLIST';
 
-          <div className="relative flex-grow min-w-[320px]">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <svg className="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <input 
-              type="text" 
-              placeholder="FILTER TERMINAL DATA..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-900/40 border border-white/5 rounded-xl pl-12 pr-6 py-3.5 text-[11px] text-white placeholder-slate-800 focus:outline-none focus:border-emerald-500/30 font-mono tracking-tight shadow-inner transition-all"
-            />
-          </div>
+  return (
+    <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a]">
+      
+      {/* Terminal Toolbar (Single Row Desktop Optimization) */}
+      <div className="px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/5 flex flex-nowrap items-center justify-between gap-4 overflow-x-auto no-scrollbar">
+        
+        {/* Navigation Tabs */}
+        <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/5 shadow-inner shrink-0">
+          {['ALL FEEDS', 'WATCHLIST'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => { setActiveTab(tab); setIsFilterPanelOpen(false); }}
+              className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === tab ? 'bg-emerald-600 text-slate-950 shadow-lg' : 'text-slate-500 hover:text-white'}`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
 
-        <div className="flex items-center space-x-6">
+        {/* Search Data */}
+        <div className="relative w-48 lg:w-64 shrink-0">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="w-3 h-3 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input 
+            type="text" 
+            placeholder="SEARCH DATA..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-slate-950 border border-white/5 rounded-lg pl-9 pr-3 py-2 text-[9px] text-white placeholder-slate-800 focus:outline-none focus:border-emerald-500/30 font-mono shadow-inner"
+          />
+        </div>
+
+        {/* Dynamic Controls (Date, Refresh, Auto-Sync) */}
+        {!isWatchlist && (
+          <div className="flex items-center space-x-3 shrink-0 px-4 border-l border-white/5">
+            <div className="flex items-center space-x-2">
+              <input 
+                type="date" 
+                value={fromDateInput} 
+                onChange={(e) => setFromDateInput(e.target.value)} 
+                className="bg-slate-950 border border-white/10 rounded-lg px-2 py-1.5 text-[8px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[100px]" 
+              />
+              <span className="text-slate-600 text-[9px]">→</span>
+              <input 
+                type="date" 
+                value={toDateInput} 
+                onChange={(e) => setToDateInput(e.target.value)} 
+                className="bg-slate-950 border border-white/10 rounded-lg px-2 py-1.5 text-[8px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[100px]" 
+              />
+              <button 
+                onClick={fetchNews} 
+                disabled={loading}
+                className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                title="Sync Feed"
+              >
+                <svg className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="flex items-center space-x-2 border-l border-white/5 pl-3">
+              <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Auto_Sync</span>
+              <button onClick={() => setAutoRefresh(!autoRefresh)} className={`relative inline-flex h-3.5 w-7 items-center rounded-full transition-colors ${autoRefresh ? 'bg-emerald-500' : 'bg-slate-800'}`}>
+                <span className={`inline-block h-2 w-2 transform rounded-full bg-white transition-transform ${autoRefresh ? 'translate-x-4' : 'translate-x-1'}`} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Quotes, Filters, and Copy */}
+        <div className="flex items-center space-x-3 shrink-0 ml-auto border-l border-white/5 pl-4">
           {activeQuote && (
-            <div className="flex items-center bg-sky-500/10 border border-sky-500/20 rounded-lg px-4 py-2 animate-in slide-in-from-right-4">
-              <span className="text-[10px] font-black text-white mr-2">{activeQuote.symbol}:</span>
-              <span className="text-[10px] font-mono text-white mr-2">{activeQuote.price || 'FETCHING...'}</span>
-              {activeQuote.change !== undefined && (
-                <span className={`text-[10px] font-bold ${activeQuote.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                  {activeQuote.change >= 0 ? '+' : ''}{activeQuote.change.toFixed(2)}
-                </span>
-              )}
-              <button onClick={() => setActiveQuote(null)} className="ml-3 text-slate-500 hover:text-white">✕</button>
+            <div className="flex items-center bg-sky-500/10 border border-sky-500/20 rounded-lg px-3 py-1.5 animate-in slide-in-from-right-4">
+              <span className="text-[8px] font-black text-white mr-2">{activeQuote.symbol}:</span>
+              <span className="text-[9px] font-mono text-white">{activeQuote.price || '...'}</span>
             </div>
           )}
-
-          <div className="flex items-center space-x-3 px-4 py-2.5 bg-slate-900/40 rounded-xl border border-white/5">
-            <div className={`w-2 h-2 ${autoRefresh ? 'bg-emerald-500 animate-pulse' : 'bg-slate-700'} rounded-full`}></div>
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">SYNC ACTIVE</span>
-          </div>
-
+          
           <button 
-            onClick={copyAllTitles}
-            className="p-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-all border border-white/5 shadow-xl"
-            title="Copy All Active Dispatches"
+            onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+            className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-1.5 ${isFilterPanelOpen ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-slate-900 border-white/5 text-slate-400 hover:text-white'}`}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            <span>Filters</span>
+          </button>
+
+          <button onClick={copyAllTitles} className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg border border-white/5 shadow-sm" title="Copy Dispatch Titles">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
             </svg>
           </button>
         </div>
       </div>
 
-      {/* Advanced Filters Block */}
-      <div className="px-2 mb-10 flex flex-wrap items-end justify-between gap-6">
-        <div className="flex flex-wrap items-center gap-6">
-           <div className="flex items-center space-x-4">
-              <div className="flex flex-col">
-                 <span className="text-[8px] font-black text-slate-600 uppercase mb-1 tracking-widest">START_DATE</span>
-                 <input 
-                  type="date" 
-                  value={fromDateInput} 
-                  onChange={(e) => setFromDateInput(e.target.value)}
-                  className="bg-slate-950/50 border border-white/10 rounded-lg px-3 py-1.5 text-[10px] text-white font-mono focus:outline-none focus:border-emerald-500 transition-colors"
-                 />
+      {/* Filter Panel (Sentiment, Time, Sort) */}
+      {isFilterPanelOpen && (
+        <div className="px-8 py-8 bg-[#0d121f] border-b border-white/10 space-y-8 animate-in slide-in-from-top-4 duration-300">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            
+            {/* Sentiment Filter */}
+            <div className="space-y-4">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">AI Sentiment Protocol</span>
+              <div className="flex items-center space-x-1 bg-slate-950 p-1.5 rounded-2xl border border-white/5 shadow-inner">
+                {['ALL', 'BULLISH', 'BEARISH'].map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setSentimentFilter(filter as any)}
+                    className={`flex-1 px-4 py-2.5 text-[9px] font-black rounded-xl transition-all ${sentimentFilter === filter ? 'bg-emerald-600 text-slate-950 shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                  >
+                    {filter}
+                  </button>
+                ))}
               </div>
-              <div className="flex flex-col">
-                 <span className="text-[8px] font-black text-slate-600 uppercase mb-1 tracking-widest">END_DATE</span>
-                 <input 
-                  type="date" 
-                  value={toDateInput} 
-                  onChange={(e) => setToDateInput(e.target.value)}
-                  className="bg-slate-950/50 border border-white/10 rounded-lg px-3 py-1.5 text-[10px] text-white font-mono focus:outline-none focus:border-emerald-500 transition-colors"
-                 />
-              </div>
-              <button 
-                onClick={fetchNews}
-                disabled={loading}
-                className="mt-4 px-6 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 text-[10px] font-black border border-emerald-500/30 rounded-lg transition-all disabled:opacity-50"
-              >
-                {loading ? 'REFETCHING...' : 'REFETCH'}
-              </button>
-           </div>
-           
-           <div className="h-8 w-px bg-white/5 mx-2"></div>
+            </div>
 
-           <div className="flex items-center space-x-3">
-              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Sort Protocol:</span>
-              <select 
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value as any)}
-                className="bg-slate-950/50 border border-white/10 rounded-lg px-3 py-2 text-[10px] text-white font-mono focus:outline-none focus:border-emerald-500 uppercase cursor-pointer transition-all"
-              >
-                <option value="TIME">Time (Newest)</option>
-                <option value="SENTIMENT">AI Sentiment Weight</option>
-                <option value="CHANGE">Volatility / % Change</option>
+            {/* Time Protocol */}
+            <div className="space-y-4">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Intraday Time Range</span>
+              <div className="flex items-center space-x-4 bg-slate-950 p-3 rounded-2xl border border-white/10 shadow-inner">
+                <div className="flex-1 flex flex-col space-y-2">
+                   <input type="range" min="0" max="23" value={timeRange.from} onChange={(e) => setTimeRange({ ...timeRange, from: parseInt(e.target.value) })} className="w-full accent-emerald-500" />
+                   <input type="range" min="0" max="24" value={timeRange.to} onChange={(e) => setTimeRange({ ...timeRange, to: parseInt(e.target.value) })} className="w-full accent-rose-500" />
+                </div>
+                <div className="flex flex-col items-center space-y-1 font-mono text-[10px] w-14">
+                  <span className="text-emerald-500">{timeRange.from.toString().padStart(2, '0')}:00</span>
+                  <span className="text-slate-700">TO</span>
+                  <span className="text-rose-500">{timeRange.to.toString().padStart(2, '0')}:00</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Sort Protocol */}
+            <div className="space-y-4">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Terminal Sort Method</span>
+              <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} className="w-full bg-slate-950 border border-white/10 rounded-2xl px-6 py-3.5 text-[11px] text-white font-mono uppercase focus:border-emerald-500 focus:outline-none shadow-inner">
+                <option value="TIME">Chronological Sync</option>
+                <option value="SENTIMENT">AI Confidence Score</option>
+                <option value="CHANGE">Intrinsic Volatility</option>
               </select>
-           </div>
-        </div>
+            </div>
 
-        <div className="flex items-center space-x-3 bg-slate-900/40 px-4 py-2 rounded-xl border border-white/5">
-             <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Auto 10s Refresh</span>
-             <button 
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${autoRefresh ? 'bg-emerald-500' : 'bg-slate-800'}`}
-             >
-               <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${autoRefresh ? 'translate-x-6' : 'translate-x-1'}`} />
-             </button>
           </div>
-      </div>
 
-      {/* Grid Container */}
-      <div className="min-h-[600px] px-1">
+          <div className="flex items-center justify-end pt-4 border-t border-white/5">
+            <button onClick={() => setIsFilterPanelOpen(false)} className="text-[9px] font-black text-slate-600 hover:text-white uppercase tracking-[0.2em] transition-colors">Collapse Filter Node</button>
+          </div>
+        </div>
+      )}
+
+      {/* Internal Scrollable Content Area */}
+      <div className="flex-grow overflow-y-auto px-8 py-8 custom-scrollbar bg-black/5">
         {loading && news.length === 0 ? (
-          <div className="h-96 flex flex-col items-center justify-center space-y-6 opacity-30">
+          <div className="h-full flex flex-col items-center justify-center space-y-6 opacity-30">
             <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-[12px] font-black uppercase tracking-[0.4em]">SYNCING TERMINAL DATA...</p>
+            <p className="text-[12px] font-black uppercase tracking-[0.4em]">Establishing Secure Feed...</p>
           </div>
         ) : processedNews.length === 0 ? (
-          <div className="h-96 flex flex-col items-center justify-center space-y-4">
-            <div className="opacity-20 flex flex-col items-center">
-              <svg className="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.726 2.179a2 2 0 01-1.9 1.36h-1.856a2 2 0 01-1.9-1.36l-.726-2.179a2 2 0 00-1.96-1.414l-2.387.477a2 2 0 00-1.022.547L2 18.428V21a1 1 0 001 1h18a1 1 0 001-1v-2.572l-2.572-3z" />
-              </svg>
-              <p className="text-xl font-black uppercase tracking-[0.3em]">No Match Found</p>
-            </div>
-            {activeTab === 'WATCHLIST' && (
-              <button onClick={() => setActiveTab('ALL FEEDS')} className="text-emerald-500 text-[10px] font-black uppercase tracking-widest hover:underline">Explore Public Feeds</button>
-            )}
+          <div className="h-full flex flex-col items-center justify-center text-center opacity-30">
+            <p className="text-xl font-black uppercase tracking-[0.3em]">No Match Found in Data Tunnel</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -409,17 +448,12 @@ const MarketTerminal: React.FC = () => {
               <div key={newsItem.id} className="relative">
                 <NewsCard 
                   news={newsItem} 
-                  onCopy={(text) => { navigator.clipboard.writeText(text); alert('Station: Item copied.'); }}
+                  onCopy={(text) => { navigator.clipboard.writeText(text); }}
                   onWatchlistAdd={handleWatchlistAdd}
                   fetchPrice={fetchPrice}
                 />
-                {activeTab === 'WATCHLIST' && (
-                  <button 
-                    onClick={() => removeFromWatchlist(newsItem.id)}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-lg hover:bg-rose-400 transition-all z-10"
-                  >
-                    ✕
-                  </button>
+                {isWatchlist && (
+                  <button onClick={() => removeFromWatchlist(newsItem.id)} className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-lg hover:scale-110 transition-all">✕</button>
                 )}
               </div>
             ))}
@@ -428,24 +462,20 @@ const MarketTerminal: React.FC = () => {
       </div>
 
       {/* Terminal Footer Status Bar */}
-      <footer className="mt-12 bg-[#111621] border-t border-white/5 px-8 py-3.5 flex items-center justify-between text-[9px] font-black font-mono text-slate-600 tracking-[0.2em] uppercase">
+      <footer className="shrink-0 bg-[#111621] border-t border-white/5 px-8 py-3.5 flex items-center justify-between text-[9px] font-black font-mono text-slate-600 tracking-[0.2em] uppercase">
         <div className="flex items-center space-x-10">
           <div className="flex items-center space-x-2">
-            <span className="text-emerald-500">TERMINAL:</span>
+            <span className="text-emerald-500 font-black">SYSTEM:</span>
             <span>READY</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-emerald-500">LOADED:</span>
-            <span>{processedNews.length} DISPATCHES</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-emerald-500">PING:</span>
-            <span>14ms</span>
+            <span className="text-emerald-500 font-black">STREAM:</span>
+            <span>{processedNews.length} SYNCED</span>
           </div>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 opacity-40"></div>
-          <span className="opacity-60 italic tracking-tight">STOCKMANCH STATION V5.1-STABLE</span>
+          <span className="opacity-60 italic tracking-tight uppercase">StockManch Station V5.6-STABLE</span>
         </div>
       </footer>
     </div>

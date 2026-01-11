@@ -3,10 +3,104 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MarketTerminal from '../components/MarketTerminal';
 import { User } from '../types';
+import { Logo } from '../constants';
+
+const OverviewSection: React.FC<{ user: User }> = ({ user }) => (
+  <div className="flex-grow overflow-y-auto p-8 custom-scrollbar space-y-8 animate-in fade-in duration-500">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="bg-[#111621] border border-white/5 p-8 rounded-3xl shadow-2xl">
+        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Node Health</p>
+        <div className="flex items-end justify-between">
+          <h3 className="text-4xl font-black text-white uppercase tracking-tighter">99.98%</h3>
+          <span className="text-emerald-500 text-[10px] font-bold">OPERATIONAL</span>
+        </div>
+      </div>
+      <div className="bg-[#111621] border border-white/5 p-8 rounded-3xl shadow-2xl">
+        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Active Plan</p>
+        <div className="flex items-end justify-between">
+          <h3 className="text-2xl font-black text-emerald-500 uppercase tracking-tighter">{user.planName}</h3>
+          <span className="text-slate-500 text-[10px] font-bold italic">RENEWS 12 FEB</span>
+        </div>
+      </div>
+      <div className="bg-[#111621] border border-white/5 p-8 rounded-3xl shadow-2xl">
+        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Alert Dispatch</p>
+        <div className="flex items-end justify-between">
+          <h3 className="text-4xl font-black text-white uppercase tracking-tighter">142</h3>
+          <span className="text-sky-500 text-[10px] font-bold">LAST 24H</span>
+        </div>
+      </div>
+    </div>
+
+    <div className="bg-[#111621] border border-white/5 rounded-3xl p-8 shadow-2xl overflow-hidden relative">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] rounded-full"></div>
+      <h3 className="text-lg font-black text-white uppercase tracking-widest mb-8 flex items-center">
+        <span className="w-2 h-2 bg-emerald-500 rounded-full mr-3 animate-pulse"></span>
+        Market Activity Heatmap
+      </h3>
+      <div className="grid grid-cols-12 gap-2 h-32">
+        {Array(24).fill(0).map((_, i) => (
+          <div key={i} className={`rounded-lg ${Math.random() > 0.5 ? 'bg-emerald-500/20' : 'bg-slate-800/40'} border border-white/5 flex items-center justify-center text-[8px] font-mono text-slate-600`}>
+            {i.toString().padStart(2, '0')}
+          </div>
+        ))}
+      </div>
+      <p className="mt-6 text-[11px] text-slate-500 font-medium">This heatmap displays peak news dispatch hours across the NSE/BSE ecosystem for your tracked sectors.</p>
+    </div>
+  </div>
+);
+
+const AccountSection: React.FC<{ user: User }> = ({ user }) => (
+  <div className="flex-grow overflow-y-auto p-8 custom-scrollbar space-y-8 animate-in fade-in duration-500">
+    <div className="max-w-3xl">
+      <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-8">Trader Profile</h3>
+      <div className="bg-[#111621] border border-white/5 rounded-3xl p-10 space-y-8 shadow-2xl">
+        <div className="flex items-center space-x-8">
+          <div className="w-24 h-24 bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] flex items-center justify-center text-3xl text-emerald-500 font-black">
+            {user.name.charAt(0)}
+          </div>
+          <div>
+            <h4 className="text-xl font-bold text-white mb-1">{user.name}</h4>
+            <p className="text-slate-500 font-mono text-sm">{user.email}</p>
+            <div className="mt-3 flex space-x-2">
+              <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-slate-400 uppercase tracking-widest">ID: {user.id}</span>
+              <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-emerald-500 uppercase tracking-widest">VERIFIED</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-white/5">
+          <div className="space-y-4">
+            <h5 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Contact Node</h5>
+            <div className="p-4 bg-slate-950/50 rounded-2xl border border-white/5 text-sm font-mono text-white">
+              {user.phone}
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h5 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Telegram Linking</h5>
+            <button className="w-full p-4 bg-[#0088cc]/10 hover:bg-[#0088cc]/20 border border-[#0088cc]/30 rounded-2xl text-[11px] font-black text-[#0088cc] uppercase tracking-widest transition-all text-left flex items-center justify-between">
+              Link @stockmanch_bot
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="pt-8 space-y-4">
+          <h5 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">System Security</h5>
+          <button className="px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black text-white uppercase tracking-widest transition-all">
+            Rotate Encryption Password
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'TERMINAL' | 'BILLING' | 'SETTINGS'>('TERMINAL');
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState<'overview' | 'terminal' | 'account'>('terminal');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const [user] = useState<User>({
     id: 'TRD-772',
@@ -20,7 +114,6 @@ const Dashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    window.scrollTo(0, 0);
     document.title = "Terminal Dashboard | StockManch";
   }, []);
 
@@ -28,127 +121,126 @@ const Dashboard: React.FC = () => {
     navigate('/login');
   };
 
+  const menuItems = [
+    { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+    { id: 'terminal', label: 'Market Terminal', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+    { id: 'account', label: 'Account Node', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+  ];
+
+  const sectionTitles = {
+    overview: 'Management Console',
+    terminal: 'Market Terminal',
+    account: 'Account Control'
+  };
+
   return (
-    <div className="min-h-screen bg-[#0b0f1a] flex text-slate-300">
-      {/* Sidebar Navigation */}
-      <aside className="w-80 bg-[#111621] border-r border-white/5 p-10 flex flex-col hidden lg:flex">
-        <div className="mb-12">
-           <div className="w-16 h-16 rounded-[1.5rem] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-2xl font-black mb-6">
-             {user.name.charAt(0)}
-           </div>
-           <h3 className="text-white font-black uppercase tracking-tighter text-xl">{user.name}</h3>
-           <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">{user.id}</p>
+    <div className="h-screen bg-[#0b0f1a] flex flex-col text-slate-300 overflow-hidden">
+      {/* Absolute Full Width Header */}
+      <header className="w-full bg-[#111621] px-8 py-4 flex items-center justify-between shrink-0 border-b border-white/10 z-20">
+        <div className="flex items-center space-x-8">
+          <Logo className="h-8 w-auto" />
+          <div className="h-6 w-px bg-white/10"></div>
+          <div>
+            <h2 className="text-white font-black uppercase tracking-tighter text-lg leading-none transition-all duration-300">
+              {sectionTitles[activeSection]}
+            </h2>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Station ID: {user.id}</p>
+          </div>
         </div>
 
-        <nav className="space-y-3 flex-grow">
-          {[
-            { id: 'OVERVIEW', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
-            { id: 'TERMINAL', label: 'Market Terminal', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
-            { id: 'BILLING', label: 'Plan & Billing', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
-            { id: 'SETTINGS', label: 'Profile Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
-          ].map((item) => (
+        <div className="flex items-center space-x-6">
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] font-black text-white uppercase tracking-tight">{user.name}</span>
+            <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest">{user.planName}</span>
+          </div>
+          <button 
+            onClick={handleLogout}
+            className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
+            title="System Logout"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      {/* Primary Layout Wrapper */}
+      <div className="flex-grow flex overflow-hidden">
+        {/* Sidebar Navigation */}
+        <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-20 lg:w-64'} bg-[#0d121f] border-r border-white/5 flex flex-col shrink-0 z-10 transition-all duration-300 relative`}>
+          <nav className="flex-grow py-8 px-4 space-y-4">
             <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
-              className={`w-full flex items-center px-6 py-4 rounded-2xl transition-all group ${activeTab === item.id ? 'bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-500/10' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="w-full flex items-center justify-center p-4 rounded-2xl text-slate-500 hover:text-white hover:bg-white/5 transition-all mb-4"
+              title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
             >
-              <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+              <svg className={`w-6 h-6 transition-transform duration-300 ${isSidebarCollapsed ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
               </svg>
-              <span className="uppercase text-[11px] tracking-widest">{item.label}</span>
             </button>
-          ))}
-        </nav>
 
-        <button 
-          onClick={handleLogout}
-          className="mt-12 flex items-center px-6 py-4 rounded-2xl text-slate-600 hover:text-rose-500 transition-colors uppercase text-[11px] font-black tracking-widest"
-        >
-          <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          System Logout
-        </button>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="flex-grow p-6 md:p-12 overflow-y-auto">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-          <div>
-            <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-2">
-              {activeTab.charAt(0) + activeTab.slice(1).toLowerCase()}
-            </h2>
-            <p className="text-slate-500 text-sm font-medium italic">Active Node Session: {Math.random().toString(16).slice(2, 8).toUpperCase()}</p>
-          </div>
-          <div className="flex items-center space-x-4">
-             <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-               <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Active Plan: {user.planName}</span>
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveSection(item.id as any)}
+                className={`w-full flex items-center space-x-4 p-4 rounded-2xl transition-all group ${activeSection === item.id ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/10 font-black' : 'text-slate-500 hover:text-white hover:bg-white/5 font-bold'}`}
+              >
+                <svg className="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                </svg>
+                <span className={`${isSidebarCollapsed ? 'hidden' : 'hidden lg:block'} uppercase tracking-widest text-[11px] truncate`}>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+          
+          <div className="p-6 border-t border-white/5">
+             <div className={`${isSidebarCollapsed ? 'hidden' : 'hidden lg:block'}`}>
+               <div className="flex items-center justify-between mb-2">
+                 <span className="text-[9px] font-black text-slate-600 uppercase">Usage Node</span>
+                 <span className="text-[9px] font-black text-emerald-500">82%</span>
+               </div>
+               <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                 <div className="w-[82%] h-full bg-emerald-500"></div>
+               </div>
              </div>
+             {isSidebarCollapsed && (
+               <div className="flex justify-center">
+                 <div className="w-1.5 h-10 bg-slate-900 rounded-full overflow-hidden border border-white/5 relative">
+                   <div className="absolute bottom-0 left-0 w-full h-[82%] bg-emerald-500"></div>
+                 </div>
+               </div>
+             )}
           </div>
-        </header>
+        </aside>
 
-        {activeTab === 'TERMINAL' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {user.hasDashboardAccess ? (
-              <MarketTerminal />
-            ) : (
-              <div className="bg-[#161b27] border border-white/5 p-20 rounded-[4rem] text-center max-w-4xl mx-auto shadow-2xl relative overflow-hidden group">
+        {/* Dynamic Content Panel */}
+        <main className="flex-grow flex flex-col min-w-0">
+          {user.hasDashboardAccess ? (
+            <>
+              {activeSection === 'terminal' && <MarketTerminal />}
+              {activeSection === 'overview' && <OverviewSection user={user} />}
+              {activeSection === 'account' && <AccountSection user={user} />}
+            </>
+          ) : (
+            <div className="flex-grow flex items-center justify-center p-12">
+              <div className="bg-[#161b27] border border-white/5 p-20 rounded-[4rem] text-center max-w-4xl shadow-2xl relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div className="w-24 h-24 bg-rose-500/10 border border-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-10 text-rose-500">
                   <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2-2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-                <h3 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">Terminal Access Denied</h3>
-                <p className="text-slate-400 text-lg font-medium mb-12 max-w-lg mx-auto">The institutional-grade market terminal is reserved for subscribers on the "Dashboard Only" or "Alerts + Dashboard" plans.</p>
-                <button 
-                  onClick={() => setActiveTab('BILLING')}
-                  className="px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-emerald-500/20"
-                >
+                <h3 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">Institutional Lock</h3>
+                <p className="text-slate-400 text-lg font-medium mb-12 max-w-lg mx-auto">This node is reserved for high-fidelity traders.</p>
+                <button className="px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all">
                   Upgrade Membership
                 </button>
               </div>
-            )}
-          </div>
-        )}
-
-        {/* ... Other tabs ... */}
-        {activeTab === 'OVERVIEW' && (
-          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-[#161b27] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                 <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6">Subscription Status</h4>
-                 <p className="text-2xl font-bold text-white mb-2 uppercase italic">{user.planName}</p>
-                 <p className="text-sm text-emerald-500 font-bold">Renewals on 12 Feb 2026</p>
-              </div>
-              <div className="bg-[#161b27] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                 <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6">Alert Delivery</h4>
-                 <p className="text-2xl font-bold text-white mb-2">Telegram Active</p>
-                 <p className="text-sm text-slate-500 font-bold uppercase tracking-tighter">@stockmanch_alerts</p>
-              </div>
-              <div className="bg-[#161b27] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                 <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6">Terminal Access</h4>
-                 <p className="text-2xl font-bold text-white mb-2">{user.hasDashboardAccess ? 'UNLOCKED' : 'LOCKED'}</p>
-                 <p className="text-sm text-slate-500 font-bold">Requires Bundle/Dashboard Plan</p>
-              </div>
             </div>
-          </div>
-        )}
-        
-        {activeTab === 'BILLING' && (
-           <div className="bg-[#161b27] p-10 rounded-[3rem] border border-white/5 shadow-2xl">
-             <h3 className="text-xl font-bold text-white mb-8 uppercase tracking-widest border-l-4 border-emerald-500 pl-4">Billing Protocol</h3>
-             <p className="text-slate-400 font-medium">Your account is currently in active standing under the {user.planName} tier.</p>
-           </div>
-        )}
-
-        {activeTab === 'SETTINGS' && (
-           <div className="bg-[#161b27] p-10 rounded-[3rem] border border-white/5 shadow-2xl">
-             <h3 className="text-xl font-bold text-white mb-8 uppercase tracking-widest border-l-4 border-emerald-500 pl-4">Security Configuration</h3>
-             <p className="text-slate-400 font-medium">Profile settings for {user.name} ({user.email}).</p>
-           </div>
-        )}
-      </main>
+          )}
+        </main>
+      </div>
     </div>
   );
 };
