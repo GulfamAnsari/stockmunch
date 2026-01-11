@@ -31,7 +31,7 @@ const TickerTape = () => {
   );
 };
 
-const NewsCard = ({ news, onAddToWatchlist }: { news: StockNews, onAddToWatchlist: (symbol: string) => void }) => {
+const NewsCard = ({ news }: { news: StockNews }) => {
   const getSentimentStyles = (sentiment: string) => {
     switch (sentiment) {
       case 'bullish':
@@ -87,16 +87,16 @@ const NewsCard = ({ news, onAddToWatchlist }: { news: StockNews, onAddToWatchlis
         {/* Source Footer */}
         <footer className="mt-auto pt-3 flex items-center justify-between border-t border-white/5">
           <div className="flex items-center space-x-2">
-            <button 
-              onClick={() => onAddToWatchlist(news.symbol)}
-              className="px-2 py-1 bg-white/5 hover:bg-emerald-500/10 hover:text-emerald-500 border border-white/10 rounded-md text-[8px] font-black uppercase tracking-widest transition-all"
-            >
-              + Watchlist
-            </button>
+            <span className="text-[8px] text-slate-600 uppercase font-bold tracking-tight">SRC:</span>
+            <span className="text-[9px] text-sky-400 font-bold tracking-tight">{news.source}</span>
           </div>
           <div className="flex items-center space-x-1">
-            <span className="text-[8px] text-slate-600 uppercase font-bold mr-2">{news.source}</span>
-            <button className="p-1.5 text-slate-600 hover:text-white hover:bg-slate-800 rounded transition-all">
+            <button className="p-1.5 text-slate-600 hover:text-white hover:bg-slate-800 rounded transition-all" aria-label="Save for later">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+            </button>
+            <button className="p-1.5 text-slate-600 hover:text-white hover:bg-slate-800 rounded transition-all" aria-label="Share news">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
@@ -111,21 +111,11 @@ const NewsCard = ({ news, onAddToWatchlist }: { news: StockNews, onAddToWatchlis
 const Dashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLive, setIsLive] = useState(true);
-  const [activeTab, setActiveTab] = useState('feeds');
-  const [watchlist, setWatchlist] = useState<string[]>([]);
-
-  const handleAddToWatchlist = (symbol: string) => {
-    if (!watchlist.includes(symbol)) {
-      setWatchlist([...watchlist, symbol]);
-      alert(`${symbol} added to your personal watchlist!`);
-    }
-  };
 
   return (
     <div className="w-full">
       {/* Institutional Terminal Frame Showcase */}
       <section className="relative rounded-2xl overflow-hidden bg-[#0b0f1a] border border-white/10 shadow-[0_32px_80px_-16px_rgba(0,0,0,0.6)] animate-in fade-in slide-in-from-bottom-8 duration-1000">
-        
         {/* Terminal Window Header */}
         <header className="bg-[#161b27] border-b border-white/10 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -137,20 +127,20 @@ const Dashboard: React.FC = () => {
             <div className="h-6 w-px bg-white/5 mx-2"></div>
             <div className="bg-slate-950/50 px-4 py-1.5 rounded-lg border border-white/5 text-[11px] text-slate-500 font-mono flex items-center space-x-2">
               <svg className="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2-2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span>stockmanch.com/terminal/v2</span>
+              <span>stockmanch.com/terminal/live-feed</span>
             </div>
           </div>
           <div className="flex items-center space-x-6">
              <div className="hidden lg:flex items-center space-x-3">
                 <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`}></div>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">NSE Live Feed</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Exchange: NSE Live</span>
              </div>
              <div className="h-5 w-px bg-white/10 hidden lg:block"></div>
              <div className="flex items-center space-x-3">
                 <div className="text-right hidden sm:block">
-                   <p className="text-[10px] font-black text-white leading-none uppercase">Terminal Access</p>
+                   <p className="text-[10px] font-black text-white leading-none">Trader Dashboard</p>
                    <p className="text-[9px] text-emerald-500 font-bold opacity-60 uppercase">PRO MEMBER</p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-[10px] text-emerald-500 font-bold shadow-lg shadow-emerald-500/5">SM</div>
@@ -163,21 +153,11 @@ const Dashboard: React.FC = () => {
 
         <div className="p-8">
           {/* Main Dashboard Filters & Search */}
-          <nav className="flex flex-wrap items-center gap-4 mb-8">
+          <nav className="flex flex-wrap items-center gap-4 mb-8" aria-label="Terminal filters">
             <div className="flex bg-slate-900/80 rounded-xl p-1 border border-white/5 shadow-inner">
-              <button 
-                onClick={() => setActiveTab('feeds')}
-                className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === 'feeds' ? 'bg-emerald-600 text-slate-950 shadow-xl shadow-emerald-500/10' : 'text-slate-500 hover:text-white'}`}
-              >
-                All Feeds
-              </button>
-              <button 
-                onClick={() => setActiveTab('watchlist')}
-                className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all flex items-center ${activeTab === 'watchlist' ? 'bg-emerald-600 text-slate-950 shadow-xl shadow-emerald-500/10' : 'text-slate-500 hover:text-white'}`}
-              >
-                Watchlist
-                {watchlist.length > 0 && <span className="ml-2 w-4 h-4 bg-slate-950 text-emerald-500 rounded-full flex items-center justify-center text-[8px] font-black">{watchlist.length}</span>}
-              </button>
+              <button className="px-6 py-2 text-[10px] font-black uppercase tracking-widest bg-emerald-600 text-slate-950 rounded-lg shadow-xl shadow-emerald-500/10">All Feeds</button>
+              <button className="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">Watchlist</button>
+              <button className="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all">Analysis</button>
             </div>
 
             <div className="h-8 w-px bg-white/10 hidden md:block"></div>
@@ -188,56 +168,62 @@ const Dashboard: React.FC = () => {
               </svg>
               <input 
                 type="text" 
-                placeholder="SYMBOL OR KEYWORD SEARCH..." 
+                placeholder="FILTER TERMINAL BY SYMBOL OR CONTENT..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-slate-900/40 border border-white/5 rounded-xl pl-12 pr-4 py-3 text-[11px] text-white placeholder-slate-700 focus:outline-none focus:border-emerald-500/40 transition-all font-mono tracking-tight"
+                aria-label="Filter terminal"
               />
             </div>
 
             <div className="ml-auto flex items-center gap-4">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-slate-900 border border-white/5 rounded-xl text-[10px] font-black text-slate-400 hover:text-white hover:border-white/10 transition-all uppercase tracking-widest" aria-label="Toggle Advanced Filters">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+                <span>Filters</span>
+              </button>
               <button 
                 onClick={() => setIsLive(!isLive)}
                 className={`flex items-center space-x-3 px-6 py-2.5 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest shadow-xl ${isLive ? 'bg-emerald-500 text-slate-950 shadow-emerald-500/10' : 'bg-slate-800 text-slate-400'}`}
               >
                 <div className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-slate-950 animate-pulse' : 'bg-slate-600'}`}></div>
-                <span>{isLive ? 'Live' : 'Paused'}</span>
+                <span>{isLive ? 'Terminal Live' : 'Feed Paused'}</span>
               </button>
             </div>
           </nav>
 
           {/* Institutional Grid Layout */}
-          {activeTab === 'watchlist' && watchlist.length === 0 ? (
-            <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-3xl">
-              <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-tight">Your Watchlist is Empty</h3>
-              <p className="text-slate-500 text-sm max-w-xs mx-auto mb-8 font-medium">Add stocks to your watchlist from the main feed to track them specifically.</p>
-              <button onClick={() => setActiveTab('feeds')} className="px-8 py-3 bg-emerald-500 text-slate-950 text-xs font-black uppercase tracking-widest rounded-xl">Browse All Feeds</button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {(activeTab === 'feeds' ? MOCK_NEWS : MOCK_NEWS.filter(n => watchlist.includes(n.symbol))).map((news) => (
-                <NewsCard key={news.id} news={news} onAddToWatchlist={handleAddToWatchlist} />
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {MOCK_NEWS.map((news) => (
+              <NewsCard key={news.id} news={news} />
+            ))}
+            {/* Adding more cards to show the high-density terminal look */}
+            {MOCK_NEWS.map((news) => (
+              <NewsCard key={`fill-${news.id}`} news={{...news, id: `fill-${news.id}`, symbol: news.id === '1' ? 'TCS' : 'RELIANCE'}} />
+            ))}
+          </div>
         </div>
 
         {/* Terminal Status Footer */}
         <footer className="bg-[#161b27] border-t border-white/10 px-8 py-3 flex items-center justify-between text-[9px] font-mono text-slate-600 tracking-wider">
            <div className="flex items-center space-x-8">
               <div className="flex items-center space-x-2">
-                 <span className="text-emerald-500 font-black">NODE:</span>
-                 <span>MUM-01-SECURE</span>
+                 <span className="text-emerald-500 font-black">CORE:</span>
+                 <span>OPERATIONAL</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                 <span className="text-emerald-500 font-black">LATENCY:</span>
+                 <span>18ms</span>
+              </div>
+              <div className="hidden lg:flex items-center space-x-2">
+                 <span className="text-emerald-500 font-black">UPTIME:</span>
+                 <span>99.98%</span>
               </div>
            </div>
            <div className="flex items-center space-x-2">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/40"></div>
-              <span className="uppercase opacity-60">StockManch Terminal v4.2.1-STABLE</span>
+              <span className="uppercase opacity-60">StockManch Terminal Showcase v4.1.0</span>
            </div>
         </footer>
       </section>
