@@ -2,34 +2,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { StockNews } from '../types';
 
-const TickerTape = () => {
-  const stocks = [
-    { symbol: 'BHARTIARTL', price: '1,120.45', change: '+0.5%' },
-    { symbol: 'SBIN', price: '612.90', change: '+1.7%' },
-    { symbol: 'RELIANCE', price: '2,543.20', change: '+1.2%' },
-    { symbol: 'TCS', price: '3,890.45', change: '-0.4%' },
-    { symbol: 'HDFCBANK', price: '1,678.10', change: '+0.8%' },
-    { symbol: 'INFY', price: '1,512.00', change: '+2.1%' },
-    { symbol: 'ICICIBANK', price: '987.30', change: '-1.1%' },
-  ];
-
-  return (
-    <div className="w-full bg-[#0b0f1a] border-y border-white/5 py-2 overflow-hidden whitespace-nowrap">
-      <div className="inline-block animate-marquee">
-        {Array(3).fill(stocks).flat().map((stock, i) => (
-          <span key={i} className="inline-flex items-center mx-6 space-x-2">
-            <span className="text-[10px] font-black text-white tracking-tighter uppercase">{stock.symbol}</span>
-            <span className="text-[10px] font-mono text-slate-400">{stock.price}</span>
-            <span className={`text-[9px] font-bold ${stock.change.startsWith('+') ? 'text-emerald-500' : 'text-rose-500'}`}>
-              {stock.change}
-            </span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 const NewsCard: React.FC<{ 
   news: StockNews; 
   onCopy: (text: string) => void;
@@ -167,7 +139,6 @@ const MarketTerminal: React.FC = () => {
   const [fromDateInput, setFromDateInput] = useState('2026-01-11');
   const [toDateInput, setToDateInput] = useState('2026-01-12');
 
-  // Load Watchlist
   useEffect(() => {
     const saved = localStorage.getItem('stockmanch_watchlist');
     if (saved) setWatchlist(JSON.parse(saved));
@@ -232,7 +203,6 @@ const MarketTerminal: React.FC = () => {
 
   const fetchPrice = async (symbol: string, bseCode?: string) => {
     try {
-      // Prioritize BSE code for the requested price API as seen in example
       const querySymbol = bseCode ? `${bseCode}.BO` : `${symbol}.NS`;
       setActiveQuote({ symbol, price: undefined });
       const resp = await fetch(`https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`);
@@ -292,57 +262,11 @@ const MarketTerminal: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col bg-[#0b0f1a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_32px_120px_-20px_rgba(0,0,0,0.8)] animate-in fade-in slide-in-from-bottom-8 duration-1000">
+    <div className="w-full flex flex-col bg-[#0b0f1a] animate-in fade-in duration-700">
       
-      {/* 1. Terminal Window Bar */}
-      <div className="bg-[#161b27] border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="flex space-x-2">
-            <div className="w-3 h-3 rounded-full bg-rose-500/20 border border-rose-500/40"></div>
-            <div className="w-3 h-3 rounded-full bg-amber-500/20 border border-amber-500/40"></div>
-            <div className="w-3 h-3 rounded-full bg-emerald-500/20 border border-emerald-500/40"></div>
-          </div>
-          <div className="h-6 w-px bg-white/5 mx-2"></div>
-          <div className="bg-slate-950/60 px-5 py-2 rounded-xl border border-white/5 text-[11px] text-slate-500 font-mono flex items-center shadow-inner min-w-[320px]">
-            <span className="opacity-60">stockmanch.com/terminal/dashboard</span>
-          </div>
-        </div>
-        
-        {activeQuote && (
-          <div className="flex items-center bg-sky-500/10 border border-sky-500/20 rounded-lg px-4 py-1.5 animate-in slide-in-from-top-4">
-            <span className="text-[10px] font-black text-white mr-2">{activeQuote.symbol}:</span>
-            <span className="text-[10px] font-mono text-white mr-2">{activeQuote.price || 'FETCHING...'}</span>
-            {activeQuote.change !== undefined && (
-              <span className={`text-[10px] font-bold ${activeQuote.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                {activeQuote.change >= 0 ? '+' : ''}{activeQuote.change.toFixed(2)}
-              </span>
-            )}
-            <button onClick={() => setActiveQuote(null)} className="ml-3 text-slate-500 hover:text-white">✕</button>
-          </div>
-        )}
-
+      {/* Terminal Status & Quick Controls */}
+      <div className="px-2 py-4 flex flex-wrap items-center justify-between gap-6 border-b border-white/10 mb-8 bg-black/5">
         <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-3">
-            <div className={`w-2 h-2 ${autoRefresh ? 'bg-emerald-500 animate-pulse' : 'bg-slate-700'} rounded-full`}></div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-              {autoRefresh ? 'STATION SYNC: ACTIVE' : 'STATION SYNC: PAUSED'}
-            </span>
-          </div>
-          <div className="flex items-center space-x-4 border-l border-white/10 pl-6">
-             <div className="text-right">
-                <p className="text-[10px] font-black text-white leading-none uppercase tracking-tight">Harsh Vardhan</p>
-                <p className="text-[9px] text-emerald-500 font-bold opacity-70 uppercase tracking-tighter">TRD-772</p>
-             </div>
-             <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-[11px] font-black text-emerald-500 uppercase">HV</div>
-          </div>
-        </div>
-      </div>
-
-      <TickerTape />
-
-      {/* Terminal Controls */}
-      <div className="px-8 py-8 flex flex-col space-y-6 bg-black/10">
-        <div className="flex flex-wrap items-center gap-6">
           <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/5 shadow-inner">
             {['ALL FEEDS', 'WATCHLIST'].map((tab) => (
               <button
@@ -355,7 +279,7 @@ const MarketTerminal: React.FC = () => {
             ))}
           </div>
 
-          <div className="relative flex-grow max-w-lg">
+          <div className="relative flex-grow min-w-[320px]">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <svg className="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -363,35 +287,48 @@ const MarketTerminal: React.FC = () => {
             </div>
             <input 
               type="text" 
-              placeholder="SEARCH DISPATCH BY SYMBOL, NAME OR KEYWORD..." 
+              placeholder="FILTER TERMINAL DATA..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-slate-900/40 border border-white/5 rounded-xl pl-12 pr-6 py-3.5 text-[11px] text-white placeholder-slate-800 focus:outline-none focus:border-emerald-500/30 font-mono tracking-tight shadow-inner transition-all"
             />
           </div>
+        </div>
 
-          <div className="flex items-center space-x-3 bg-slate-900/40 px-4 py-2 rounded-xl border border-white/5">
-             <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Auto 10s</span>
-             <button 
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${autoRefresh ? 'bg-emerald-500' : 'bg-slate-800'}`}
-             >
-               <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${autoRefresh ? 'translate-x-6' : 'translate-x-1'}`} />
-             </button>
+        <div className="flex items-center space-x-6">
+          {activeQuote && (
+            <div className="flex items-center bg-sky-500/10 border border-sky-500/20 rounded-lg px-4 py-2 animate-in slide-in-from-right-4">
+              <span className="text-[10px] font-black text-white mr-2">{activeQuote.symbol}:</span>
+              <span className="text-[10px] font-mono text-white mr-2">{activeQuote.price || 'FETCHING...'}</span>
+              {activeQuote.change !== undefined && (
+                <span className={`text-[10px] font-bold ${activeQuote.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  {activeQuote.change >= 0 ? '+' : ''}{activeQuote.change.toFixed(2)}
+                </span>
+              )}
+              <button onClick={() => setActiveQuote(null)} className="ml-3 text-slate-500 hover:text-white">✕</button>
+            </div>
+          )}
+
+          <div className="flex items-center space-x-3 px-4 py-2.5 bg-slate-900/40 rounded-xl border border-white/5">
+            <div className={`w-2 h-2 ${autoRefresh ? 'bg-emerald-500 animate-pulse' : 'bg-slate-700'} rounded-full`}></div>
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">SYNC ACTIVE</span>
           </div>
 
           <button 
             onClick={copyAllTitles}
-            className="px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all flex items-center space-x-3 border border-white/5"
+            className="p-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-all border border-white/5 shadow-xl"
+            title="Copy All Active Dispatches"
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
             </svg>
-            <span>COPY ALL DISPATCH</span>
           </button>
         </div>
+      </div>
 
-        <div className="flex flex-wrap items-center gap-6 pt-2 border-t border-white/5">
+      {/* Advanced Filters Block */}
+      <div className="px-2 mb-10 flex flex-wrap items-end justify-between gap-6">
+        <div className="flex flex-wrap items-center gap-6">
            <div className="flex items-center space-x-4">
               <div className="flex flex-col">
                  <span className="text-[8px] font-black text-slate-600 uppercase mb-1 tracking-widest">START_DATE</span>
@@ -416,7 +353,7 @@ const MarketTerminal: React.FC = () => {
                 disabled={loading}
                 className="mt-4 px-6 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 text-[10px] font-black border border-emerald-500/30 rounded-lg transition-all disabled:opacity-50"
               >
-                {loading ? 'SYNCING...' : 'REFETCH'}
+                {loading ? 'REFETCHING...' : 'REFETCH'}
               </button>
            </div>
            
@@ -435,14 +372,24 @@ const MarketTerminal: React.FC = () => {
               </select>
            </div>
         </div>
+
+        <div className="flex items-center space-x-3 bg-slate-900/40 px-4 py-2 rounded-xl border border-white/5">
+             <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Auto 10s Refresh</span>
+             <button 
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${autoRefresh ? 'bg-emerald-500' : 'bg-slate-800'}`}
+             >
+               <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${autoRefresh ? 'translate-x-6' : 'translate-x-1'}`} />
+             </button>
+          </div>
       </div>
 
-      {/* Grid */}
-      <div className="px-8 pb-12 min-h-[600px]">
+      {/* Grid Container */}
+      <div className="min-h-[600px] px-1">
         {loading && news.length === 0 ? (
           <div className="h-96 flex flex-col items-center justify-center space-y-6 opacity-30">
             <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-[12px] font-black uppercase tracking-[0.4em]">Establishing Secure Data Tunnel...</p>
+            <p className="text-[12px] font-black uppercase tracking-[0.4em]">SYNCING TERMINAL DATA...</p>
           </div>
         ) : processedNews.length === 0 ? (
           <div className="h-96 flex flex-col items-center justify-center space-y-4">
@@ -450,19 +397,19 @@ const MarketTerminal: React.FC = () => {
               <svg className="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.726 2.179a2 2 0 01-1.9 1.36h-1.856a2 2 0 01-1.9-1.36l-.726-2.179a2 2 0 00-1.96-1.414l-2.387.477a2 2 0 00-1.022.547L2 18.428V21a1 1 0 001 1h18a1 1 0 001-1v-2.572l-2.572-3z" />
               </svg>
-              <p className="text-xl font-black uppercase tracking-[0.3em]">No Station Match Detected</p>
+              <p className="text-xl font-black uppercase tracking-[0.3em]">No Match Found</p>
             </div>
             {activeTab === 'WATCHLIST' && (
-              <button onClick={() => setActiveTab('ALL FEEDS')} className="text-emerald-500 text-[10px] font-black uppercase tracking-widest hover:underline">Browse Main Feed</button>
+              <button onClick={() => setActiveTab('ALL FEEDS')} className="text-emerald-500 text-[10px] font-black uppercase tracking-widest hover:underline">Explore Public Feeds</button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-700">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {processedNews.map((newsItem) => (
               <div key={newsItem.id} className="relative">
                 <NewsCard 
                   news={newsItem} 
-                  onCopy={(text) => { navigator.clipboard.writeText(text); alert('Station: Data copied.'); }}
+                  onCopy={(text) => { navigator.clipboard.writeText(text); alert('Station: Item copied.'); }}
                   onWatchlistAdd={handleWatchlistAdd}
                   fetchPrice={fetchPrice}
                 />
@@ -470,15 +417,9 @@ const MarketTerminal: React.FC = () => {
                   <button 
                     onClick={() => removeFromWatchlist(newsItem.id)}
                     className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-lg hover:bg-rose-400 transition-all z-10"
-                    title="Remove from Station Watchlist"
                   >
                     ✕
                   </button>
-                )}
-                {activeTab === 'WATCHLIST' && (newsItem as any).userSentiment && (
-                  <div className={`absolute top-2 right-2 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest shadow-lg ${(newsItem as any).userSentiment === 'BULLISH' ? 'bg-emerald-500 text-slate-950' : 'bg-rose-500 text-white'}`}>
-                    {(newsItem as any).userSentiment}
-                  </div>
                 )}
               </div>
             ))}
@@ -486,22 +427,25 @@ const MarketTerminal: React.FC = () => {
         )}
       </div>
 
-      <footer className="bg-[#111621] border-t border-white/5 px-8 py-3.5 flex items-center justify-between text-[9px] font-black font-mono text-slate-600 tracking-[0.2em] uppercase">
+      {/* Terminal Footer Status Bar */}
+      <footer className="mt-12 bg-[#111621] border-t border-white/5 px-8 py-3.5 flex items-center justify-between text-[9px] font-black font-mono text-slate-600 tracking-[0.2em] uppercase">
         <div className="flex items-center space-x-10">
           <div className="flex items-center space-x-2">
-            <span className="text-emerald-500">ENGINE_STATUS:</span>
-            <span>OPERATIONAL</span>
+            <span className="text-emerald-500">TERMINAL:</span>
+            <span>READY</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-emerald-500">DISPATCHES:</span>
-            <span>{processedNews.length} SYNCED</span>
+            <span className="text-emerald-500">LOADED:</span>
+            <span>{processedNews.length} DISPATCHES</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-emerald-500">PING:</span>
+            <span>14ms</span>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 opacity-40"></div>
-            <span className="opacity-60 italic">STOCKMANCH TERMINAL V5.0.0-STABLE</span>
-          </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 opacity-40"></div>
+          <span className="opacity-60 italic tracking-tight">STOCKMANCH STATION V5.1-STABLE</span>
         </div>
       </footer>
     </div>
