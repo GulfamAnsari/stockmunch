@@ -137,7 +137,6 @@ export const MOCK_NEWS: StockNews[] = [
     logoColor: 'bg-orange-600'
   }
 ];
-
 export const MOCK_CHART_DATA = [
   { time: '09:15', price: 2450 },
   { time: '10:00', price: 2465 },
