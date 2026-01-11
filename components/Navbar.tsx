@@ -1,13 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Logo } from '../constants';
 
 interface NavbarProps {
   onOpenPricing: () => void;
+  onNavigateHome: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onOpenPricing }) => {
+const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onNavigateHome }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,11 +21,18 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, target: string) => {
+  const handleSectionClick = (e: React.MouseEvent, target: string) => {
     e.preventDefault();
-    const element = document.getElementById(target);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    if (location.pathname !== '/') {
+      navigate('/');
+      // Timeout to ensure routing finishes before scrolling
+      setTimeout(() => {
+        const element = document.getElementById(target);
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
+    } else {
+      const element = document.getElementById(target);
+      if (element) element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -30,22 +41,19 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing }) => {
       isScrolled ? 'py-3 glass border-b shadow-2xl shadow-black/20' : 'py-5 bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-        <div 
-          className="flex items-center cursor-pointer" 
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        >
+        <Link to="/" className="flex items-center">
           <Logo className="h-10 w-auto" />
-        </div>
+        </Link>
 
         <div className="hidden md:flex items-center space-x-10 text-sm font-semibold text-slate-400">
-          <a href="#features" onClick={(e) => handleLinkClick(e, 'features')} className="hover:text-emerald-500 transition-colors">Features</a>
-          <a href="#pricing" onClick={(e) => handleLinkClick(e, 'pricing')} className="hover:text-emerald-500 transition-colors">Pricing</a>
-          <a href="#faq" onClick={(e) => handleLinkClick(e, 'faq')} className="hover:text-emerald-500 transition-colors">FAQ</a>
+          <a href="#features" onClick={(e) => handleSectionClick(e, 'features')} className="hover:text-emerald-500 transition-colors">Features</a>
+          <a href="#pricing" onClick={(e) => handleSectionClick(e, 'pricing')} className="hover:text-emerald-500 transition-colors">Pricing</a>
+          <a href="#faq" onClick={(e) => handleSectionClick(e, 'faq')} className="hover:text-emerald-500 transition-colors">FAQ</a>
         </div>
 
         <div className="flex items-center space-x-4">
           <button 
-            onClick={(e) => handleLinkClick(e, 'dashboard')}
+            onClick={(e) => handleSectionClick(e, 'dashboard')}
             className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-sm font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/20 flex items-center group"
           >
             Go to Dashboard

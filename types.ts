@@ -28,3 +28,10 @@ export enum SubscriptionView {
   DASHBOARD = 'DASHBOARD',
   BUNDLE = 'BUNDLE'
 }
+
+export enum PageView {
+  HOME = 'HOME',
+  PRIVACY = 'PRIVACY',
+  TERMS = 'TERMS',
+  REGULATORY = 'REGULATORY'
+}
