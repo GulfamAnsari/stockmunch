@@ -23,15 +23,24 @@ export interface PricingPlan {
   popular?: boolean;
 }
 
-export enum SubscriptionView {
-  ALERTS = 'ALERTS',
-  DASHBOARD = 'DASHBOARD',
-  BUNDLE = 'BUNDLE'
+export interface User {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  planId: string;
+  planName: string;
+  hasDashboardAccess: boolean;
+  joinedAt: string;
 }
 
 export enum PageView {
   HOME = 'HOME',
   PRIVACY = 'PRIVACY',
   TERMS = 'TERMS',
-  REGULATORY = 'REGULATORY'
+  REGULATORY = 'REGULATORY',
+  ABOUT = 'ABOUT',
+  CONTACT = 'CONTACT',
+  LOGIN = 'LOGIN',
+  DASHBOARD = 'DASHBOARD'
 }

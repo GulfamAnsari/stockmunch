@@ -75,7 +75,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className="bg-[#0b0f1a] pt-24 pb-16 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
             {/* Branding Column */}
             <div className="space-y-8">
@@ -110,8 +110,13 @@ const App: React.FC = () => {
               </ul>
             </div>
 
-            {/* Legal Links */}
+            {/* Company & Legal Links */}
             <div>
+              <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-8 border-l-2 border-emerald-500 pl-3">Company</h4>
+              <ul className="space-y-4 text-sm text-slate-500 font-medium mb-8">
+                <li><Link to="/about" className="hover:text-emerald-500 transition-colors block">Our Mission</Link></li>
+                <li><Link to="/contact" className="hover:text-emerald-500 transition-colors block">Contact Us</Link></li>
+              </ul>
               <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-8 border-l-2 border-emerald-500 pl-3">Legal</h4>
               <ul className="space-y-4 text-sm text-slate-500 font-medium">
                 <li><Link to="/privacy" className="hover:text-emerald-500 transition-colors block">Privacy Charter</Link></li>
@@ -131,7 +136,6 @@ const App: React.FC = () => {
                   support@stockmanch.com
                 </li>
                 <li><button onClick={() => scrollToSection('faq')} className="hover:text-emerald-500 transition-colors text-left w-full">Help Center / FAQ</button></li>
-                <li><a href="#" className="hover:text-emerald-500 transition-colors block">Telegram Live Support</a></li>
               </ul>
             </div>
           </div>

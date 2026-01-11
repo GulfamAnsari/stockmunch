@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Hero from '../components/Hero';
-import Dashboard from '../components/Dashboard';
+import Terminal from '../components/Terminal';
 import AlertShowcase from '../components/AlertShowcase';
 import { FAQ_DATA } from '../constants';
 
@@ -62,7 +63,7 @@ const Home: React.FC<HomeProps> = ({
             {[
               {
                 title: "Instant Alerts",
-                desc: "Receive real-time news alerts delivered via Telegram. WhatsApp integration is currently in beta for selected users.",
+                desc: "Receive real-time news alerts delivered via Telegram. Our high-speed dispatch engine ensures news hits your device the second it breaks.",
                 icon: (
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -128,7 +129,7 @@ const Home: React.FC<HomeProps> = ({
           <h2 className="text-5xl font-black text-white mb-6 uppercase tracking-tighter">
             Choose Your <span className="text-[#1fa84f]">Plan</span>
           </h2>
-          <p className="text-slate-400 mb-20 text-lg font-medium max-w-2xl mx-auto">Get professional alerts and dashboard access. WhatsApp integration coming soon to all tiers.</p>
+          <p className="text-slate-400 mb-20 text-lg font-medium max-w-2xl mx-auto">Get professional alerts and dashboard access. Instant Telegram delivery for serious traders.</p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
             {pricingPlans.map((plan) => {
@@ -203,9 +204,18 @@ const Home: React.FC<HomeProps> = ({
         </div>
       </section>
 
+      {/* Terminal Showcase Section on Landing Page - High Fidelity Preview */}
       <section id="dashboard" className="py-24 bg-[#0b0f1a] border-t border-white/5">
-         <div className="max-w-[1500px] mx-auto px-6">
-            <Dashboard />
+         <div className="max-w-[1500px] mx-auto px-6 relative">
+            <div className="mb-12 text-center">
+               <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">
+                 Experience the <span className="text-emerald-500 italic">Terminal</span>
+               </h2>
+               <p className="text-slate-400 text-sm font-medium mb-8">Institutional-grade data aggregation at your fingertips. High-fidelity real-time preview.</p>
+            </div>
+            <div className="transition-all duration-700">
+               <Terminal />
+            </div>
          </div>
       </section>
     </>

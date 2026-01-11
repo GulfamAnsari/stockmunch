@@ -5,6 +5,10 @@ import Home from './pages/Home';
 import PrivacyCharter from './pages/PrivacyCharter';
 import TermsOfUsage from './pages/TermsOfUsage';
 import RegulatoryPolicy from './pages/RegulatoryPolicy';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 import { PRICING_PLANS } from './constants';
 
 interface AppRoutesProps {
@@ -37,9 +41,13 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           />
         } 
       />
+      <Route path="/about" element={<AboutUs />} />
+      <Route path="/contact" element={<ContactUs />} />
       <Route path="/privacy" element={<PrivacyCharter />} />
       <Route path="/terms" element={<TermsOfUsage />} />
       <Route path="/regulatory" element={<RegulatoryPolicy />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/dashboard" element={<Dashboard />} />
     </Routes>
   );
 };

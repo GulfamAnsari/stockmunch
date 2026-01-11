@@ -15,8 +15,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
   const [formData, setFormData] = useState({ 
     phone: '', 
     otp: '', 
-    password: '', 
-    wantsWhatsapp: true
+    password: ''
   });
   const [loading, setLoading] = useState(false);
   
@@ -25,7 +24,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
   useEffect(() => {
     if (!isOpen) {
       setStep('PHONE');
-      setFormData({ phone: '', otp: '', password: '', wantsWhatsapp: true });
+      setFormData({ phone: '', otp: '', password: '' });
     }
   }, [isOpen]);
 
@@ -120,24 +119,6 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                     </div>
                   </div>
 
-                  <label className="flex items-center space-x-3 cursor-pointer group bg-white/5 p-4 rounded-xl border border-white/5 hover:border-green-500/30 transition-all">
-                    <div className="relative flex items-center">
-                      <input 
-                        type="checkbox" 
-                        checked={formData.wantsWhatsapp}
-                        onChange={(e) => setFormData({...formData, wantsWhatsapp: e.target.checked})}
-                        className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-white/20 bg-slate-900 checked:bg-green-500 transition-all"
-                      />
-                      <svg className="absolute left-0 top-0 h-5 w-5 text-slate-900 pointer-events-none hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-slate-200 uppercase tracking-wide group-hover:text-green-400">Opt-in for WhatsApp Alerts (Beta)</span>
-                      <p className="text-[10px] text-slate-500 font-medium">Be the first to get news on WhatsApp when we launch.</p>
-                    </div>
-                  </label>
-
                   <button 
                     type="submit"
                     disabled={loading || formData.phone.length < 10}
@@ -177,7 +158,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                   </div>
                   <button 
                     type="submit"
-                    className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl"
+                    className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl"
                   >
                     {loading ? <LoadingSpinner /> : "Verify & Continue"}
                   </button>
@@ -207,7 +188,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                   </div>
                   <button 
                     type="submit"
-                    className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl"
+                    className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl"
                   >
                     {loading ? <LoadingSpinner /> : "Finalize Activation"}
                   </button>
@@ -226,10 +207,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                   Ready for <span className="text-emerald-500">Action</span>
                 </h2>
                 <p className="text-slate-400 font-medium mb-10 max-w-sm mx-auto leading-relaxed">
-                  Your 30-day <span className="text-white font-bold">{planName}</span> trial is active.
-                  {formData.wantsWhatsapp && (
-                    <span className="block mt-2 text-green-400 font-bold">You've been added to the WhatsApp Beta Waitlist!</span>
-                  )}
+                  Your 30-day <span className="text-white font-bold">{planName}</span> trial is active. Get instant stock news alerts directly on your device via Telegram.
                 </p>
 
                 <div className="grid grid-cols-1 gap-4">

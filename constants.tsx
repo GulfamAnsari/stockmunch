@@ -57,7 +57,7 @@ export const MOCK_NEWS: StockNews[] = [
     symbol: 'COASTAL',
     companyName: 'Coastal Corporation',
     title: 'Coastal Corporation credit ratings reaffirmed',
-    content: "Coastal Corporation Ltd's credit ratings by CARE Ratings were reaffirmed at 'CARE BB (Stable)' for long-term and 'CARE A4' for short-term bank facilities. Revenue rose 45% YoY in FY25, driven by a 48% production volume increase. Profitability improved in H1FY26 despite earlier challenges.",
+    content: "Coastal Corporation Ltd's credit ratings by CARE Ratings were reaffirmed at 'CARE BB (Stable)' for long-term and 'CARE A4' for short-term bank facilities. Revenue rose 45% YoY in FY25, driven by a 48% production volume increase.",
     timestamp: '10 Jan 2026 05:36PM',
     priceChange: -4.38,
     sentiment: 'bullish',
@@ -71,7 +71,7 @@ export const MOCK_NEWS: StockNews[] = [
     symbol: 'RANEMADRAS',
     companyName: 'Rane Madras',
     title: 'Rane (Madras) Ltd received a Show Cause Notice',
-    content: 'Rane (Madras) Ltd received a Show Cause Notice for Rs.7.61 Cr expense disallowance. The issue involves trademark fees, gratuity gains, with Rs.2.66 Cr impact plus penalties.',
+    content: 'Rane (Madras) Ltd received a Show Cause Notice for Rs.7.61 Cr expense disallowance. The issue involves trademark fees and gratuity gains.',
     timestamp: '10 Jan 2026 05:25PM',
     priceChange: -2.23,
     sentiment: 'bearish',
@@ -85,7 +85,7 @@ export const MOCK_NEWS: StockNews[] = [
     symbol: 'DMART',
     companyName: 'Avenue Supermarts',
     title: 'Avenue Supermarts Q3FY26 Results',
-    content: 'Avenue Supermarts Ltd reported Q3FY26 standalone revenue of ₹17,642.9 Cr and consolidated revenue of ₹18,117.8 Cr, showcasing strong performance. Board approved Mr. Anshul Asawa\'s appointment as CEO from Feb 2026.',
+    content: 'Avenue Supermarts Ltd reported Q3FY26 standalone revenue of ₹17,642.9 Cr. Board approved new CEO appointment from Feb 2026.',
     timestamp: '10 Jan 2026 05:20PM',
     priceChange: 0.30,
     sentiment: 'neutral',
@@ -93,48 +93,6 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'BSE',
     platform: 'Groww',
     logoColor: 'bg-[#1fa84f]'
-  },
-  {
-    id: '4',
-    symbol: 'RALLIS',
-    companyName: 'Rallis India',
-    title: 'Rallis India Ltd. to hold analyst/investor meet',
-    content: 'Rallis India Ltd. will hold an analyst/investor meet on Jan 21, 2026 at 11:00 AM IST to discuss Q3 and 9M FY26 results. The call includes management\'s remarks and a Q&A session.',
-    timestamp: '10 Jan 2026 05:20PM',
-    priceChange: -2.05,
-    sentiment: 'neutral',
-    sentimentScore: 82,
-    source: 'BSE',
-    platform: 'Groww',
-    logoColor: 'bg-sky-700'
-  },
-  {
-    id: '5',
-    symbol: 'MAPRO',
-    companyName: 'Mapro Industries',
-    title: 'Mapro Industries board meeting scheduled',
-    content: "Mapro Industries Ltd's board meeting is scheduled for January 16, 2026. The meeting will consider and approve Q3 FY2025 unaudited standalone financial results under SEBI LODR regulations.",
-    timestamp: '10 Jan 2026 05:20PM',
-    priceChange: 0,
-    sentiment: 'neutral',
-    sentimentScore: 92,
-    source: 'BSE',
-    platform: 'Groww',
-    logoColor: 'bg-teal-600'
-  },
-  {
-    id: '6',
-    symbol: 'NVTI',
-    companyName: 'Nanavati Vntrs',
-    title: 'Nanavati Ventures announces resignation',
-    content: 'Nanavati Ventures Ltd announced the cessation of Mr. Nikunj Kalubhai Maniya as Company Secretary. The resignation is effective from January 10, 2026, as acknowledged by the Board of Directors.',
-    timestamp: '10 Jan 2026 05:15PM',
-    priceChange: 0,
-    sentiment: 'neutral',
-    sentimentScore: 58,
-    source: 'BSE',
-    platform: 'Groww',
-    logoColor: 'bg-orange-600'
   }
 ];
 
@@ -198,11 +156,7 @@ export const PRICING_PLANS: PricingPlan[] = [
 export const FAQ_DATA = [
   {
     question: "How quickly do I receive alerts?",
-    answer: "Our system is designed for near-instant delivery. Most alerts are processed and delivered within 50ms of the news break."
-  },
-  {
-    question: "When is WhatsApp integration coming?",
-    answer: "We are currently in the final testing phase of our WhatsApp API integration. It will be rolled out to all 'Alerts' subscribers within the next few weeks at no extra cost."
+    answer: "Our system is designed for near-instant delivery. Most alerts are processed and delivered via Telegram within milliseconds of the news break."
   },
   {
     question: "What is the Personal Watchlist?",
