@@ -122,10 +122,13 @@ const Home: React.FC<HomeProps> = ({
 
       <section id="pricing" className="py-24 bg-[#0b0f1a]">
         <div className="max-w-7xl mx-auto px-6 text-center">
+          <div className="inline-block px-4 py-2 bg-emerald-500/10 text-emerald-400 text-xs font-black uppercase tracking-widest rounded-full border border-emerald-500/20 mb-6">
+            Limited Time Offer: 30-Day Full Access Trial
+          </div>
           <h2 className="text-5xl font-black text-white mb-6 uppercase tracking-tighter">
             Pricing & <span className="text-[#1fa84f]">Plans</span>
           </h2>
-          <p className="text-slate-400 mb-20 text-lg font-medium">Choose the tier that powers your trading strategy.</p>
+          <p className="text-slate-400 mb-20 text-lg font-medium max-w-2xl mx-auto">Choose the tier that powers your trading strategy. All plans include a risk-free trial.</p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
             {pricingPlans.map((plan) => {
@@ -143,6 +146,10 @@ const Home: React.FC<HomeProps> = ({
                       : 'border-white/5 bg-[#161b27]/40 scale-100'
                   }`}
                 >
+                  <div className="absolute top-4 right-6 bg-emerald-500/20 text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter border border-emerald-500/30">
+                    30-Day Trial
+                  </div>
+                  
                   {isActive && (
                     <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-[#1fa84f] text-slate-950 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl animate-in fade-in slide-in-from-bottom-2">
                       {hoveredPlanId ? 'Selected' : 'Best Value'}
@@ -157,7 +164,7 @@ const Home: React.FC<HomeProps> = ({
                   <ul className="space-y-5 mb-12 text-left flex-grow">
                     {plan.features.map((f: string, i: number) => (
                       <li key={i} className="flex items-start text-sm text-slate-300 font-medium">
-                        <svg className="w-5 h-5 text-[#1fa84f] mr-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className={`w-5 h-5 ${f.includes('Trial') ? 'text-sky-400' : 'text-[#1fa84f]'} mr-4 flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                       {f}
@@ -173,7 +180,7 @@ const Home: React.FC<HomeProps> = ({
                       : 'bg-slate-800 text-slate-400 hover:text-white border border-white/5'
                   } ${isJoining ? 'animate-pulse cursor-wait' : ''}`}
                 >
-                  {isJoining ? 'Next Journey...' : plan.cta}
+                  {isJoining ? 'Initializing Trial...' : plan.cta}
                 </button>
               </div>
             )})}

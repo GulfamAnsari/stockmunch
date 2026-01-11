@@ -62,7 +62,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing }) => {
           <svg className="w-3 h-3 mr-2" viewBox="0 0 24 24" fill="currentColor">
             <path d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          Real-time stock alerts delivered instantly
+          Start your 30-day full-access trial today
         </div>
         
         {/* Headline */}
@@ -73,46 +73,50 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing }) => {
         
         {/* Description */}
         <p className="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-          Get instant stock market news alerts delivered to your phone. Stay ahead of the market with our real-time notification system and comprehensive dashboard.
+          Get instant stock market news alerts delivered to your phone. Stay ahead of the market with our real-time notification system and comprehensive terminal dashboard.
         </p>
         
         {/* Buttons */}
         <div className="flex flex-col lg:flex-row items-center justify-center space-y-4 lg:space-y-0 lg:space-x-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
           <button 
             onClick={onOpenPricing}
-            className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center"
+            className="w-full sm:w-auto px-10 py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-xl transition-all shadow-2xl shadow-emerald-500/25 flex flex-col items-center justify-center group"
           >
-            Start Your Journey
-            <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
+            <span className="flex items-center">
+              Start 30-Day Free Trial
+              <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </span>
+            <span className="text-[10px] opacity-70 mt-1">No credit card required upfront</span>
           </button>
           
           <a 
             href="#alerts" 
             onClick={scrollToAlerts}
-            className="w-full sm:w-auto px-8 py-4 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 font-bold rounded-xl border border-sky-500/30 transition-all flex items-center justify-center"
+            className="w-full sm:w-auto px-8 py-5 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 font-bold rounded-xl border border-sky-500/30 transition-all flex items-center justify-center"
           >
-            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            View Telegram Alert
+            View Alert Showcase
           </a>
 
           <a 
             href="#dashboard" 
             onClick={scrollToDashboard}
-            className="w-full sm:w-auto px-8 py-4 bg-transparent hover:bg-emerald-500/5 text-emerald-500 font-bold rounded-xl border border-emerald-500/50 transition-all flex items-center justify-center"
+            className="w-full sm:w-auto px-8 py-5 bg-transparent hover:bg-emerald-500/5 text-emerald-500 font-bold rounded-xl border border-emerald-500/50 transition-all flex items-center justify-center"
           >
-            View Dashboard Demo
+            Terminal Demo
           </a>
         </div>
 
-        {/* Stats Section (Updated: Removed Active Subscribers and Alert Delivery) */}
+        {/* Stats Section */}
         <div className="mt-24 flex justify-center animate-in fade-in slide-in-from-bottom-12 duration-700 delay-500">
           <div className="text-center px-12 border-x border-white/5">
             <div className="text-5xl font-extrabold text-emerald-500 mb-2 tracking-tighter uppercase">99.9%</div>
             <div className="text-slate-400 text-xs font-black uppercase tracking-widest opacity-60">System Uptime</div>
+          </div>
+          <div className="text-center px-12 border-r border-white/5">
+            <div className="text-5xl font-extrabold text-emerald-500 mb-2 tracking-tighter uppercase">30 Days</div>
+            <div className="text-slate-400 text-xs font-black uppercase tracking-widest opacity-60">Risk Free Trial</div>
           </div>
         </div>
 

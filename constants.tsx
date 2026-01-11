@@ -155,31 +155,34 @@ export const PRICING_PLANS: PricingPlan[] = [
     name: 'Alerts Only',
     price: 150,
     features: [
+      '30-Day Free Trial',
       'Real-time stock alerts',
       'Telegram notification',
       'Breaking news updates',
       'Email support'
     ],
-    cta: 'Get Started'
+    cta: 'Start Free Trial'
   },
   {
     id: 'dashboard-only',
     name: 'Dashboard Only',
     price: 150,
     features: [
+      '30-Day Free Trial',
       'Full dashboard access',
       'Real time stock news updates',
       'Historical data search',
       'Email support',
       'Advance filtering of news'
     ],
-    cta: 'Get Started'
+    cta: 'Start Free Trial'
   },
   {
     id: 'alerts-dashboard',
     name: 'Alerts + Dashboard',
     price: 250,
     features: [
+      '30-Day Free Trial',
       'Real-time stock alerts',
       'Telegram notification',
       'Breaking news updates',
@@ -189,7 +192,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Email support',
       'Advance filtering of news'
     ],
-    cta: 'Get Started',
+    cta: 'Start Free Trial',
     popular: true
   }
 ];
@@ -209,14 +212,14 @@ export const FAQ_DATA = [
   },
   {
     question: "Is there a free trial available?",
-    answer: "We offer a 7-day limited access trial for new users to explore the dashboard and experience the alert speed."
+    answer: "Absolutely! We offer a 30-day full access trial for all new users so you can experience the speed and power of StockManch risk-free."
   },
   {
     question: "Can I cancel my subscription anytime?",
-    answer: "Absolutely. You can cancel your subscription from your account settings at any time without any hidden fees."
+    answer: "Yes. You can cancel your subscription from your account settings at any time. If you are in the trial period, you won't be charged."
   },
   {
     question: "How do I access the dashboard?",
-    answer: "Once you subscribe, you can log in directly on StockManch.com to access your personalized market insights."
+    answer: "Once you start your trial or subscribe, you can log in directly on StockManch.com to access your terminal."
   }
 ];
