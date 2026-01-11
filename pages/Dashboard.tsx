@@ -1,28 +1,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Terminal from '../components/Terminal';
+import MarketTerminal from '../components/MarketTerminal';
 import { User } from '../types';
 
 const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'TERMINAL' | 'BILLING' | 'SETTINGS'>('OVERVIEW');
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'TERMINAL' | 'BILLING' | 'SETTINGS'>('TERMINAL');
   const navigate = useNavigate();
 
-  // Mock User State
   const [user] = useState<User>({
     id: 'TRD-772',
     name: 'Harsh Vardhan',
     phone: '+91 9876543210',
     email: 'harsh@terminal.com',
-    planId: 'alerts-only',
-    planName: 'Alerts Only',
-    hasDashboardAccess: true, // User only has the alerts plan
+    planId: 'alerts-dashboard',
+    planName: 'Alerts + Dashboard',
+    hasDashboardAccess: true,
     joinedAt: '12 Jan 2026'
   });
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Dashboard | StockManch";
+    document.title = "Terminal Dashboard | StockManch";
   }, []);
 
   const handleLogout = () => {
@@ -74,7 +73,7 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="flex-grow p-6 md:p-12 overflow-y-auto">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-16">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
             <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-2">
               {activeTab.charAt(0) + activeTab.slice(1).toLowerCase()}
@@ -88,48 +87,10 @@ const Dashboard: React.FC = () => {
           </div>
         </header>
 
-        {activeTab === 'OVERVIEW' && (
-          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-[#161b27] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                 <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6">Subscription Status</h4>
-                 <p className="text-2xl font-bold text-white mb-2 uppercase italic">{user.planName}</p>
-                 <p className="text-sm text-emerald-500 font-bold">Renewals on 12 Feb 2026</p>
-              </div>
-              <div className="bg-[#161b27] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                 <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6">Alert Delivery</h4>
-                 <p className="text-2xl font-bold text-white mb-2">Telegram Active</p>
-                 <p className="text-sm text-slate-500 font-bold uppercase tracking-tighter">@stockmanch_alerts</p>
-              </div>
-              <div className="bg-[#161b27] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-                 <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6">Terminal Access</h4>
-                 <p className="text-2xl font-bold text-white mb-2">{user.hasDashboardAccess ? 'UNLOCKED' : 'LOCKED'}</p>
-                 <p className="text-sm text-slate-500 font-bold">Requires Bundle/Dashboard Plan</p>
-              </div>
-            </div>
-
-            <section className="bg-emerald-500/5 border border-emerald-500/20 p-10 rounded-[3rem] shadow-inner">
-               <h3 className="text-2xl font-bold text-white mb-4 uppercase tracking-tight">Recent Activity Log</h3>
-               <div className="space-y-4">
-                 {[
-                   { event: 'Login successful via mobile verification', time: '12 mins ago' },
-                   { event: 'Telegram alert dispatched: RELIANCE Q3', time: '4 hours ago' },
-                   { event: 'Subscription plan updated to "Alerts Only"', time: '1 day ago' },
-                 ].map((log, i) => (
-                   <div key={i} className="flex justify-between items-center py-4 border-b border-white/5 last:border-0">
-                     <span className="text-sm text-slate-400 font-medium">{log.event}</span>
-                     <span className="text-[10px] font-mono text-slate-600 uppercase">{log.time}</span>
-                   </div>
-                 ))}
-               </div>
-            </section>
-          </div>
-        )}
-
         {activeTab === 'TERMINAL' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {user.hasDashboardAccess ? (
-              <Terminal />
+              <MarketTerminal />
             ) : (
               <div className="bg-[#161b27] border border-white/5 p-20 rounded-[4rem] text-center max-w-4xl mx-auto shadow-2xl relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -151,59 +112,41 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'BILLING' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <div className="bg-[#161b27] p-10 rounded-[3rem] border border-white/5 shadow-2xl">
-               <h3 className="text-xl font-bold text-white mb-8 uppercase tracking-widest border-l-4 border-emerald-500 pl-4">Your Subscriptions</h3>
-               <div className="flex flex-col md:flex-row items-center justify-between p-8 bg-slate-950/40 rounded-3xl border border-white/5">
-                 <div className="mb-6 md:mb-0">
-                    <p className="text-white font-bold text-lg uppercase tracking-tight mb-1">{user.planName}</p>
-                    <p className="text-slate-500 text-sm font-medium italic">Next billing amount: ₹150 + GST</p>
-                 </div>
-                 <button className="px-8 py-3 bg-white/5 hover:bg-emerald-500/10 hover:text-emerald-500 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Modify Plan</button>
-               </div>
-             </div>
-
-             <div className="bg-[#161b27] p-10 rounded-[3rem] border border-white/5 shadow-2xl">
-               <h3 className="text-xl font-bold text-white mb-8 uppercase tracking-widest border-l-4 border-emerald-500 pl-4">Billing History</h3>
-               <div className="space-y-4">
-                 {[
-                   { id: 'INV-4412', date: '12 Jan 2026', amount: '₹177.00', status: 'Paid' },
-                   { id: 'INV-3211', date: '12 Dec 2025', amount: '₹177.00', status: 'Paid' },
-                 ].map((inv) => (
-                   <div key={inv.id} className="flex justify-between items-center py-6 border-b border-white/5 last:border-0 font-medium">
-                     <span className="text-white text-sm">{inv.id}</span>
-                     <span className="text-slate-400 text-sm">{inv.date}</span>
-                     <span className="text-emerald-500 font-black">{inv.amount}</span>
-                     <button className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors">Download PDF</button>
-                   </div>
-                 ))}
-               </div>
-             </div>
+        {/* ... Other tabs ... */}
+        {activeTab === 'OVERVIEW' && (
+          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="bg-[#161b27] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
+                 <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6">Subscription Status</h4>
+                 <p className="text-2xl font-bold text-white mb-2 uppercase italic">{user.planName}</p>
+                 <p className="text-sm text-emerald-500 font-bold">Renewals on 12 Feb 2026</p>
+              </div>
+              <div className="bg-[#161b27] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
+                 <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6">Alert Delivery</h4>
+                 <p className="text-2xl font-bold text-white mb-2">Telegram Active</p>
+                 <p className="text-sm text-slate-500 font-bold uppercase tracking-tighter">@stockmanch_alerts</p>
+              </div>
+              <div className="bg-[#161b27] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
+                 <h4 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6">Terminal Access</h4>
+                 <p className="text-2xl font-bold text-white mb-2">{user.hasDashboardAccess ? 'UNLOCKED' : 'LOCKED'}</p>
+                 <p className="text-sm text-slate-500 font-bold">Requires Bundle/Dashboard Plan</p>
+              </div>
+            </div>
           </div>
+        )}
+        
+        {activeTab === 'BILLING' && (
+           <div className="bg-[#161b27] p-10 rounded-[3rem] border border-white/5 shadow-2xl">
+             <h3 className="text-xl font-bold text-white mb-8 uppercase tracking-widest border-l-4 border-emerald-500 pl-4">Billing Protocol</h3>
+             <p className="text-slate-400 font-medium">Your account is currently in active standing under the {user.planName} tier.</p>
+           </div>
         )}
 
         {activeTab === 'SETTINGS' && (
-          <div className="bg-[#161b27] p-12 rounded-[3rem] border border-white/5 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl">
-            <h3 className="text-xl font-bold text-white mb-10 uppercase tracking-widest border-l-4 border-emerald-500 pl-4">Profile Protocol</h3>
-            <form className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Display Name</label>
-                  <input type="text" defaultValue={user.name} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-emerald-500" />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Email Terminal</label>
-                  <input type="email" defaultValue={user.email} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-emerald-500" />
-                </div>
-              </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Mobile Interface</label>
-                <input type="text" disabled defaultValue={user.phone} className="w-full bg-slate-950/30 border border-white/5 rounded-2xl px-6 py-4 text-sm text-slate-500 font-mono cursor-not-allowed" />
-              </div>
-              <button type="submit" className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-emerald-500/10">Save Configuration</button>
-            </form>
-          </div>
+           <div className="bg-[#161b27] p-10 rounded-[3rem] border border-white/5 shadow-2xl">
+             <h3 className="text-xl font-bold text-white mb-8 uppercase tracking-widest border-l-4 border-emerald-500 pl-4">Security Configuration</h3>
+             <p className="text-slate-400 font-medium">Profile settings for {user.name} ({user.email}).</p>
+           </div>
         )}
       </main>
     </div>

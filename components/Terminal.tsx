@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { MOCK_NEWS } from '../constants';
 import { StockNews } from '../types';
 
@@ -119,7 +119,7 @@ const Terminal: React.FC = () => {
   return (
     <div className="w-full flex flex-col bg-[#0b0f1a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_32px_120px_-20px_rgba(0,0,0,0.8)] animate-in fade-in slide-in-from-bottom-8 duration-1000">
       
-      {/* 1. Terminal Window Bar (Professional Browser Mock) */}
+      {/* 1. Terminal Window Bar */}
       <div className="bg-[#161b27] border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex space-x-2">
@@ -128,7 +128,6 @@ const Terminal: React.FC = () => {
             <div className="w-3 h-3 rounded-full bg-emerald-500/20 border border-emerald-500/40"></div>
           </div>
           <div className="h-6 w-px bg-white/5 mx-2"></div>
-          {/* Mock URL Bar - Clean version without confusing icons */}
           <div className="bg-slate-950/60 px-5 py-2 rounded-xl border border-white/5 text-[11px] text-slate-500 font-mono flex items-center shadow-inner min-w-[320px]">
             <span className="opacity-60">stockmanch.com/terminal/live-feed</span>
           </div>
@@ -186,21 +185,16 @@ const Terminal: React.FC = () => {
         </button>
       </div>
 
-      {/* 4. News Grid - Rendering all 12 items */}
+      {/* 4. News Grid */}
       <div className="px-8 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredNews.map((news) => (
             <NewsCard key={news.id} news={news} />
           ))}
         </div>
-        {filteredNews.length === 0 && (
-          <div className="py-20 text-center opacity-20">
-            <p className="text-xl font-black uppercase tracking-widest text-white">No Matching Dispatch Found</p>
-          </div>
-        )}
       </div>
 
-      {/* 5. Terminal Footer (Status Bar) */}
+      {/* 5. Terminal Footer */}
       <footer className="bg-[#111621] border-t border-white/5 px-8 py-3.5 flex items-center justify-between text-[9px] font-black font-mono text-slate-600 tracking-[0.2em] uppercase">
         <div className="flex items-center space-x-10">
           <div className="flex items-center space-x-2">
