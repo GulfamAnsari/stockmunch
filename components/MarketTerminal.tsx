@@ -277,7 +277,7 @@ const MarketTerminal: React.FC = () => {
             title: item.data.title || '',
             content: item.data.body || '',
             image: item.data.image || item.data.featuredImage,
-            logoUrl: item.data.logoUrl,
+            logoUrl: item.data.cta?.[0]?.logoUrl,
             aiAnalysis: item.summary || item.data.summary || (item.machineLearningSentiments?.explanation),
             timestamp: new Date(item.publishedAt).toLocaleString('en-IN', { 
               day: '2-digit', month: 'short', year: 'numeric', 
