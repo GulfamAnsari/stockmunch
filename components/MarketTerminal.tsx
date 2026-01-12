@@ -2,6 +2,18 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { StockNews } from '../types';
 
+const AnimatedTooltip: React.FC<{ text: string; children: React.ReactNode }> = ({ text, children }) => {
+  return (
+    <div className="group relative flex flex-col">
+      {children}
+      <div className="absolute z-[100] bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-3 bg-[#1a2235]/95 backdrop-blur-xl text-slate-200 text-[10px] font-medium rounded-2xl border border-white/10 shadow-2xl w-72 pointer-events-none opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 transition-all duration-300 ease-out text-left leading-relaxed">
+        {text}
+        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-[6px] border-transparent border-t-[#1a2235]/95"></div>
+      </div>
+    </div>
+  );
+};
+
 const NewsCard: React.FC<{ 
   news: StockNews; 
   isWatchlist?: boolean;
@@ -10,7 +22,31 @@ const NewsCard: React.FC<{
   fetchPrice: (symbol: string, bseCode?: string) => void;
 }> = ({ news, isWatchlist, onCopy, onWatchlistAdd, fetchPrice }) => {
   const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
+  const [livePercentage, setLivePercentage] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchLocalPercent = async () => {
+      // Priority: NSE Symbol > BSE Code
+      const hasNse = news.symbol && news.symbol !== 'NSE';
+      const bse = (news as any).bseCode;
+      const querySymbol = hasNse ? `${news.symbol}.NS` : (bse ? `${bse}.BO` : null);
+      
+      if (!querySymbol) return;
+
+      try {
+        const resp = await fetch(`https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`);
+        const data = await resp.json();
+        if (data && data.meta && data.meta.chartPreviousClose) {
+          const pct = ((data.meta.regularMarketPrice - data.meta.chartPreviousClose) / data.meta.chartPreviousClose) * 100;
+          setLivePercentage(pct);
+        }
+      } catch (e) {
+        console.warn(`Could not fetch live percentage for ${querySymbol}`);
+      }
+    };
+    fetchLocalPercent();
+  }, [news.symbol, (news as any).bseCode]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -31,17 +67,15 @@ const NewsCard: React.FC<{
   };
 
   return (
-    <div className="bg-[#111621] border border-white/5 rounded-xl flex flex-col h-full overflow-hidden hover:border-emerald-500/30 transition-all group shadow-2xl relative">
-      {/* Watchlist Badge - Repositioned to avoid overlap with date, styled like close button */}
+    <div className="bg-[#111621] border border-white/5 rounded-xl flex flex-col h-full hover:border-emerald-500/30 transition-all group shadow-2xl relative">
       {isWatchlist && news.userSentiment && (
-        <div className={`absolute -top-2 -left-2 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest z-10 border shadow-lg ${news.userSentiment === 'BULLISH' ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-rose-500 text-white border-rose-400'}`}>
+        <div className={`absolute -top-2 -left-2 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest z-30 border shadow-lg ${news.userSentiment === 'BULLISH' ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-rose-500 text-white border-rose-400'}`}>
           {news.userSentiment}
         </div>
       )}
 
-      {/* API Image Display */}
       {news.image && (
-        <div className="w-full h-32 overflow-hidden bg-slate-900 border-b border-white/5">
+        <div className="w-full h-32 overflow-hidden bg-slate-900 border-b border-white/5 rounded-t-xl">
           <img src={news.image} alt={news.symbol} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
         </div>
       )}
@@ -49,14 +83,18 @@ const NewsCard: React.FC<{
       <div className="p-4 flex flex-col h-full">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-3">
-            <div className={`w-9 h-9 rounded-lg ${news.logoColor || 'bg-slate-700'} flex items-center justify-center text-white text-[11px] font-black shadow-inner`}>
-              {news.symbol.substring(0, 2)}
+            <div className={`w-9 h-9 rounded-lg ${news.logoColor || 'bg-slate-700'} flex items-center justify-center text-white text-[11px] font-black shadow-inner overflow-hidden`}>
+              {news.logoUrl ? (
+                <img src={news.logoUrl} alt={news.symbol} className="w-full h-full object-contain p-1" />
+              ) : (
+                news.symbol.substring(0, 2)
+              )}
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h3 className="text-[11px] font-black text-white tracking-wider uppercase leading-none">{news.symbol}</h3>
-                <span className={`text-[9px] font-bold flex items-center ${news.sentiment === 'bullish' ? 'text-emerald-500' : 'text-rose-500'}`}>
-                   {news.sentiment === 'bullish' ? '↑' : '↓'} {(Math.random() * 5).toFixed(2)}%
+                <span className={`text-[9px] font-bold flex items-center ${livePercentage !== null ? (livePercentage >= 0 ? 'text-emerald-500' : 'text-rose-500') : 'text-slate-600'}`}>
+                   {livePercentage !== null ? (livePercentage >= 0 ? '↑' : '↓') : '•'} {livePercentage !== null ? Math.abs(livePercentage).toFixed(2) : '0.00'}%
                 </span>
               </div>
               <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight truncate max-w-[120px]">{news.companyName}</p>
@@ -68,19 +106,26 @@ const NewsCard: React.FC<{
           </div>
         </div>
 
-        <h4 className="text-[12px] font-bold text-slate-100 leading-snug mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors">
-          {news.title}
-        </h4>
+        <AnimatedTooltip text={news.title}>
+          <h4 className="text-[12px] font-bold text-slate-100 leading-snug mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors">
+            {news.title}
+          </h4>
+        </AnimatedTooltip>
 
-        <p className="text-[10px] text-slate-400 line-clamp-2 leading-relaxed mb-4 opacity-80 font-medium italic border-l-2 border-emerald-500/30 pl-3">
-          {news.content}
-        </p>
+        <AnimatedTooltip text={news.content}>
+          <p className="text-[10px] text-slate-400 line-clamp-4 leading-relaxed mb-4 opacity-80 font-medium italic border-l-2 border-emerald-500/30 pl-3 transition-colors group-hover:text-slate-200">
+            {news.content}
+          </p>
+        </AnimatedTooltip>
 
-        {/* AI Analysis Section */}
         {news.aiAnalysis && (
           <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
              <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest block mb-1">AI Deep Analysis</span>
-             <p className="text-[9px] text-slate-300 leading-tight line-clamp-3">{news.aiAnalysis}</p>
+             <AnimatedTooltip text={news.aiAnalysis}>
+               <p className="text-[9px] text-slate-300 leading-tight line-clamp-3 group-hover:text-white transition-colors">
+                 {news.aiAnalysis}
+               </p>
+             </AnimatedTooltip>
           </div>
         )}
 
@@ -163,7 +208,7 @@ const MarketTerminal: React.FC = () => {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   
   // Pagination / Infinite Scroll
-  const [displayLimit, setDisplayLimit] = useState(50);
+  const [displayLimit, setDisplayLimit] = useState(20); // Initialized to 20 per request
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const filterRef = useRef<HTMLDivElement>(null);
@@ -206,14 +251,15 @@ const MarketTerminal: React.FC = () => {
             companyName: item.data.cta?.[0]?.ctaText || 'Market Entry',
             title: item.data.title || '',
             content: item.data.body || '',
-            image: item.data.image || item.data.featuredImage, // API image support
-            aiAnalysis: item.summary || item.data.summary || (item.machineLearningSentiments?.explanation), // AI Analysis support
+            image: item.data.image || item.data.featuredImage,
+            logoUrl: item.data.logoUrl,
+            aiAnalysis: item.summary || item.data.summary || (item.machineLearningSentiments?.explanation),
             timestamp: new Date(item.publishedAt).toLocaleString('en-IN', { 
               day: '2-digit', month: 'short', year: 'numeric', 
               hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
             }),
             rawPublishedAt: item.publishedAt,
-            priceChange: (Math.random() * 4 - 2), 
+            priceChange: 0, // Now calculated live per card
             sentiment: item.machineLearningSentiments?.label === 'negative' ? 'bearish' : 
                        item.machineLearningSentiments?.label === 'positive' ? 'bullish' : 'neutral',
             sentimentScore: Math.round((item.machineLearningSentiments?.confidence || 0.5) * 100),
@@ -224,7 +270,7 @@ const MarketTerminal: React.FC = () => {
           allItems.push(...mappedItems);
         });
         setNews(allItems);
-        setDisplayLimit(50); // Reset pagination on new fetch
+        setDisplayLimit(20); // Reset display limit to 20 for initial view
       }
     } catch (error) {
       console.error("Terminal API Error:", error);
@@ -245,12 +291,11 @@ const MarketTerminal: React.FC = () => {
     return () => clearInterval(interval);
   }, [autoRefresh, loading, fetchNews, activeTab]);
 
-  // Infinite Scroll Observer
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
     if (target.scrollHeight - target.scrollTop <= target.clientHeight + 100) {
       if (displayLimit < processedNews.length) {
-        setDisplayLimit(prev => prev + 50);
+        setDisplayLimit(prev => prev + 20); // Increase limit on scroll
       }
     }
   };
@@ -340,15 +385,9 @@ const MarketTerminal: React.FC = () => {
     alert(`Station: ${processedNews.length} dispatch titles copied.`);
   };
 
-  const isWatchlist = activeTab === 'WATCHLIST';
-
   return (
     <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a]">
-      
-      {/* Terminal Toolbar */}
       <div className="px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/5 flex flex-wrap items-center justify-between gap-y-3 gap-x-6">
-        
-        {/* Navigation Tabs & Search */}
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/5 shadow-inner shrink-0">
             {['ALL FEEDS', 'WATCHLIST'].map((tab) => (
@@ -378,8 +417,7 @@ const MarketTerminal: React.FC = () => {
           </div>
         </div>
 
-        {/* Date & Sync */}
-        {!isWatchlist && (
+        {activeTab !== 'WATCHLIST' && (
           <div className="flex items-center space-x-3 shrink-0">
             <div className="flex items-center space-x-2 bg-slate-900/50 p-1 rounded-lg border border-white/10">
               <input 
@@ -408,17 +446,9 @@ const MarketTerminal: React.FC = () => {
                 )}
               </button>
             </div>
-            
-            <div className="flex items-center space-x-2 border-l border-white/10 pl-3">
-              <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Auto_Sync</span>
-              <button onClick={() => setAutoRefresh(!autoRefresh)} className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${autoRefresh ? 'bg-emerald-500' : 'bg-slate-800'}`}>
-                <span className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${autoRefresh ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
-              </button>
-            </div>
           </div>
         )}
 
-        {/* Filters Popup & Quotes */}
         <div className="flex items-center gap-4 shrink-0 relative" ref={filterRef}>
           {activeQuote && (
             <div className="flex items-center bg-sky-500/20 border border-sky-500/30 rounded-lg px-3 py-1.5 animate-in slide-in-from-right-4">
@@ -467,20 +497,6 @@ const MarketTerminal: React.FC = () => {
                 <div className="h-px bg-white/5"></div>
 
                 <div className="space-y-3">
-                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Hour Range</span>
-                  <div className="bg-slate-950 p-3 rounded-xl border border-white/10">
-                    <input type="range" min="0" max="23" value={timeRange.from} onChange={(e) => setTimeRange({ ...timeRange, from: parseInt(e.target.value) })} className="w-full accent-emerald-500 mb-2" />
-                    <input type="range" min="0" max="24" value={timeRange.to} onChange={(e) => setTimeRange({ ...timeRange, to: parseInt(e.target.value) })} className="w-full accent-rose-500" />
-                    <div className="flex justify-between mt-2 font-mono text-[9px]">
-                      <span className="text-emerald-500">{timeRange.from.toString().padStart(2, '0')}:00</span>
-                      <span className="text-rose-500">{timeRange.to.toString().padStart(2, '0')}:00</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="h-px bg-white/5"></div>
-
-                <div className="space-y-3">
                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Primary Sort Method</span>
                   <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-white font-mono uppercase focus:outline-none">
                     <option value="TIME">Newest First</option>
@@ -491,16 +507,9 @@ const MarketTerminal: React.FC = () => {
               </div>
             </div>
           )}
-
-          <button onClick={copyAllTitles} className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg border border-white/10 shadow-sm" title="Copy Current View">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-            </svg>
-          </button>
         </div>
       </div>
 
-      {/* Grid Area - 6 Columns on XL screens */}
       <div 
         ref={scrollContainerRef} 
         onScroll={handleScroll} 
@@ -517,24 +526,29 @@ const MarketTerminal: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 pt-4">
               {pagedNews.map((newsItem) => (
                 <div key={newsItem.id} className="relative">
                   <NewsCard 
                     news={newsItem} 
-                    isWatchlist={isWatchlist}
+                    isWatchlist={activeTab === 'WATCHLIST'}
                     onCopy={(text) => { navigator.clipboard.writeText(text); }}
                     onWatchlistAdd={handleWatchlistAdd}
                     fetchPrice={fetchPrice}
                   />
-                  {isWatchlist && (
-                    <button onClick={() => removeFromWatchlist(newsItem.id)} className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-lg hover:scale-110 transition-all z-20">✕</button>
+                  {activeTab === 'WATCHLIST' && (
+                    <button 
+                      onClick={() => removeFromWatchlist(newsItem.id)} 
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-lg hover:scale-110 transition-all z-40 border border-white/20"
+                      title="Remove from Watchlist"
+                    >
+                      ✕
+                    </button>
                   )}
                 </div>
               ))}
             </div>
             
-            {/* Infinite Scroll Loader */}
             {displayLimit < processedNews.length && (
               <div className="py-10 flex justify-center">
                  <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
@@ -544,7 +558,6 @@ const MarketTerminal: React.FC = () => {
         )}
       </div>
 
-      {/* Terminal Footer */}
       <footer className="shrink-0 bg-[#111621] border-t border-white/5 px-8 py-3 flex items-center justify-between text-[9px] font-black font-mono text-slate-600 tracking-[0.2em] uppercase">
         <div className="flex items-center space-x-10">
           <div className="flex items-center space-x-2">
@@ -558,7 +571,7 @@ const MarketTerminal: React.FC = () => {
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 opacity-40"></div>
-          <span className="opacity-60 italic tracking-tight uppercase">StockManch Station V5.8-STABLE</span>
+          <span className="opacity-60 italic tracking-tight uppercase">StockManch Station V5.9-STABLE</span>
         </div>
       </footer>
     </div>
