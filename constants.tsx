@@ -66,7 +66,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-indigo-600',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T17:36:00Z'
+    rawPublishedAt: '2026-01-10T17:36:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '501831'
   },
   {
     id: '2',
@@ -82,7 +84,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-blue-500',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T17:25:00Z'
+    rawPublishedAt: '2026-01-10T17:25:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '532661'
   },
   {
     id: '3',
@@ -98,7 +102,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-[#1fa84f]',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T17:20:00Z'
+    rawPublishedAt: '2026-01-10T17:20:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '540376'
   },
   {
     id: '4',
@@ -114,7 +120,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-sky-700',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T17:20:00Z'
+    rawPublishedAt: '2026-01-10T17:20:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '500355'
   },
   {
     id: '5',
@@ -130,7 +138,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-teal-600',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T17:20:00Z'
+    rawPublishedAt: '2026-01-10T17:20:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '509762'
   },
   {
     id: '6',
@@ -146,7 +156,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-orange-600',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T17:15:00Z'
+    rawPublishedAt: '2026-01-10T17:15:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '543455'
   },
   {
     id: '7',
@@ -162,7 +174,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-blue-900',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T16:30:00Z'
+    rawPublishedAt: '2026-01-10T16:30:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '500325'
   },
   {
     id: '8',
@@ -178,7 +192,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-blue-600',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T16:15:00Z'
+    rawPublishedAt: '2026-01-10T16:15:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '532540'
   },
   {
     id: '9',
@@ -194,7 +210,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-blue-800',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T15:50:00Z'
+    rawPublishedAt: '2026-01-10T15:50:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '500180'
   },
   {
     id: '10',
@@ -210,7 +228,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-blue-400',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T15:20:00Z'
+    rawPublishedAt: '2026-01-10T15:20:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '500209'
   },
   {
     id: '11',
@@ -226,7 +246,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-blue-700',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T14:45:00Z'
+    rawPublishedAt: '2026-01-10T14:45:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '500112'
   },
   {
     id: '12',
@@ -242,7 +264,9 @@ export const MOCK_NEWS: StockNews[] = [
     platform: 'Groww',
     logoColor: 'bg-red-600',
     // Fix: Added missing rawPublishedAt property
-    rawPublishedAt: '2026-01-10T14:10:00Z'
+    rawPublishedAt: '2026-01-10T14:10:00Z',
+    // Fix: Added missing bseCode property
+    bseCode: '532454'
   }
 ];
 

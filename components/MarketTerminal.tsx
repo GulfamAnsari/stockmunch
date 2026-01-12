@@ -39,10 +39,9 @@ const AnimatedTooltip: React.FC<{ text: string; children: React.ReactNode; label
 const NewsCard: React.FC<{ 
   news: StockNews; 
   isWatchlist?: boolean;
-  onCopy: (text: string) => void;
   onWatchlistAdd: (item: any) => void;
   fetchPrice: (symbol: string, bseCode?: string) => void;
-}> = ({ news, isWatchlist, onCopy, onWatchlistAdd, fetchPrice }) => {
+}> = ({ news, isWatchlist, onWatchlistAdd, fetchPrice }) => {
   const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
   const [livePercentage, setLivePercentage] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -203,15 +202,6 @@ const NewsCard: React.FC<{
           </div>
           
           <div className="flex items-center space-x-2">
-             <button 
-              onClick={() => onCopy(`${news.timestamp} | ${news.symbol} | ${news.title}`)}
-              className="p-1.5 bg-white/5 hover:bg-white/10 text-slate-500 hover:text-white rounded-lg transition-all"
-              title="Copy ID"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-              </svg>
-            </button>
             <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest">{news.source}</span>
           </div>
         </div>
@@ -239,6 +229,10 @@ const MarketTerminal: React.FC = () => {
   const filterRef = useRef<HTMLDivElement>(null);
   const [fromDateInput, setFromDateInput] = useState('2026-01-11');
   const [toDateInput, setToDateInput] = useState('2026-01-12');
+
+  const isFiltered = useMemo(() => {
+    return sentimentFilters.some(f => f !== 'ALL') || timeRange.from !== 0 || timeRange.to !== 24;
+  }, [sentimentFilters, timeRange]);
 
   useEffect(() => {
     const saved = localStorage.getItem('stockmanch_watchlist');
@@ -376,9 +370,9 @@ const MarketTerminal: React.FC = () => {
     if (searchTerm) {
       const lower = searchTerm.toLowerCase();
       list = list.filter(n => 
-        n.symbol.toLowerCase().includes(lower) || 
+        n.symbol?.toLowerCase().includes(lower) || 
         n.title.toLowerCase().includes(lower) ||
-        n.companyName.toLowerCase().includes(lower)
+        n.companyName?.toLowerCase().includes(lower)
       );
     }
 
@@ -405,7 +399,7 @@ const MarketTerminal: React.FC = () => {
   const pagedNews = useMemo(() => processedNews.slice(0, displayLimit), [processedNews, displayLimit]);
 
   const copyAllTitles = () => {
-    const content = processedNews.map(n => `${n.timestamp} | ${n.symbol} | ${n.title}`).join('\n');
+    const content = processedNews.map(n => `${n.timestamp} | ${n.symbol || n.bseCode} | ${n.title}`).join('\n');
     navigator.clipboard.writeText(content);
     alert(`Station: ${processedNews.length} dispatch titles copied.`);
   };
@@ -484,12 +478,25 @@ const MarketTerminal: React.FC = () => {
           
           <button 
             onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-            className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-1.5 ${isFilterPanelOpen ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'}`}
+            className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-1.5 relative ${isFilterPanelOpen ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'}`}
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
             <span>Filters</span>
+            {isFiltered && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full animate-pulse border border-slate-900"></span>
+            )}
+          </button>
+
+          <button 
+            onClick={copyAllTitles} 
+            className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg border border-white/10 transition-all flex items-center justify-center"
+            title="Copy Current Filtered Dispatch"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+            </svg>
           </button>
 
           {isFilterPanelOpen && (
@@ -557,7 +564,6 @@ const MarketTerminal: React.FC = () => {
                   <NewsCard 
                     news={newsItem} 
                     isWatchlist={activeTab === 'WATCHLIST'}
-                    onCopy={(text) => { navigator.clipboard.writeText(text); }}
                     onWatchlistAdd={handleWatchlistAdd}
                     fetchPrice={fetchPrice}
                   />
