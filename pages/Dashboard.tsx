@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MarketTerminal from '../components/MarketTerminal';
@@ -136,6 +137,7 @@ const Dashboard: React.FC = () => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden">
       <nav className="flex-grow py-8 px-4 space-y-4">
+        {/* Toggle only for desktop */}
         <button
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           className="hidden lg:flex w-full items-center justify-center p-4 rounded-2xl text-slate-500 hover:text-white hover:bg-white/5 transition-all mb-4"
@@ -177,8 +179,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="h-screen bg-[#0b0f1a] flex flex-col text-slate-300 overflow-hidden">
+      {/* Header */}
       <header className="w-full bg-[#111621] px-4 md:px-8 py-4 flex items-center justify-between shrink-0 border-b border-white/10 z-20">
         <div className="flex items-center space-x-3 md:space-x-8">
+          {/* Mobile Sidebar Toggle */}
           <button 
             onClick={() => setIsMobileSidebarOpen(true)}
             className="lg:hidden p-2 text-slate-400 hover:text-white"
@@ -213,10 +217,12 @@ const Dashboard: React.FC = () => {
       </header>
 
       <div className="flex-grow flex overflow-hidden relative">
+        {/* Desktop Sidebar */}
         <aside className={`hidden lg:flex ${isSidebarCollapsed ? 'w-20' : 'w-64'} bg-[#0d121f] border-r border-white/5 flex-col shrink-0 z-10 transition-all duration-300`}>
           <SidebarContent />
         </aside>
 
+        {/* Mobile Sidebar Overlay */}
         {isMobileSidebarOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileSidebarOpen(false)}></div>
@@ -232,6 +238,7 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
+        {/* Content Area */}
         <main className="flex-grow flex flex-col min-w-0 bg-[#0b0f1a]">
           {user.hasDashboardAccess ? (
             <div className="flex-grow flex flex-col overflow-hidden">
