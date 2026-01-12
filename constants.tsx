@@ -65,9 +65,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'BSE',
     platform: 'Groww',
     logoColor: 'bg-indigo-600',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T17:36:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '501831'
   },
   {
@@ -83,9 +81,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'ScoutQuest',
     platform: 'Groww',
     logoColor: 'bg-blue-500',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T17:25:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '532661'
   },
   {
@@ -101,9 +97,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'BSE',
     platform: 'Groww',
     logoColor: 'bg-[#1fa84f]',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T17:20:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '540376'
   },
   {
@@ -119,9 +113,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'BSE',
     platform: 'Groww',
     logoColor: 'bg-sky-700',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T17:20:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '500355'
   },
   {
@@ -137,9 +129,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'BSE',
     platform: 'Groww',
     logoColor: 'bg-teal-600',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T17:20:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '509762'
   },
   {
@@ -155,9 +145,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'BSE',
     platform: 'Groww',
     logoColor: 'bg-orange-600',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T17:15:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '543455'
   },
   {
@@ -173,9 +161,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'BSE',
     platform: 'Groww',
     logoColor: 'bg-blue-900',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T16:30:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '500325'
   },
   {
@@ -191,9 +177,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'BSE',
     platform: 'Groww',
     logoColor: 'bg-blue-600',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T16:15:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '532540'
   },
   {
@@ -209,9 +193,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'NSE',
     platform: 'Groww',
     logoColor: 'bg-blue-800',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T15:50:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '500180'
   },
   {
@@ -227,9 +209,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'BSE',
     platform: 'Groww',
     logoColor: 'bg-blue-400',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T15:20:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '500209'
   },
   {
@@ -245,9 +225,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'BSE',
     platform: 'Groww',
     logoColor: 'bg-blue-700',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T14:45:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '500112'
   },
   {
@@ -263,9 +241,7 @@ export const MOCK_NEWS: StockNews[] = [
     source: 'BSE',
     platform: 'Groww',
     logoColor: 'bg-red-600',
-    // Fix: Added missing rawPublishedAt property
     rawPublishedAt: '2026-01-10T14:10:00Z',
-    // Fix: Added missing bseCode property
     bseCode: '532454'
   }
 ];
@@ -343,5 +319,29 @@ export const FAQ_DATA = [
   {
     question: "Can I cancel my subscription anytime?",
     answer: "Yes. You can cancel your subscription from your account settings at any time. If you are in the trial period, you won't be charged."
+  },
+  {
+    question: "Is StockManch a SEBI registered investment advisor?",
+    answer: "StockManch is a technology-driven information aggregator and AI analysis platform. We do not provide personalized investment advice or buy/sell recommendations. We are not a SEBI registered advisor."
+  },
+  {
+    question: "What data sources does StockManch use?",
+    answer: "We pull data directly from official exchange feeds (NSE/BSE), corporate filing repositories, and verified financial news outlets to ensure the highest fidelity and speed."
+  },
+  {
+    question: "Can I access the dashboard on my mobile phone?",
+    answer: "Yes, our terminal is fully responsive and optimized for mobile browsers. You can monitor your watchlist and read news dispatches on the go."
+  },
+  {
+    question: "How does the AI Sentiment Analysis work?",
+    answer: "Our engine uses advanced Large Language Models (Gemini) to process news context in real-time. It evaluates the potential impact on stock price to label news as Bullish, Bearish, or Neutral."
+  },
+  {
+    question: "What happens after my 30-day free trial ends?",
+    answer: "Once your trial expires, you will need to choose a paid plan to continue receiving alerts and accessing the professional terminal. No charges are made during the trial."
+  },
+  {
+    question: "Can I link multiple Telegram accounts to one subscription?",
+    answer: "Currently, each subscription is linked to a single verified Telegram account to ensure secure and dedicated alert delivery."
   }
 ];
