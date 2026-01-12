@@ -131,13 +131,14 @@ const MarketTerminal: React.FC = () => {
   const [activeTab, setActiveTab] = useState('ALL FEEDS');
   const [news, setNews] = useState<StockNews[]>([]);
   const [loading, setLoading] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(false); // Changed to false initially
+  const [autoRefresh, setAutoRefresh] = useState(false);
   const [sortOrder, setSortOrder] = useState<'TIME' | 'SENTIMENT' | 'CHANGE'>('TIME');
-  const [sentimentFilter, setSentimentFilter] = useState<'ALL' | 'BULLISH' | 'BEARISH'>('ALL');
+  const [sentimentFilters, setSentimentFilters] = useState<string[]>(['ALL']);
   const [timeRange, setTimeRange] = useState({ from: 0, to: 24 });
   const [watchlist, setWatchlist] = useState<any[]>([]);
   const [activeQuote, setActiveQuote] = useState<{symbol: string, price?: number, change?: number} | null>(null);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
 
   const [fromDateInput, setFromDateInput] = useState('2026-01-11');
   const [toDateInput, setToDateInput] = useState('2026-01-12');
@@ -145,6 +146,14 @@ const MarketTerminal: React.FC = () => {
   useEffect(() => {
     const saved = localStorage.getItem('stockmanch_watchlist');
     if (saved) setWatchlist(JSON.parse(saved));
+    
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setIsFilterPanelOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const fetchNews = useCallback(async () => {
@@ -236,6 +245,21 @@ const MarketTerminal: React.FC = () => {
     localStorage.setItem('stockmanch_watchlist', JSON.stringify(next));
   };
 
+  const handleSentimentToggle = (val: string) => {
+    if (val === 'ALL') {
+      setSentimentFilters(['ALL']);
+      return;
+    }
+    let next = sentimentFilters.filter(f => f !== 'ALL');
+    if (next.includes(val)) {
+      next = next.filter(f => f !== val);
+    } else {
+      next.push(val);
+    }
+    if (next.length === 0) next = ['ALL'];
+    setSentimentFilters(next);
+  };
+
   const processedNews = useMemo(() => {
     let list = activeTab === 'WATCHLIST' ? [...watchlist] : [...news];
     
@@ -248,8 +272,8 @@ const MarketTerminal: React.FC = () => {
       );
     }
 
-    if (sentimentFilter !== 'ALL') {
-      list = list.filter(n => n.sentiment.toUpperCase() === sentimentFilter);
+    if (!sentimentFilters.includes('ALL')) {
+      list = list.filter(n => sentimentFilters.includes(n.sentiment.toUpperCase()));
     }
 
     list = list.filter(n => {
@@ -266,7 +290,7 @@ const MarketTerminal: React.FC = () => {
     }
 
     return list;
-  }, [news, watchlist, activeTab, searchTerm, sortOrder, sentimentFilter, timeRange]);
+  }, [news, watchlist, activeTab, searchTerm, sortOrder, sentimentFilters, timeRange]);
 
   const copyAllTitles = () => {
     const content = processedNews.map(n => `${n.timestamp} | ${n.symbol} | ${n.title}`).join('\n');
@@ -279,159 +303,164 @@ const MarketTerminal: React.FC = () => {
   return (
     <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a]">
       
-      {/* Terminal Toolbar (Single Row Desktop Optimization) */}
-      <div className="px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/5 flex flex-nowrap items-center justify-between gap-4 overflow-x-auto no-scrollbar">
+      {/* Terminal Toolbar (Responsive Wrapper) */}
+      <div className="px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/5 flex flex-wrap items-center justify-between gap-y-3 gap-x-6">
         
-        {/* Navigation Tabs */}
-        <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/5 shadow-inner shrink-0">
-          {['ALL FEEDS', 'WATCHLIST'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => { setActiveTab(tab); setIsFilterPanelOpen(false); }}
-              className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === tab ? 'bg-emerald-600 text-slate-950 shadow-lg' : 'text-slate-500 hover:text-white'}`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Search Data */}
-        <div className="relative w-48 lg:w-64 shrink-0">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="w-3 h-3 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+        {/* Navigation Tabs & Search */}
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/5 shadow-inner shrink-0">
+            {['ALL FEEDS', 'WATCHLIST'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => { setActiveTab(tab); setIsFilterPanelOpen(false); }}
+                className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === tab ? 'bg-emerald-600 text-slate-950 shadow-lg' : 'text-slate-500 hover:text-white'}`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
-          <input 
-            type="text" 
-            placeholder="SEARCH DATA..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-950 border border-white/5 rounded-lg pl-9 pr-3 py-2 text-[9px] text-white placeholder-slate-800 focus:outline-none focus:border-emerald-500/30 font-mono shadow-inner"
-          />
+
+          <div className="relative w-48 lg:w-72 shrink-0">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              placeholder="SEARCH SYMBOL, NAME..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all font-mono"
+            />
+          </div>
         </div>
 
-        {/* Dynamic Controls (Date, Refresh, Auto-Sync) */}
+        {/* Date & Sync - Main Row */}
         {!isWatchlist && (
-          <div className="flex items-center space-x-3 shrink-0 px-4 border-l border-white/5">
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3 shrink-0">
+            <div className="flex items-center space-x-2 bg-slate-900/50 p-1 rounded-lg border border-white/10">
               <input 
                 type="date" 
                 value={fromDateInput} 
                 onChange={(e) => setFromDateInput(e.target.value)} 
-                className="bg-slate-950 border border-white/10 rounded-lg px-2 py-1.5 text-[8px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[100px]" 
+                className="bg-slate-950 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[115px] cursor-pointer" 
               />
-              <span className="text-slate-600 text-[9px]">→</span>
+              <span className="text-slate-400 text-[10px]">→</span>
               <input 
                 type="date" 
                 value={toDateInput} 
                 onChange={(e) => setToDateInput(e.target.value)} 
-                className="bg-slate-950 border border-white/10 rounded-lg px-2 py-1.5 text-[8px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[100px]" 
+                className="bg-slate-950 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[115px] cursor-pointer" 
               />
               <button 
                 onClick={fetchNews} 
                 disabled={loading}
-                className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
+                className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-md border border-emerald-500/30 hover:bg-emerald-500/30 transition-all"
                 title="Sync Feed"
               >
-                <svg className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </button>
             </div>
             
-            <div className="flex items-center space-x-2 border-l border-white/5 pl-3">
-              <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Auto_Sync</span>
-              <button onClick={() => setAutoRefresh(!autoRefresh)} className={`relative inline-flex h-3.5 w-7 items-center rounded-full transition-colors ${autoRefresh ? 'bg-emerald-500' : 'bg-slate-800'}`}>
-                <span className={`inline-block h-2 w-2 transform rounded-full bg-white transition-transform ${autoRefresh ? 'translate-x-4' : 'translate-x-1'}`} />
+            <div className="flex items-center space-x-2 border-l border-white/10 pl-3">
+              <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Auto_Sync</span>
+              <button onClick={() => setAutoRefresh(!autoRefresh)} className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${autoRefresh ? 'bg-emerald-500' : 'bg-slate-800'}`}>
+                <span className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${autoRefresh ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
               </button>
             </div>
           </div>
         )}
 
-        {/* Quotes, Filters, and Copy */}
-        <div className="flex items-center space-x-3 shrink-0 ml-auto border-l border-white/5 pl-4">
+        {/* Filters Popup & Quotes */}
+        <div className="flex items-center gap-4 shrink-0 relative" ref={filterRef}>
           {activeQuote && (
-            <div className="flex items-center bg-sky-500/10 border border-sky-500/20 rounded-lg px-3 py-1.5 animate-in slide-in-from-right-4">
-              <span className="text-[8px] font-black text-white mr-2">{activeQuote.symbol}:</span>
-              <span className="text-[9px] font-mono text-white">{activeQuote.price || '...'}</span>
+            <div className="flex items-center bg-sky-500/20 border border-sky-500/30 rounded-lg px-3 py-1.5 animate-in slide-in-from-right-4">
+              <span className="text-[9px] font-black text-white mr-2">{activeQuote.symbol}:</span>
+              <span className="text-[10px] font-mono text-white">{activeQuote.price || '...'}</span>
             </div>
           )}
           
           <button 
             onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-            className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-1.5 ${isFilterPanelOpen ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-slate-900 border-white/5 text-slate-400 hover:text-white'}`}
+            className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-1.5 ${isFilterPanelOpen ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'}`}
           >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
             <span>Filters</span>
           </button>
 
-          <button onClick={copyAllTitles} className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg border border-white/5 shadow-sm" title="Copy Dispatch Titles">
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          {/* Small Popup Filter Panel */}
+          {isFilterPanelOpen && (
+            <div className="absolute top-full right-0 mt-3 w-72 bg-[#161b27] border border-white/10 rounded-2xl shadow-2xl p-6 z-[100] animate-in fade-in zoom-in-95 duration-200">
+              <div className="space-y-6">
+                {/* Checkbox Sentiments */}
+                <div className="space-y-3">
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">AI Sentiment</span>
+                  <div className="grid grid-cols-1 gap-2">
+                    {['ALL', 'BULLISH', 'BEARISH'].map((opt) => (
+                      <label key={opt} className="flex items-center space-x-3 cursor-pointer group">
+                        <div className="relative flex items-center">
+                          <input 
+                            type="checkbox" 
+                            checked={sentimentFilters.includes(opt)} 
+                            onChange={() => handleSentimentToggle(opt)}
+                            className="peer h-4 w-4 appearance-none border border-white/20 rounded bg-slate-900 checked:bg-emerald-500 checked:border-emerald-500 transition-all cursor-pointer"
+                          />
+                          <svg className="absolute w-3 h-3 text-slate-950 left-0.5 pointer-events-none hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
+                            <path d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${sentimentFilters.includes(opt) ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`}>
+                          {opt}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="h-px bg-white/5"></div>
+
+                {/* Time Protocol */}
+                <div className="space-y-3">
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Hour Range</span>
+                  <div className="bg-slate-950 p-3 rounded-xl border border-white/10">
+                    <input type="range" min="0" max="23" value={timeRange.from} onChange={(e) => setTimeRange({ ...timeRange, from: parseInt(e.target.value) })} className="w-full accent-emerald-500 mb-2" />
+                    <input type="range" min="0" max="24" value={timeRange.to} onChange={(e) => setTimeRange({ ...timeRange, to: parseInt(e.target.value) })} className="w-full accent-rose-500" />
+                    <div className="flex justify-between mt-2 font-mono text-[9px]">
+                      <span className="text-emerald-500">{timeRange.from.toString().padStart(2, '0')}:00</span>
+                      <span className="text-rose-500">{timeRange.to.toString().padStart(2, '0')}:00</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="h-px bg-white/5"></div>
+
+                {/* Sort */}
+                <div className="space-y-3">
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Sort Order</span>
+                  <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-white font-mono uppercase focus:outline-none">
+                    <option value="TIME">Time</option>
+                    <option value="SENTIMENT">AI Score</option>
+                    <option value="CHANGE">Volatility</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <button onClick={copyAllTitles} className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg border border-white/10 shadow-sm" title="Copy Current View">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
             </svg>
           </button>
         </div>
       </div>
 
-      {/* Filter Panel (Sentiment, Time, Sort) */}
-      {isFilterPanelOpen && (
-        <div className="px-8 py-8 bg-[#0d121f] border-b border-white/10 space-y-8 animate-in slide-in-from-top-4 duration-300">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            
-            {/* Sentiment Filter */}
-            <div className="space-y-4">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">AI Sentiment Protocol</span>
-              <div className="flex items-center space-x-1 bg-slate-950 p-1.5 rounded-2xl border border-white/5 shadow-inner">
-                {['ALL', 'BULLISH', 'BEARISH'].map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setSentimentFilter(filter as any)}
-                    className={`flex-1 px-4 py-2.5 text-[9px] font-black rounded-xl transition-all ${sentimentFilter === filter ? 'bg-emerald-600 text-slate-950 shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Time Protocol */}
-            <div className="space-y-4">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Intraday Time Range</span>
-              <div className="flex items-center space-x-4 bg-slate-950 p-3 rounded-2xl border border-white/10 shadow-inner">
-                <div className="flex-1 flex flex-col space-y-2">
-                   <input type="range" min="0" max="23" value={timeRange.from} onChange={(e) => setTimeRange({ ...timeRange, from: parseInt(e.target.value) })} className="w-full accent-emerald-500" />
-                   <input type="range" min="0" max="24" value={timeRange.to} onChange={(e) => setTimeRange({ ...timeRange, to: parseInt(e.target.value) })} className="w-full accent-rose-500" />
-                </div>
-                <div className="flex flex-col items-center space-y-1 font-mono text-[10px] w-14">
-                  <span className="text-emerald-500">{timeRange.from.toString().padStart(2, '0')}:00</span>
-                  <span className="text-slate-700">TO</span>
-                  <span className="text-rose-500">{timeRange.to.toString().padStart(2, '0')}:00</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Sort Protocol */}
-            <div className="space-y-4">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Terminal Sort Method</span>
-              <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} className="w-full bg-slate-950 border border-white/10 rounded-2xl px-6 py-3.5 text-[11px] text-white font-mono uppercase focus:border-emerald-500 focus:outline-none shadow-inner">
-                <option value="TIME">Chronological Sync</option>
-                <option value="SENTIMENT">AI Confidence Score</option>
-                <option value="CHANGE">Intrinsic Volatility</option>
-              </select>
-            </div>
-
-          </div>
-
-          <div className="flex items-center justify-end pt-4 border-t border-white/5">
-            <button onClick={() => setIsFilterPanelOpen(false)} className="text-[9px] font-black text-slate-600 hover:text-white uppercase tracking-[0.2em] transition-colors">Collapse Filter Node</button>
-          </div>
-        </div>
-      )}
-
-      {/* Internal Scrollable Content Area */}
+      {/* Grid Area - Desktop Optimized for 5 columns */}
       <div className="flex-grow overflow-y-auto px-8 py-8 custom-scrollbar bg-black/5">
         {loading && news.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center space-y-6 opacity-30">
@@ -443,7 +472,7 @@ const MarketTerminal: React.FC = () => {
             <p className="text-xl font-black uppercase tracking-[0.3em]">No Match Found in Data Tunnel</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
             {processedNews.map((newsItem) => (
               <div key={newsItem.id} className="relative">
                 <NewsCard 
@@ -462,7 +491,7 @@ const MarketTerminal: React.FC = () => {
       </div>
 
       {/* Terminal Footer Status Bar */}
-      <footer className="shrink-0 bg-[#111621] border-t border-white/5 px-8 py-3.5 flex items-center justify-between text-[9px] font-black font-mono text-slate-600 tracking-[0.2em] uppercase">
+      <footer className="shrink-0 bg-[#111621] border-t border-white/5 px-8 py-3 flex items-center justify-between text-[9px] font-black font-mono text-slate-600 tracking-[0.2em] uppercase">
         <div className="flex items-center space-x-10">
           <div className="flex items-center space-x-2">
             <span className="text-emerald-500 font-black">SYSTEM:</span>
@@ -475,7 +504,7 @@ const MarketTerminal: React.FC = () => {
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 opacity-40"></div>
-          <span className="opacity-60 italic tracking-tight uppercase">StockManch Station V5.6-STABLE</span>
+          <span className="opacity-60 italic tracking-tight uppercase">StockManch Station V5.7-STABLE</span>
         </div>
       </footer>
     </div>
