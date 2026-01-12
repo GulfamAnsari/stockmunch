@@ -64,7 +64,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 93,
     source: 'BSE',
     platform: 'Groww',
-    logoColor: 'bg-indigo-600'
+    logoColor: 'bg-indigo-600',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T17:36:00Z'
   },
   {
     id: '2',
@@ -78,7 +80,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 50,
     source: 'ScoutQuest',
     platform: 'Groww',
-    logoColor: 'bg-blue-500'
+    logoColor: 'bg-blue-500',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T17:25:00Z'
   },
   {
     id: '3',
@@ -92,7 +96,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 85,
     source: 'BSE',
     platform: 'Groww',
-    logoColor: 'bg-[#1fa84f]'
+    logoColor: 'bg-[#1fa84f]',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T17:20:00Z'
   },
   {
     id: '4',
@@ -106,7 +112,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 82,
     source: 'BSE',
     platform: 'Groww',
-    logoColor: 'bg-sky-700'
+    logoColor: 'bg-sky-700',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T17:20:00Z'
   },
   {
     id: '5',
@@ -120,7 +128,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 92,
     source: 'BSE',
     platform: 'Groww',
-    logoColor: 'bg-teal-600'
+    logoColor: 'bg-teal-600',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T17:20:00Z'
   },
   {
     id: '6',
@@ -134,7 +144,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 58,
     source: 'BSE',
     platform: 'Groww',
-    logoColor: 'bg-orange-600'
+    logoColor: 'bg-orange-600',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T17:15:00Z'
   },
   {
     id: '7',
@@ -148,7 +160,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 89,
     source: 'BSE',
     platform: 'Groww',
-    logoColor: 'bg-blue-900'
+    logoColor: 'bg-blue-900',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T16:30:00Z'
   },
   {
     id: '8',
@@ -162,7 +176,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 94,
     source: 'BSE',
     platform: 'Groww',
-    logoColor: 'bg-blue-600'
+    logoColor: 'bg-blue-600',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T16:15:00Z'
   },
   {
     id: '9',
@@ -176,7 +192,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 91,
     source: 'NSE',
     platform: 'Groww',
-    logoColor: 'bg-blue-800'
+    logoColor: 'bg-blue-800',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T15:50:00Z'
   },
   {
     id: '10',
@@ -190,7 +208,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 78,
     source: 'BSE',
     platform: 'Groww',
-    logoColor: 'bg-blue-400'
+    logoColor: 'bg-blue-400',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T15:20:00Z'
   },
   {
     id: '11',
@@ -204,7 +224,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 88,
     source: 'BSE',
     platform: 'Groww',
-    logoColor: 'bg-blue-700'
+    logoColor: 'bg-blue-700',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T14:45:00Z'
   },
   {
     id: '12',
@@ -218,7 +240,9 @@ export const MOCK_NEWS: StockNews[] = [
     sentimentScore: 85,
     source: 'BSE',
     platform: 'Groww',
-    logoColor: 'bg-red-600'
+    logoColor: 'bg-red-600',
+    // Fix: Added missing rawPublishedAt property
+    rawPublishedAt: '2026-01-10T14:10:00Z'
   }
 ];
 

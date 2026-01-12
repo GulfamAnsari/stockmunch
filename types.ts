@@ -12,6 +12,10 @@ export interface StockNews {
   source: string;
   platform: string;
   logoColor?: string;
+  image?: string;
+  aiAnalysis?: string;
+  userSentiment?: 'BULLISH' | 'BEARISH';
+  rawPublishedAt: string;
 }
 
 export interface PricingPlan {

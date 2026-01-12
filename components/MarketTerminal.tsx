@@ -4,10 +4,11 @@ import { StockNews } from '../types';
 
 const NewsCard: React.FC<{ 
   news: StockNews; 
+  isWatchlist?: boolean;
   onCopy: (text: string) => void;
   onWatchlistAdd: (item: any) => void;
   fetchPrice: (symbol: string, bseCode?: string) => void;
-}> = ({ news, onCopy, onWatchlistAdd, fetchPrice }) => {
+}> = ({ news, isWatchlist, onCopy, onWatchlistAdd, fetchPrice }) => {
   const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -30,7 +31,21 @@ const NewsCard: React.FC<{
   };
 
   return (
-    <div className="bg-[#111621] border border-white/5 rounded-xl flex flex-col h-full overflow-hidden hover:border-emerald-500/30 transition-all group shadow-2xl">
+    <div className="bg-[#111621] border border-white/5 rounded-xl flex flex-col h-full overflow-hidden hover:border-emerald-500/30 transition-all group shadow-2xl relative">
+      {/* Watchlist Badge - Repositioned to avoid overlap with date, styled like close button */}
+      {isWatchlist && news.userSentiment && (
+        <div className={`absolute -top-2 -left-2 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest z-10 border shadow-lg ${news.userSentiment === 'BULLISH' ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-rose-500 text-white border-rose-400'}`}>
+          {news.userSentiment}
+        </div>
+      )}
+
+      {/* API Image Display */}
+      {news.image && (
+        <div className="w-full h-32 overflow-hidden bg-slate-900 border-b border-white/5">
+          <img src={news.image} alt={news.symbol} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
+        </div>
+      )}
+
       <div className="p-4 flex flex-col h-full">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-3">
@@ -57,17 +72,25 @@ const NewsCard: React.FC<{
           {news.title}
         </h4>
 
-        <p className="text-[10px] text-slate-400 line-clamp-3 leading-relaxed mb-4 opacity-80 font-medium">
+        <p className="text-[10px] text-slate-400 line-clamp-2 leading-relaxed mb-4 opacity-80 font-medium italic border-l-2 border-emerald-500/30 pl-3">
           {news.content}
         </p>
+
+        {/* AI Analysis Section */}
+        {news.aiAnalysis && (
+          <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
+             <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest block mb-1">AI Deep Analysis</span>
+             <p className="text-[9px] text-slate-300 leading-tight line-clamp-3">{news.aiAnalysis}</p>
+          </div>
+        )}
 
         <div className="flex items-center gap-2 mb-4">
           <div className={`px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-[0.15em] inline-flex items-center ${getSentimentStyles(news.sentiment)}`}>
             <div className={`w-1 h-1 rounded-full mr-2 ${news.sentiment === 'bullish' ? 'bg-emerald-500' : news.sentiment === 'bearish' ? 'bg-rose-500' : 'bg-amber-500'} animate-pulse`}></div>
-            {news.sentiment}
+            AI ANALYSIS: {news.sentiment}
           </div>
           <div className="bg-white/5 border border-white/10 px-2 py-1.5 rounded-lg text-[9px] font-mono text-slate-400 uppercase tracking-tighter">
-            Confidence: <span className="text-white">{news.sentimentScore}%</span>
+            Impact: <span className="text-white">{news.sentimentScore}%</span>
           </div>
         </div>
 
@@ -138,8 +161,12 @@ const MarketTerminal: React.FC = () => {
   const [watchlist, setWatchlist] = useState<any[]>([]);
   const [activeQuote, setActiveQuote] = useState<{symbol: string, price?: number, change?: number} | null>(null);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  const filterRef = useRef<HTMLDivElement>(null);
+  
+  // Pagination / Infinite Scroll
+  const [displayLimit, setDisplayLimit] = useState(50);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const filterRef = useRef<HTMLDivElement>(null);
   const [fromDateInput, setFromDateInput] = useState('2026-01-11');
   const [toDateInput, setToDateInput] = useState('2026-01-12');
 
@@ -179,6 +206,8 @@ const MarketTerminal: React.FC = () => {
             companyName: item.data.cta?.[0]?.ctaText || 'Market Entry',
             title: item.data.title || '',
             content: item.data.body || '',
+            image: item.data.image || item.data.featuredImage, // API image support
+            aiAnalysis: item.summary || item.data.summary || (item.machineLearningSentiments?.explanation), // AI Analysis support
             timestamp: new Date(item.publishedAt).toLocaleString('en-IN', { 
               day: '2-digit', month: 'short', year: 'numeric', 
               hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
@@ -195,6 +224,7 @@ const MarketTerminal: React.FC = () => {
           allItems.push(...mappedItems);
         });
         setNews(allItems);
+        setDisplayLimit(50); // Reset pagination on new fetch
       }
     } catch (error) {
       console.error("Terminal API Error:", error);
@@ -214,6 +244,16 @@ const MarketTerminal: React.FC = () => {
     }
     return () => clearInterval(interval);
   }, [autoRefresh, loading, fetchNews, activeTab]);
+
+  // Infinite Scroll Observer
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    if (target.scrollHeight - target.scrollTop <= target.clientHeight + 100) {
+      if (displayLimit < processedNews.length) {
+        setDisplayLimit(prev => prev + 50);
+      }
+    }
+  };
 
   const fetchPrice = async (symbol: string, bseCode?: string) => {
     try {
@@ -292,6 +332,8 @@ const MarketTerminal: React.FC = () => {
     return list;
   }, [news, watchlist, activeTab, searchTerm, sortOrder, sentimentFilters, timeRange]);
 
+  const pagedNews = useMemo(() => processedNews.slice(0, displayLimit), [processedNews, displayLimit]);
+
   const copyAllTitles = () => {
     const content = processedNews.map(n => `${n.timestamp} | ${n.symbol} | ${n.title}`).join('\n');
     navigator.clipboard.writeText(content);
@@ -303,7 +345,7 @@ const MarketTerminal: React.FC = () => {
   return (
     <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a]">
       
-      {/* Terminal Toolbar (Responsive Wrapper) */}
+      {/* Terminal Toolbar */}
       <div className="px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/5 flex flex-wrap items-center justify-between gap-y-3 gap-x-6">
         
         {/* Navigation Tabs & Search */}
@@ -322,7 +364,7 @@ const MarketTerminal: React.FC = () => {
 
           <div className="relative w-48 lg:w-72 shrink-0">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
@@ -331,12 +373,12 @@ const MarketTerminal: React.FC = () => {
               placeholder="SEARCH SYMBOL, NAME..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all font-mono"
+              className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-all font-mono"
             />
           </div>
         </div>
 
-        {/* Date & Sync - Main Row */}
+        {/* Date & Sync */}
         {!isWatchlist && (
           <div className="flex items-center space-x-3 shrink-0">
             <div className="flex items-center space-x-2 bg-slate-900/50 p-1 rounded-lg border border-white/10">
@@ -344,24 +386,26 @@ const MarketTerminal: React.FC = () => {
                 type="date" 
                 value={fromDateInput} 
                 onChange={(e) => setFromDateInput(e.target.value)} 
-                className="bg-slate-950 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[115px] cursor-pointer" 
+                className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[115px] cursor-pointer" 
               />
               <span className="text-slate-400 text-[10px]">→</span>
               <input 
                 type="date" 
                 value={toDateInput} 
                 onChange={(e) => setToDateInput(e.target.value)} 
-                className="bg-slate-950 border border-white/10 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[115px] cursor-pointer" 
+                className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[115px] cursor-pointer" 
               />
               <button 
                 onClick={fetchNews} 
                 disabled={loading}
-                className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-md border border-emerald-500/30 hover:bg-emerald-500/30 transition-all"
+                className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-md border border-emerald-500/30 hover:bg-emerald-500/30 transition-all flex items-center justify-center min-w-[32px]"
                 title="Sync Feed"
               >
-                <svg className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+                {loading ? <div className="w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div> : (
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
               </button>
             </div>
             
@@ -393,15 +437,13 @@ const MarketTerminal: React.FC = () => {
             <span>Filters</span>
           </button>
 
-          {/* Small Popup Filter Panel */}
           {isFilterPanelOpen && (
             <div className="absolute top-full right-0 mt-3 w-72 bg-[#161b27] border border-white/10 rounded-2xl shadow-2xl p-6 z-[100] animate-in fade-in zoom-in-95 duration-200">
               <div className="space-y-6">
-                {/* Checkbox Sentiments */}
                 <div className="space-y-3">
-                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">AI Sentiment</span>
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">AI Sentiment Protocol</span>
                   <div className="grid grid-cols-1 gap-2">
-                    {['ALL', 'BULLISH', 'BEARISH'].map((opt) => (
+                    {['ALL', 'BULLISH', 'BEARISH', 'NEUTRAL'].map((opt) => (
                       <label key={opt} className="flex items-center space-x-3 cursor-pointer group">
                         <div className="relative flex items-center">
                           <input 
@@ -424,7 +466,6 @@ const MarketTerminal: React.FC = () => {
 
                 <div className="h-px bg-white/5"></div>
 
-                {/* Time Protocol */}
                 <div className="space-y-3">
                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Hour Range</span>
                   <div className="bg-slate-950 p-3 rounded-xl border border-white/10">
@@ -439,13 +480,12 @@ const MarketTerminal: React.FC = () => {
 
                 <div className="h-px bg-white/5"></div>
 
-                {/* Sort */}
                 <div className="space-y-3">
-                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Sort Order</span>
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Primary Sort Method</span>
                   <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-white font-mono uppercase focus:outline-none">
-                    <option value="TIME">Time</option>
-                    <option value="SENTIMENT">AI Score</option>
-                    <option value="CHANGE">Volatility</option>
+                    <option value="TIME">Newest First</option>
+                    <option value="SENTIMENT">Highest AI Confidence</option>
+                    <option value="CHANGE">Price Volatility</option>
                   </select>
                 </div>
               </div>
@@ -460,37 +500,51 @@ const MarketTerminal: React.FC = () => {
         </div>
       </div>
 
-      {/* Grid Area - Desktop Optimized for 5 columns */}
-      <div className="flex-grow overflow-y-auto px-8 py-8 custom-scrollbar bg-black/5">
+      {/* Grid Area - 6 Columns on XL screens */}
+      <div 
+        ref={scrollContainerRef} 
+        onScroll={handleScroll} 
+        className="flex-grow overflow-y-auto px-8 py-8 custom-scrollbar bg-black/5"
+      >
         {loading && news.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center space-y-6 opacity-30">
-            <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-[12px] font-black uppercase tracking-[0.4em]">Establishing Secure Feed...</p>
+          <div className="h-full flex flex-col items-center justify-center space-y-6">
+            <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-[12px] font-black uppercase tracking-[0.4em] opacity-30">Establishing Secure Feed...</p>
           </div>
         ) : processedNews.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-30">
             <p className="text-xl font-black uppercase tracking-[0.3em]">No Match Found in Data Tunnel</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-            {processedNews.map((newsItem) => (
-              <div key={newsItem.id} className="relative">
-                <NewsCard 
-                  news={newsItem} 
-                  onCopy={(text) => { navigator.clipboard.writeText(text); }}
-                  onWatchlistAdd={handleWatchlistAdd}
-                  fetchPrice={fetchPrice}
-                />
-                {isWatchlist && (
-                  <button onClick={() => removeFromWatchlist(newsItem.id)} className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-lg hover:scale-110 transition-all">✕</button>
-                )}
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-6">
+              {pagedNews.map((newsItem) => (
+                <div key={newsItem.id} className="relative">
+                  <NewsCard 
+                    news={newsItem} 
+                    isWatchlist={isWatchlist}
+                    onCopy={(text) => { navigator.clipboard.writeText(text); }}
+                    onWatchlistAdd={handleWatchlistAdd}
+                    fetchPrice={fetchPrice}
+                  />
+                  {isWatchlist && (
+                    <button onClick={() => removeFromWatchlist(newsItem.id)} className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-lg hover:scale-110 transition-all z-20">✕</button>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            {/* Infinite Scroll Loader */}
+            {displayLimit < processedNews.length && (
+              <div className="py-10 flex justify-center">
+                 <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Terminal Footer Status Bar */}
+      {/* Terminal Footer */}
       <footer className="shrink-0 bg-[#111621] border-t border-white/5 px-8 py-3 flex items-center justify-between text-[9px] font-black font-mono text-slate-600 tracking-[0.2em] uppercase">
         <div className="flex items-center space-x-10">
           <div className="flex items-center space-x-2">
@@ -504,7 +558,7 @@ const MarketTerminal: React.FC = () => {
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 opacity-40"></div>
-          <span className="opacity-60 italic tracking-tight uppercase">StockManch Station V5.7-STABLE</span>
+          <span className="opacity-60 italic tracking-tight uppercase">StockManch Station V5.8-STABLE</span>
         </div>
       </footer>
     </div>
