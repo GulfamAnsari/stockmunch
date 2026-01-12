@@ -3,12 +3,34 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { StockNews } from '../types';
 
 const AnimatedTooltip: React.FC<{ text: string; children: React.ReactNode }> = ({ text, children }) => {
+  const [position, setPosition] = useState<'left' | 'right'>('right');
+  const triggerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseEnter = () => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const windowWidth = window.innerWidth;
+      // If the right side of the tooltip (assuming ~300px width) would go off screen, show on left
+      if (rect.right + 300 > windowWidth) {
+        setPosition('left');
+      } else {
+        setPosition('right');
+      }
+    }
+  };
+
   return (
-    <div className="group relative flex flex-col">
+    <div 
+      className="group relative flex flex-col" 
+      ref={triggerRef}
+      onMouseEnter={handleMouseEnter}
+    >
       {children}
-      <div className="absolute z-[100] bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-3 bg-[#1a2235]/95 backdrop-blur-xl text-slate-200 text-[10px] font-medium rounded-2xl border border-white/10 shadow-2xl w-72 pointer-events-none opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 transition-all duration-300 ease-out text-left leading-relaxed">
+      <div className={`absolute z-[100] top-0 ${position === 'right' ? 'left-full ml-4' : 'right-full mr-4'} px-4 py-4 bg-[#1a2235]/98 backdrop-blur-2xl text-slate-200 text-[11px] font-medium rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-72 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out text-left leading-relaxed`}>
+        <div className="text-emerald-500 font-black text-[9px] uppercase tracking-widest mb-2 border-b border-white/10 pb-1">Full Dispatch Content</div>
         {text}
-        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-[6px] border-transparent border-t-[#1a2235]/95"></div>
+        {/* Arrow pointing to the trigger */}
+        <div className={`absolute top-4 ${position === 'right' ? '-left-2 border-r-white/10 border-r-8' : '-right-2 border-l-white/10 border-l-8'} border-y-transparent border-y-8`}></div>
       </div>
     </div>
   );
@@ -27,7 +49,6 @@ const NewsCard: React.FC<{
 
   useEffect(() => {
     const fetchLocalPercent = async () => {
-      // Priority: NSE Symbol > BSE Code
       const hasNse = news.symbol && news.symbol !== 'NSE';
       const bse = (news as any).bseCode;
       const querySymbol = hasNse ? `${news.symbol}.NS` : (bse ? `${bse}.BO` : null);
@@ -80,24 +101,24 @@ const NewsCard: React.FC<{
         </div>
       )}
 
-      <div className="p-4 flex flex-col h-full">
+      <div className="p-4 flex flex-col flex-grow">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-3">
-            <div className={`w-9 h-9 rounded-lg ${news.logoColor || 'bg-slate-700'} flex items-center justify-center text-white text-[11px] font-black shadow-inner overflow-hidden`}>
+            <div className={`w-9 h-9 rounded-lg ${news.logoColor || 'bg-slate-700'} flex items-center justify-center text-white text-[11px] font-black shadow-inner overflow-hidden border border-white/5`}>
               {news.logoUrl ? (
-                <img src={news.logoUrl} alt={news.symbol} className="w-full h-full object-contain p-1" />
+                <img src={news.logoUrl} alt={news.symbol} className="w-full h-full object-contain p-1 bg-white/5" />
               ) : (
                 news.symbol.substring(0, 2)
               )}
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-[11px] font-black text-white tracking-wider uppercase leading-none">{news.symbol}</h3>
+                <h3 className="text-[11px] font-black text-white tracking-wider uppercase leading-none">{news.companyName}</h3>
                 <span className={`text-[9px] font-bold flex items-center ${livePercentage !== null ? (livePercentage >= 0 ? 'text-emerald-500' : 'text-rose-500') : 'text-slate-600'}`}>
                    {livePercentage !== null ? (livePercentage >= 0 ? '↑' : '↓') : '•'} {livePercentage !== null ? Math.abs(livePercentage).toFixed(2) : '0.00'}%
                 </span>
               </div>
-              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight truncate max-w-[120px]">{news.companyName}</p>
+              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight truncate max-w-[120px]">{news.symbol}</p>
             </div>
           </div>
           <div className="text-right">
@@ -112,34 +133,28 @@ const NewsCard: React.FC<{
           </h4>
         </AnimatedTooltip>
 
-        <AnimatedTooltip text={news.content}>
-          <p className="text-[10px] text-slate-400 line-clamp-4 leading-relaxed mb-4 opacity-80 font-medium italic border-l-2 border-emerald-500/30 pl-3 transition-colors group-hover:text-slate-200">
-            {news.content}
-          </p>
-        </AnimatedTooltip>
+        <div className="flex-grow">
+          <AnimatedTooltip text={news.content}>
+            <p className="text-[10px] text-slate-400 line-clamp-4 leading-relaxed mb-4 opacity-80 font-medium italic border-l-2 border-emerald-500/30 pl-3 transition-colors group-hover:text-slate-200">
+              {news.content}
+            </p>
+          </AnimatedTooltip>
+        </div>
 
-        {news.aiAnalysis && (
-          <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
-             <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest block mb-1">AI Deep Analysis</span>
-             <AnimatedTooltip text={news.aiAnalysis}>
-               <p className="text-[9px] text-slate-300 leading-tight line-clamp-3 group-hover:text-white transition-colors">
-                 {news.aiAnalysis}
-               </p>
-             </AnimatedTooltip>
-          </div>
-        )}
-
-        <div className="flex items-center gap-2 mb-4">
-          <div className={`px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-[0.15em] inline-flex items-center ${getSentimentStyles(news.sentiment)}`}>
-            <div className={`w-1 h-1 rounded-full mr-2 ${news.sentiment === 'bullish' ? 'bg-emerald-500' : news.sentiment === 'bearish' ? 'bg-rose-500' : 'bg-amber-500'} animate-pulse`}></div>
-            AI ANALYSIS: {news.sentiment}
-          </div>
-          <div className="bg-white/5 border border-white/10 px-2 py-1.5 rounded-lg text-[9px] font-mono text-slate-400 uppercase tracking-tighter">
-            Impact: <span className="text-white">{news.sentimentScore}%</span>
+        {/* AI Analysis and Sentiment pushed to footer area */}
+        <div className="mt-auto">
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div className={`px-2 py-1.5 rounded-lg border text-[8px] font-black uppercase tracking-[0.15em] inline-flex items-center flex-grow justify-center ${getSentimentStyles(news.sentiment)}`}>
+              <div className={`w-1 h-1 rounded-full mr-2 ${news.sentiment === 'bullish' ? 'bg-emerald-500' : news.sentiment === 'bearish' ? 'bg-rose-500' : 'bg-amber-500'} animate-pulse`}></div>
+              AI ANALYSIS: {news.sentiment}
+            </div>
+            <div className="bg-white/5 border border-white/10 px-2 py-1.5 rounded-lg text-[8px] font-mono text-slate-400 uppercase tracking-tighter whitespace-nowrap">
+              Impact: <span className="text-white font-bold">{news.sentimentScore}%</span>
+            </div>
           </div>
         </div>
 
-        <div className="mt-auto pt-4 flex items-center justify-between border-t border-white/5 gap-2">
+        <div className="pt-4 flex items-center justify-between border-t border-white/5 gap-2">
           <div className="flex items-center gap-1.5 relative" ref={dropdownRef}>
             <button 
               onClick={() => setShowWatchlistOpts(!showWatchlistOpts)}
@@ -207,8 +222,7 @@ const MarketTerminal: React.FC = () => {
   const [activeQuote, setActiveQuote] = useState<{symbol: string, price?: number, change?: number} | null>(null);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   
-  // Pagination / Infinite Scroll
-  const [displayLimit, setDisplayLimit] = useState(20); // Initialized to 20 per request
+  const [displayLimit, setDisplayLimit] = useState(20);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const filterRef = useRef<HTMLDivElement>(null);
@@ -246,31 +260,32 @@ const MarketTerminal: React.FC = () => {
           const rawItems = json.data[dateKey];
           const mappedItems: StockNews[] = rawItems.map((item: any) => ({
             id: item.postId,
-            symbol: item.data.cta?.[0]?.meta?.nseScriptCode || 'NSE',
-            bseCode: item.data.cta?.[0]?.meta?.bseScriptCode,
-            companyName: item.data.cta?.[0]?.ctaText || 'Market Entry',
+            symbol: item.data.cta?.[0]?.meta?.nseScriptCode || 'N/A',
+            bseCode: item.data.cta?.[0]?.meta?.bseScriptCode || 'N/A',
+            companyName: item.data.cta?.[0]?.ctaText || 'N/A',
             title: item.data.title || '',
             content: item.data.body || '',
             image: item.data.image || item.data.featuredImage,
-            logoUrl: item.data.logoUrl,
-            aiAnalysis: item.summary || item.data.summary || (item.machineLearningSentiments?.explanation),
+            logoUrl: item.data.cta?.[0]?.logoUrl,
             timestamp: new Date(item.publishedAt).toLocaleString('en-IN', { 
               day: '2-digit', month: 'short', year: 'numeric', 
               hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
             }),
             rawPublishedAt: item.publishedAt,
-            priceChange: 0, // Now calculated live per card
+            priceChange: 0, 
             sentiment: item.machineLearningSentiments?.label === 'negative' ? 'bearish' : 
                        item.machineLearningSentiments?.label === 'positive' ? 'bullish' : 'neutral',
             sentimentScore: Math.round((item.machineLearningSentiments?.confidence || 0.5) * 100),
-            source: item.publisher || 'BSE',
-            platform: 'Groww',
-            logoColor: 'bg-indigo-600'
+            source: (item.data.body || '').split('\n')[-1],
+            logoColor: 'bg-indigo-600',
+            from: rawItems?.from,
           }));
           allItems.push(...mappedItems);
         });
-        setNews(allItems);
-        setDisplayLimit(20); // Reset display limit to 20 for initial view
+        setNews(allItems.filter((a: any) => {
+          return ((a.from || '').toUpperCase() !== "BSE INDIA");
+        }));
+        setDisplayLimit(20); 
       }
     } catch (error) {
       console.error("Terminal API Error:", error);
@@ -295,7 +310,7 @@ const MarketTerminal: React.FC = () => {
     const target = e.currentTarget;
     if (target.scrollHeight - target.scrollTop <= target.clientHeight + 100) {
       if (displayLimit < processedNews.length) {
-        setDisplayLimit(prev => prev + 20); // Increase limit on scroll
+        setDisplayLimit(prev => prev + 20); 
       }
     }
   };
