@@ -104,7 +104,7 @@ const NewsCard: React.FC<{
       <div className="p-4 flex flex-col flex-grow">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-3">
-            <div className={`w-9 h-9 rounded-lg ${news.logoColor || 'bg-slate-700'} flex items-center justify-center text-white text-[11px] font-black shadow-inner overflow-hidden border border-white/5`}>
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-white text-[11px] font-black shadow-inner overflow-hidden border border-white/5`}>
               {news.logoUrl ? (
                 <img src={news.logoUrl} alt={news.symbol} className="w-full h-full object-contain p-1 bg-white/5" />
               ) : (
@@ -113,12 +113,12 @@ const NewsCard: React.FC<{
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-[11px] font-black text-white tracking-wider uppercase leading-none">{news.symbol}</h3>
+                <h3 className="text-[11px] font-black text-white tracking-wider uppercase leading-none">{news.companyName}</h3>
                 <span className={`text-[9px] font-bold flex items-center ${livePercentage !== null ? (livePercentage >= 0 ? 'text-emerald-500' : 'text-rose-500') : 'text-slate-600'}`}>
                    {livePercentage !== null ? (livePercentage >= 0 ? '↑' : '↓') : '•'} {livePercentage !== null ? Math.abs(livePercentage).toFixed(2) : '0.00'}%
                 </span>
               </div>
-              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight truncate max-w-[120px]">{news.companyName}</p>
+              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight truncate max-w-[120px]">{news.symbol || news?.bseCode}</p>
             </div>
           </div>
           <div className="text-right">
@@ -271,11 +271,11 @@ const MarketTerminal: React.FC = () => {
           const rawItems = json.data[dateKey];
           const mappedItems: StockNews[] = rawItems.map((item: any) => ({
             id: item.postId,
-            symbol: item.data.cta?.[0]?.meta?.nseScriptCode || 'NSE',
+            symbol: item.data.cta?.[0]?.meta?.nseScriptCode,
             bseCode: item.data.cta?.[0]?.meta?.bseScriptCode,
-            companyName: item.data.cta?.[0]?.ctaText || 'Market Entry',
+            companyName: item.data.cta?.[0]?.ctaText,
             title: item.data.title || '',
-            content: item.data.body || '',
+            content: (item.data.body || '').split("Source:")[0],
             image: item.data.image || item.data.featuredImage,
             logoUrl: item.data.cta?.[0]?.logoUrl,
             aiAnalysis: item.summary || item.data.summary || (item.machineLearningSentiments?.explanation),
@@ -288,7 +288,8 @@ const MarketTerminal: React.FC = () => {
             sentiment: item.machineLearningSentiments?.label === 'negative' ? 'bearish' : 
                        item.machineLearningSentiments?.label === 'positive' ? 'bullish' : 'neutral',
             sentimentScore: Math.round((item.machineLearningSentiments?.confidence || 0.5) * 100),
-            source: item.from,
+            from: item.from,
+            source: (item.data.body || '').split("\n")[(item.data.body || '').split("\n").length - 1],
             logoColor: 'bg-indigo-600'
           }));
           allItems.push(...mappedItems);

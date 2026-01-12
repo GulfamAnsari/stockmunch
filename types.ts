@@ -17,6 +17,7 @@ export interface StockNews {
   aiAnalysis?: string;
   userSentiment?: 'BULLISH' | 'BEARISH';
   rawPublishedAt: string;
+  bseCode: string;
 }
 
 export interface PricingPlan {
