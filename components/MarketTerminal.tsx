@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { StockNews } from '../types';
 
-const AnimatedTooltip: React.FC<{ text: string; children: React.ReactNode }> = ({ text, children }) => {
+const AnimatedTooltip: React.FC<{ text: string; children: React.ReactNode; label?: string }> = ({ text, children, label = "Dispatch" }) => {
   const [position, setPosition] = useState<'left' | 'right'>('right');
   const triggerRef = useRef<HTMLDivElement>(null);
 
@@ -21,13 +21,13 @@ const AnimatedTooltip: React.FC<{ text: string; children: React.ReactNode }> = (
 
   return (
     <div 
-      className="group relative flex flex-col" 
+      className="group/tooltip relative flex flex-col" 
       ref={triggerRef}
       onMouseEnter={handleMouseEnter}
     >
       {children}
-      <div className={`absolute z-[100] top-0 ${position === 'right' ? 'left-full ml-4' : 'right-full mr-4'} px-4 py-4 bg-[#1a2235]/98 backdrop-blur-2xl text-slate-200 text-[11px] font-medium rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-72 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out text-left leading-relaxed`}>
-        <div className="text-emerald-500 font-black text-[9px] uppercase tracking-widest mb-2 border-b border-white/10 pb-1">Full Dispatch Content</div>
+      <div className={`absolute z-[100] top-0 ${position === 'right' ? 'left-full ml-4' : 'right-full mr-4'} px-4 py-4 bg-[#1a2235]/98 backdrop-blur-2xl text-slate-200 text-[11px] font-medium rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-72 pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 ease-out text-left leading-relaxed`}>
+        <div className="text-emerald-500 font-black text-[9px] uppercase tracking-widest mb-2 border-b border-white/10 pb-1">Full {label}</div>
         {text}
         {/* Arrow pointing to the trigger */}
         <div className={`absolute top-4 ${position === 'right' ? '-left-2 border-r-white/10 border-r-8' : '-right-2 border-l-white/10 border-l-8'} border-y-transparent border-y-8`}></div>
@@ -113,12 +113,12 @@ const NewsCard: React.FC<{
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-[11px] font-black text-white tracking-wider uppercase leading-none">{news.companyName}</h3>
+                <h3 className="text-[11px] font-black text-white tracking-wider uppercase leading-none">{news.symbol}</h3>
                 <span className={`text-[9px] font-bold flex items-center ${livePercentage !== null ? (livePercentage >= 0 ? 'text-emerald-500' : 'text-rose-500') : 'text-slate-600'}`}>
                    {livePercentage !== null ? (livePercentage >= 0 ? '↑' : '↓') : '•'} {livePercentage !== null ? Math.abs(livePercentage).toFixed(2) : '0.00'}%
                 </span>
               </div>
-              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight truncate max-w-[120px]">{news.symbol}</p>
+              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight truncate max-w-[120px]">{news.companyName}</p>
             </div>
           </div>
           <div className="text-right">
@@ -127,14 +127,14 @@ const NewsCard: React.FC<{
           </div>
         </div>
 
-        <AnimatedTooltip text={news.title}>
+        <AnimatedTooltip text={news.title} label="Title">
           <h4 className="text-[12px] font-bold text-slate-100 leading-snug mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors">
             {news.title}
           </h4>
         </AnimatedTooltip>
 
         <div className="flex-grow">
-          <AnimatedTooltip text={news.content}>
+          <AnimatedTooltip text={news.content} label="Description">
             <p className="text-[10px] text-slate-400 line-clamp-4 leading-relaxed mb-4 opacity-80 font-medium italic border-l-2 border-emerald-500/30 pl-3 transition-colors group-hover:text-slate-200">
               {news.content}
             </p>
@@ -143,6 +143,17 @@ const NewsCard: React.FC<{
 
         {/* AI Analysis and Sentiment pushed to footer area */}
         <div className="mt-auto">
+          {news.aiAnalysis && (
+            <div className="mb-3 p-3 bg-white/5 rounded-lg border border-white/10">
+               <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest block mb-1">AI Deep Analysis</span>
+               <AnimatedTooltip text={news.aiAnalysis} label="AI Analysis">
+                 <p className="text-[9px] text-slate-300 leading-tight line-clamp-2">
+                   {news.aiAnalysis}
+                 </p>
+               </AnimatedTooltip>
+            </div>
+          )}
+
           <div className="flex items-center justify-between gap-2 mb-4">
             <div className={`px-2 py-1.5 rounded-lg border text-[8px] font-black uppercase tracking-[0.15em] inline-flex items-center flex-grow justify-center ${getSentimentStyles(news.sentiment)}`}>
               <div className={`w-1 h-1 rounded-full mr-2 ${news.sentiment === 'bullish' ? 'bg-emerald-500' : news.sentiment === 'bearish' ? 'bg-rose-500' : 'bg-amber-500'} animate-pulse`}></div>
@@ -250,7 +261,7 @@ const MarketTerminal: React.FC = () => {
         const parts = d.split('-');
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
       };
-      const url = `https://droidtechknow.com/admin/api/stocks/news/save.php?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}`;
+      const url = `https://droidtechknow.com/admin/api/stocks/news/save.php?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}&source=g`;
       const response = await fetch(url);
       const json = await response.json();
       
@@ -260,13 +271,14 @@ const MarketTerminal: React.FC = () => {
           const rawItems = json.data[dateKey];
           const mappedItems: StockNews[] = rawItems.map((item: any) => ({
             id: item.postId,
-            symbol: item.data.cta?.[0]?.meta?.nseScriptCode || 'N/A',
-            bseCode: item.data.cta?.[0]?.meta?.bseScriptCode || 'N/A',
-            companyName: item.data.cta?.[0]?.ctaText || 'N/A',
+            symbol: item.data.cta?.[0]?.meta?.nseScriptCode || 'NSE',
+            bseCode: item.data.cta?.[0]?.meta?.bseScriptCode,
+            companyName: item.data.cta?.[0]?.ctaText || 'Market Entry',
             title: item.data.title || '',
             content: item.data.body || '',
             image: item.data.image || item.data.featuredImage,
-            logoUrl: item.data.cta?.[0]?.logoUrl,
+            logoUrl: item.data.logoUrl,
+            aiAnalysis: item.summary || item.data.summary || (item.machineLearningSentiments?.explanation),
             timestamp: new Date(item.publishedAt).toLocaleString('en-IN', { 
               day: '2-digit', month: 'short', year: 'numeric', 
               hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
@@ -276,15 +288,12 @@ const MarketTerminal: React.FC = () => {
             sentiment: item.machineLearningSentiments?.label === 'negative' ? 'bearish' : 
                        item.machineLearningSentiments?.label === 'positive' ? 'bullish' : 'neutral',
             sentimentScore: Math.round((item.machineLearningSentiments?.confidence || 0.5) * 100),
-            source: (item.data.body || '').split('\n')[-1],
-            logoColor: 'bg-indigo-600',
-            from: rawItems?.from,
+            source: item.from,
+            logoColor: 'bg-indigo-600'
           }));
           allItems.push(...mappedItems);
         });
-        setNews(allItems.filter((a: any) => {
-          return ((a.from || '').toUpperCase() !== "BSE INDIA");
-        }));
+        setNews(allItems);
         setDisplayLimit(20); 
       }
     } catch (error) {
@@ -401,7 +410,7 @@ const MarketTerminal: React.FC = () => {
   };
 
   return (
-    <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a]">
+    <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a] overflow-x-hidden">
       <div className="px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/5 flex flex-wrap items-center justify-between gap-y-3 gap-x-6">
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/5 shadow-inner shrink-0">
@@ -528,7 +537,7 @@ const MarketTerminal: React.FC = () => {
       <div 
         ref={scrollContainerRef} 
         onScroll={handleScroll} 
-        className="flex-grow overflow-y-auto px-8 py-8 custom-scrollbar bg-black/5"
+        className="flex-grow overflow-y-auto px-8 py-8 custom-scrollbar bg-black/5 overflow-x-hidden"
       >
         {loading && news.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center space-y-6">
