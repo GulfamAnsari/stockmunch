@@ -88,12 +88,16 @@ const NewsCard: React.FC<{
   const [isRead, setIsRead] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isNew = useMemo(() => {
-    if (isRead) return false;
+  // Determine if the card was new when it first arrived in this session
+  // It remains "new" and highlighted until clicked (isRead becomes true)
+  const [isNew] = useState(() => {
     const publishedAt = new Date(news.rawPublishedAt).getTime();
     const now = Date.now();
-    return now - publishedAt < 10 * 60 * 1000;
-  }, [news.rawPublishedAt, isRead]);
+    // Consider it "new" if it was published in the last 10 mins when it first appears in terminal
+    return (now - publishedAt) < 10 * 60 * 1000;
+  });
+
+  const shouldHighlight = isNew && !isRead;
 
   const fetchLocalPercent = useCallback(async () => {
     const hasNse = news.symbol && news.symbol !== "NSE";
@@ -124,10 +128,9 @@ const NewsCard: React.FC<{
   }, [news.id, news.symbol, (news as any).bseCode, onPriceUpdate]);
 
   useEffect(() => {
-    if (!autoRefresh) {
-      fetchLocalPercent();
-    }
-  }, [fetchLocalPercent, autoRefresh]);
+    // Only call on initial card load when Live Monitor is NOT active
+    fetchLocalPercent();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -157,12 +160,12 @@ const NewsCard: React.FC<{
     <div
       onClick={() => setIsRead(true)}
       className={`bg-[#111621] border ${
-        isNew
+        shouldHighlight
           ? "border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
           : "border-white/5"
       } rounded-xl flex flex-col h-full hover:border-emerald-500/30 transition-all group shadow-2xl relative cursor-pointer`}
     >
-      {isNew && (
+      {shouldHighlight && (
         <div className="absolute -top-2 right-2 px-2 py-0.5 bg-emerald-500 text-slate-950 text-[8px] font-black uppercase rounded z-20 shadow-lg animate-pulse">
           New Alert
         </div>
@@ -221,7 +224,7 @@ const NewsCard: React.FC<{
                   }`}
                 >
                   {news.priceChange !== 0 ? (news.priceChange >= 0 ? "↑" : "↓") : "•"}{" "}
-                  {Math.abs(news.priceChange).toFixed(2)}%
+                  {news.priceChange || news.priceChange == 0 ?Math.abs(news.priceChange).toFixed(2): ""}%
                 </span>
               </div>
               <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider truncate max-w-[140px] mt-1">
@@ -510,7 +513,17 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
           }));
           allItems.push(...mappedItems);
         });
-        setNews(allItems);
+
+        // Use functional update to preserve existing priceChange data
+        setNews((prevNews) => {
+          return allItems.map(newItem => {
+            const existingItem = prevNews.find(p => p.id === newItem.id);
+            return {
+              ...newItem,
+              priceChange: existingItem ? existingItem.priceChange : 0
+            };
+          });
+        });
       }
     } catch (error) {
       console.error("Terminal API Error:", error);
@@ -963,6 +976,12 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
             <span className="text-emerald-500 font-black">STREAM:</span>
             <span>{processedNews.length} SYNCED</span>
           </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 opacity-40"></div>
+          <span className="opacity-60 italic tracking-tight uppercase text-center">
+            StockManch
+          </span>
         </div>
       </footer>
     </div>
