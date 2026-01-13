@@ -1,4 +1,3 @@
-
 import React, {
   useState,
   useEffect,
@@ -14,18 +13,50 @@ const AnimatedTooltip: React.FC<{
   children: React.ReactNode;
   label?: string;
 }> = ({ text, children, label = "Dispatch" }) => {
-  const [position, setPosition] = useState<"left" | "right">("right");
+  const [position, setPosition] = useState<"left" | "right" | "top" | "bottom">("right");
   const triggerRef = useRef<HTMLDivElement>(null);
 
   const handleMouseEnter = () => {
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       const windowWidth = window.innerWidth;
-      if (rect.right + 300 > windowWidth) {
-        setPosition("left");
+      const windowHeight = window.innerHeight;
+
+      if (windowWidth < 768) {
+        // Mobile positioning: Top or Bottom
+        if (rect.top > (windowHeight - rect.bottom)) {
+          setPosition("top");
+        } else {
+          setPosition("bottom");
+        }
       } else {
-        setPosition("right");
+        // Desktop positioning: Left or Right
+        if (rect.right + 300 > windowWidth) {
+          setPosition("left");
+        } else {
+          setPosition("right");
+        }
       }
+    }
+  };
+
+  const getPositionClasses = () => {
+    switch (position) {
+      case "right": return "top-0 left-full ml-4";
+      case "left": return "top-0 right-full mr-4";
+      case "top": return "bottom-full left-0 mb-4";
+      case "bottom": return "top-full left-0 mt-4";
+      default: return "top-0 left-full ml-4";
+    }
+  };
+
+  const getArrowClasses = () => {
+    switch (position) {
+      case "right": return "-left-2 top-4 border-r-white/10 border-r-8 border-y-transparent border-y-8";
+      case "left": return "-right-2 top-4 border-l-white/10 border-l-8 border-y-transparent border-y-8";
+      case "top": return "-bottom-2 left-4 border-t-white/10 border-t-8 border-x-transparent border-x-8";
+      case "bottom": return "-top-2 left-4 border-b-white/10 border-b-8 border-x-transparent border-x-8";
+      default: return "";
     }
   };
 
@@ -37,18 +68,10 @@ const AnimatedTooltip: React.FC<{
     >
       {children}
       <div
-        className={`absolute z-[100] top-0 ${
-          position === "right" ? "left-full ml-4" : "right-full mr-4"
-        } px-4 py-4 bg-[#1a2235]/98 backdrop-blur-2xl text-slate-200 text-[11px] font-medium rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-72 pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 ease-out text-left leading-relaxed`}
+        className={`absolute z-[100] ${getPositionClasses()} px-4 py-4 bg-[#1a2235]/98 backdrop-blur-2xl text-slate-200 text-[11px] font-medium rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-72 pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 ease-out text-left leading-relaxed`}
       >
         {text}
-        <div
-          className={`absolute top-4 ${
-            position === "right"
-              ? "-left-2 border-r-white/10 border-r-8"
-              : "-right-2 border-l-white/10 border-l-8"
-          } border-y-transparent border-y-8`}
-        ></div>
+        <div className={`absolute ${getArrowClasses()}`}></div>
       </div>
     </div>
   );
@@ -353,6 +376,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isControlsVisible, setIsControlsVisible] = useState(true);
   const [sortOrder, setSortOrder] = useState<"TIME" | "SENTIMENT" | "CHANGE">(
     "TIME"
   );
@@ -510,7 +534,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
 
   const fetchPrice = async (symbol: string, bseCode?: string) => {
     try {
-      const querySymbol = bseCode ? `${bseCode}.BO` : `${symbol}.NS`;
+      const querySymbol = symbol ? `${symbol}.NS`: `${bseCode}.BO`;
       setActiveQuote({ symbol, price: undefined });
       const resp = await fetch(
         `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`
@@ -541,6 +565,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
   };
 
   const handleSentimentToggle = (val: string) => {
+    setDisplayLimit(20);
     if (val === "ALL") {
       setSentimentFilters(["ALL"]);
       return;
@@ -625,14 +650,29 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
 
   return (
     <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a] overflow-x-hidden relative">
-      <div className="px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/5 flex flex-wrap items-center justify-between gap-y-3 gap-x-6">
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/5 shadow-inner shrink-0">
+      <div className="lg:hidden shrink-0 bg-[#0d121f] px-4 py-2 flex items-center justify-between border-b border-white/5">
+        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Terminal Controls</span>
+        <button 
+          onClick={() => setIsControlsVisible(!isControlsVisible)}
+          className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest text-emerald-500 hover:bg-emerald-500/10 transition-all flex items-center space-x-1"
+        >
+          {isControlsVisible ? (
+            <><span>Hide</span><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 15l7-7 7 7" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /></svg></>
+          ) : (
+            <><span>Show</span><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /></svg></>
+          )}
+        </button>
+      </div>
+
+      <div className={`${isControlsVisible ? 'flex' : 'hidden lg:flex'} px-4 md:px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/5 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-y-4 gap-x-6`}>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-wrap">
+          <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/5 shadow-inner shrink-0 self-start sm:self-auto">
             {["ALL FEEDS", "WATCHLIST"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => {
                   setActiveTab(tab);
+                  setDisplayLimit(20);
                   setIsFilterPanelOpen(false);
                 }}
                 className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${
@@ -646,7 +686,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
             ))}
           </div>
 
-          <div className="relative w-48 lg:w-72 shrink-0">
+          <div className="relative w-full sm:w-48 lg:w-72 shrink-0">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg
                 className="w-3.5 h-3.5 text-slate-400"
@@ -666,25 +706,34 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
               type="text"
               placeholder="SEARCH SYMBOL, NAME..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setDisplayLimit(20);
+              }}
               className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-all font-mono"
             />
           </div>
           {activeTab !== "WATCHLIST" && (
-            <div className="flex items-center space-x-3 shrink-0">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
               <div className="flex items-center space-x-2 bg-slate-900/50 p-1 rounded-lg border border-white/10">
                 <input
                   type="date"
                   value={fromDateInput}
-                  onChange={(e) => setFromDateInput(e.target.value)}
-                  className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[115px] cursor-pointer"
+                  onChange={(e) => {
+                    setFromDateInput(e.target.value);
+                    setDisplayLimit(20);
+                  }}
+                  className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-full sm:w-[110px] cursor-pointer"
                 />
                 <span className="text-slate-400 text-[10px]">→</span>
                 <input
                   type="date"
                   value={toDateInput}
-                  onChange={(e) => setToDateInput(e.target.value)}
-                  className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[115px] cursor-pointer"
+                  onChange={(e) => {
+                    setToDateInput(e.target.value);
+                    setDisplayLimit(20);
+                  }}
+                  className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-full sm:w-[110px] cursor-pointer"
                 />
                 <button
                   onClick={fetchNews}
@@ -713,7 +762,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
               </div>
               <button
                 onClick={() => setAutoRefresh(!autoRefresh)}
-                className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 ${
+                className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 sm:w-auto w-full ${
                   autoRefresh
                     ? "bg-emerald-500/10 border-emerald-500 text-emerald-400"
                     : "bg-slate-900 border-white/10 text-slate-400 hover:text-white"
@@ -732,78 +781,76 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
           )}
         </div>
 
-        <div className="flex items-center gap-4 shrink-0 relative">
-          {activeQuote && (
-            <div className="flex items-center bg-sky-500/20 border border-sky-500/30 rounded-lg px-3 py-1.5 animate-in slide-in-from-right-4">
-              <span className="text-[9px] font-black text-white mr-2">
-                {activeQuote.symbol}:
-              </span>
-              <span className="text-[10px] font-mono text-white">
-                {activeQuote.price || "..."}
-              </span>
-            </div>
-          )}
+        <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 relative">
+          <div className="flex items-center gap-3">
+            {activeQuote && (
+              <div className="flex items-center bg-sky-500/20 border border-sky-500/30 rounded-lg px-3 py-1.5 animate-in slide-in-from-right-4">
+                <span className="text-[9px] font-black text-white mr-2">
+                  {activeQuote.symbol}:
+                </span>
+                <span className="text-[10px] font-mono text-white">
+                  {activeQuote.price || "..."}
+                </span>
+              </div>
+            )}
 
-          <button
-            ref={filterBtnRef}
-            onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-            className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-1.5 ${
-              isFilterPanelOpen
-                ? "bg-emerald-500 text-slate-950 border-emerald-500"
-                : "bg-slate-900 border-white/10 text-slate-400 hover:text-white"
-            }`}
-          >
-            <svg
-              className="w-3.5 h-3.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            <button
+              ref={filterBtnRef}
+              onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+              className={`px-3 sm:px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-1.5 ${
+                isFilterPanelOpen
+                  ? "bg-emerald-500 text-slate-950 border-emerald-500"
+                  : "bg-slate-900 border-white/10 text-slate-400 hover:text-white"
+              }`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-              />
-            </svg>
-            <span>Filters</span>
-          </button>
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
+              </svg>
+              <span className="hidden sm:inline">Filters</span>
+            </button>
 
-          <button
-            onClick={copyAllTitles}
-            className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg border border-white/10 transition-all flex items-center justify-center"
-            title="Copy Current Dispatch"
-          >
-            <svg
-              className="w-3.5 h-3.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            <button
+              onClick={copyAllTitles}
+              className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg border border-white/10 transition-all flex items-center justify-center"
+              title="Copy Current Dispatch"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
-              />
-            </svg>
-          </button>
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
+                />
+              </svg>
+            </button>
 
-          <button
-            onClick={toggleFullScreen}
-            className={`p-2 bg-slate-900 hover:bg-slate-800 rounded-lg border border-white/10 transition-all flex items-center justify-center ${
-              isFullScreen ? "text-emerald-500 border-emerald-500/50" : "text-slate-400 hover:text-white"
-            }`}
-            title={isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {isFullScreen ? (
+            <button
+              onClick={toggleFullScreen}
+              className={`p-2 bg-slate-900 hover:bg-slate-800 rounded-lg border border-white/10 transition-all flex items-center justify-center ${
+                isFullScreen ? "text-emerald-500 border-emerald-500/50" : "text-slate-400 hover:text-white"
+              }`}
+              title={isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
-              )}
-            </svg>
-          </button>
+              </svg>
+            </button>
+          </div>
 
           {isFilterPanelOpen && (
             <div 
@@ -862,7 +909,10 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
                   </span>
                   <select
                     value={sortOrder}
-                    onChange={(e) => setSortOrder(e.target.value as any)}
+                    onChange={(e) => {
+                      setSortOrder(e.target.value as any);
+                      setDisplayLimit(20);
+                    }}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-white font-mono uppercase focus:outline-none"
                   >
                     <option value="TIME">Newest First</option>
@@ -879,18 +929,18 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-grow overflow-y-auto px-8 py-8 custom-scrollbar bg-black/5 overflow-x-hidden"
+        className="flex-grow overflow-y-auto px-4 md:px-8 py-8 custom-scrollbar bg-black/5 overflow-x-hidden"
       >
         {loading && news.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center space-y-6">
             <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-[12px] font-black uppercase tracking-[0.4em] opacity-30">
+            <p className="text-[12px] font-black uppercase tracking-[0.4em] opacity-30 text-center">
               Connecting to Stream...
             </p>
           </div>
         ) : processedNews.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-30">
-            <p className="text-xl font-black uppercase tracking-[0.3em]">
+            <p className="text-lg sm:text-xl font-black uppercase tracking-[0.3em] px-4">
               No Match in Data Tunnel
             </p>
           </div>
@@ -926,8 +976,8 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         )}
       </div>
 
-      <footer className="shrink-0 bg-[#111621] border-t border-white/5 px-8 py-3 flex items-center justify-between text-[9px] font-black font-mono text-slate-600 tracking-[0.2em] uppercase">
-        <div className="flex items-center space-x-10">
+      <footer className="shrink-0 bg-[#111621] border-t border-white/5 px-4 md:px-8 py-3 flex flex-col sm:flex-row items-center justify-between text-[9px] font-black font-mono text-slate-600 tracking-[0.2em] uppercase gap-2">
+        <div className="flex items-center space-x-6 md:space-x-10">
           <div className="flex items-center space-x-2">
             <span className="text-emerald-500 font-black">SYSTEM:</span>
             <span>READY</span>
@@ -936,12 +986,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
             <span className="text-emerald-500 font-black">STREAM:</span>
             <span>{processedNews.length} SYNCED</span>
           </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 opacity-40"></div>
-          <span className="opacity-60 italic tracking-tight uppercase">
-            StockManch Terminal v6.0-STABLE
-          </span>
         </div>
       </footer>
     </div>
