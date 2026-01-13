@@ -95,34 +95,35 @@ const NewsCard: React.FC<{
     return now - publishedAt < 10 * 60 * 1000;
   }, [news.rawPublishedAt, isRead]);
 
-  useEffect(() => {
-    const fetchLocalPercent = async () => {
-      const hasNse = news.symbol && news.symbol !== "NSE";
-      const bse = (news as any).bseCode;
-      const querySymbol = hasNse
-        ? `${news.symbol}.NS`
-        : bse
-        ? `${bse}.BO`
-        : null;
+  const fetchLocalPercent = async () => {
+    const hasNse = news.symbol && news.symbol !== "NSE";
+    const bse = (news as any).bseCode;
+    const querySymbol = hasNse
+      ? `${news.symbol}.NS`
+      : bse
+      ? `${bse}.BO`
+      : null;
 
-      if (!querySymbol) return;
+    if (!querySymbol) return;
 
-      try {
-        const resp = await fetch(
-          `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`
-        );
-        const data = await resp.json();
-        if (data && data.meta && data.meta.chartPreviousClose) {
-          const pct =
-            ((data.meta.regularMarketPrice - data.meta.chartPreviousClose) /
-              data.meta.chartPreviousClose) *
-            100;
-          setLivePercentage(pct);
-        }
-      } catch (e) {
-        console.warn(`Could not fetch live percentage for ${querySymbol}`);
+    try {
+      const resp = await fetch(
+        `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`
+      );
+      const data = await resp.json();
+      if (data && data.meta) {
+        const { chartPreviousClose, regularMarketPrice } = data?.chart?.result?.[0]?.meta;
+        const pct =
+          ((regularMarketPrice - chartPreviousClose) /
+            chartPreviousClose) *
+          100;
+        setLivePercentage(pct);
       }
-    };
+    } catch (e) {
+      console.warn(`Could not fetch live percentage for ${querySymbol}`);
+    }
+  };
+  useEffect(() => {
     fetchLocalPercent();
   }, [news.symbol, (news as any).bseCode]);
 
@@ -337,7 +338,7 @@ const NewsCard: React.FC<{
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                fetchPrice(news.symbol, (news as any).bseCode);
+                fetchLocalPercent();
               }}
               className="p-1.5 bg-white/5 hover:bg-sky-500/10 text-slate-300 hover:text-sky-500 rounded-lg border border-white/10 transition-all"
               title="Live Quote"
@@ -541,10 +542,12 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
       );
       const data = await resp.json();
       if (data && data.meta) {
+        const { chartPreviousClose, regularMarketPrice } = data?.chart?.result?.[0]?.meta;
+
         setActiveQuote({
           symbol,
-          price: data.meta.regularMarketPrice,
-          change: data.meta.regularMarketPrice - data.meta.chartPreviousClose
+          price: regularMarketPrice,
+          change: ((chartPreviousClose - regularMarketPrice) * 100) / chartPreviousClose
         });
       }
     } catch (e) {
@@ -783,17 +786,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
 
         <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 relative">
           <div className="flex items-center gap-3">
-            {activeQuote && (
-              <div className="flex items-center bg-sky-500/20 border border-sky-500/30 rounded-lg px-3 py-1.5 animate-in slide-in-from-right-4">
-                <span className="text-[9px] font-black text-white mr-2">
-                  {activeQuote.symbol}:
-                </span>
-                <span className="text-[10px] font-mono text-white">
-                  {activeQuote.price || "..."}
-                </span>
-              </div>
-            )}
-
             <button
               ref={filterBtnRef}
               onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
