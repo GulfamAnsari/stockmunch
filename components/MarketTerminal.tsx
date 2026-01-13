@@ -81,8 +81,7 @@ const NewsCard: React.FC<{
   news: StockNews;
   isWatchlist?: boolean;
   onWatchlistAdd: (item: any) => void;
-  fetchPrice: (symbol: string, bseCode?: string) => void;
-}> = ({ news, isWatchlist, onWatchlistAdd, fetchPrice }) => {
+}> = ({ news, isWatchlist, onWatchlistAdd }) => {
   const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
   const [livePercentage, setLivePercentage] = useState<number | null>(null);
   const [isRead, setIsRead] = useState(false);
@@ -111,7 +110,7 @@ const NewsCard: React.FC<{
         `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`
       );
       const data = await resp.json();
-      if (data && data.meta) {
+      if (data) {
         const { chartPreviousClose, regularMarketPrice } = data?.chart?.result?.[0]?.meta;
         const pct =
           ((regularMarketPrice - chartPreviousClose) /
@@ -341,7 +340,7 @@ const NewsCard: React.FC<{
                 fetchLocalPercent();
               }}
               className="p-1.5 bg-white/5 hover:bg-sky-500/10 text-slate-300 hover:text-sky-500 rounded-lg border border-white/10 transition-all"
-              title="Live Quote"
+              title="Refresh price"
             >
               <svg
                 className="w-3.5 h-3.5"
@@ -530,28 +529,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
       if (displayLimit < processedNews.length) {
         setDisplayLimit((prev) => prev + 20);
       }
-    }
-  };
-
-  const fetchPrice = async (symbol: string, bseCode?: string) => {
-    try {
-      const querySymbol = symbol ? `${symbol}.NS`: `${bseCode}.BO`;
-      setActiveQuote({ symbol, price: undefined });
-      const resp = await fetch(
-        `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`
-      );
-      const data = await resp.json();
-      if (data && data.meta) {
-        const { chartPreviousClose, regularMarketPrice } = data?.chart?.result?.[0]?.meta;
-
-        setActiveQuote({
-          symbol,
-          price: regularMarketPrice,
-          change: ((chartPreviousClose - regularMarketPrice) * 100) / chartPreviousClose
-        });
-      }
-    } catch (e) {
-      console.error("Price fetch error", e);
     }
   };
 
@@ -945,7 +922,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
                     news={newsItem}
                     isWatchlist={activeTab === "WATCHLIST"}
                     onWatchlistAdd={handleWatchlistAdd}
-                    fetchPrice={fetchPrice}
                   />
                   {activeTab === "WATCHLIST" && (
                     <button
