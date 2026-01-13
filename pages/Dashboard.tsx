@@ -102,6 +102,7 @@ const Dashboard: React.FC = () => {
   const [activeSection, setActiveSection] = useState<'overview' | 'terminal' | 'account'>('terminal');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isFullScreenMode, setIsFullScreenMode] = useState(false);
 
   const [user] = useState<User>({
     id: 'TRD-772',
@@ -137,7 +138,6 @@ const Dashboard: React.FC = () => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden">
       <nav className="flex-grow py-8 px-4 space-y-4">
-        {/* Toggle only for desktop */}
         <button
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           className="hidden lg:flex w-full items-center justify-center p-4 rounded-2xl text-slate-500 hover:text-white hover:bg-white/5 transition-all mb-4"
@@ -179,51 +179,54 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="h-screen bg-[#0b0f1a] flex flex-col text-slate-300 overflow-hidden">
-      {/* Header */}
-      <header className="w-full bg-[#111621] px-4 md:px-8 py-4 flex items-center justify-between shrink-0 border-b border-white/10 z-20">
-        <div className="flex items-center space-x-3 md:space-x-8">
-          {/* Mobile Sidebar Toggle */}
-          <button 
-            onClick={() => setIsMobileSidebarOpen(true)}
-            className="lg:hidden p-2 text-slate-400 hover:text-white"
-          >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-          </button>
+      {/* Header - Hidden in Full Screen Mode */}
+      {!isFullScreenMode && (
+        <header className="w-full bg-[#111621] px-4 md:px-8 py-4 flex items-center justify-between shrink-0 border-b border-white/10 z-20 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center space-x-3 md:space-x-8">
+            <button 
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="lg:hidden p-2 text-slate-400 hover:text-white"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
 
-          <Logo className="h-6 md:h-8 w-auto hidden sm:block" />
-          <div className="h-6 w-px bg-white/10 hidden md:block"></div>
-          <div>
-            <h2 className="text-white font-black uppercase tracking-tighter text-sm md:text-lg leading-none">
-              {sectionTitles[activeSection]}
-            </h2>
-            <p className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">ID: {user.id}</p>
+            <Logo className="h-6 md:h-8 w-auto hidden sm:block" />
+            <div className="h-6 w-px bg-white/10 hidden md:block"></div>
+            <div>
+              <h2 className="text-white font-black uppercase tracking-tighter text-sm md:text-lg leading-none">
+                {sectionTitles[activeSection]}
+              </h2>
+              <p className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">ID: {user.id}</p>
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center space-x-3 md:space-x-6">
-          <div className="hidden sm:flex flex-col items-end">
-            <span className="text-[10px] font-black text-white uppercase tracking-tight">{user.name}</span>
-            <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest truncate max-w-[100px]">{user.planName}</span>
+          <div className="flex items-center space-x-3 md:space-x-6">
+            <div className="hidden sm:flex flex-col items-end">
+              <span className="text-[10px] font-black text-white uppercase tracking-tight">{user.name}</span>
+              <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest truncate max-w-[100px]">{user.planName}</span>
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-lg"
+            >
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
           </div>
-          <button 
-            onClick={handleLogout}
-            className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-lg"
-          >
-            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </button>
-        </div>
-      </header>
+        </header>
+      )}
 
       <div className="flex-grow flex overflow-hidden relative">
-        {/* Desktop Sidebar */}
-        <aside className={`hidden lg:flex ${isSidebarCollapsed ? 'w-20' : 'w-64'} bg-[#0d121f] border-r border-white/5 flex-col shrink-0 z-10 transition-all duration-300`}>
-          <SidebarContent />
-        </aside>
+        {/* Sidebar - Hidden in Full Screen Mode */}
+        {!isFullScreenMode && (
+          <aside className={`hidden lg:flex ${isSidebarCollapsed ? 'w-20' : 'w-64'} bg-[#0d121f] border-r border-white/5 flex-col shrink-0 z-10 transition-all duration-300 animate-in fade-in slide-in-from-left-4`}>
+            <SidebarContent />
+          </aside>
+        )}
 
         {/* Mobile Sidebar Overlay */}
-        {isMobileSidebarOpen && (
+        {isMobileSidebarOpen && !isFullScreenMode && (
           <div className="fixed inset-0 z-50 lg:hidden">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileSidebarOpen(false)}></div>
             <aside className="absolute top-0 left-0 w-64 h-full bg-[#0d121f] shadow-2xl flex flex-col animate-in slide-in-from-left duration-300">
@@ -242,7 +245,7 @@ const Dashboard: React.FC = () => {
         <main className="flex-grow flex flex-col min-w-0 bg-[#0b0f1a]">
           {user.hasDashboardAccess ? (
             <div className="flex-grow flex flex-col overflow-hidden">
-              {activeSection === 'terminal' && <MarketTerminal />}
+              {activeSection === 'terminal' && <MarketTerminal onToggleFullScreen={setIsFullScreenMode} />}
               {activeSection === 'overview' && <OverviewSection user={user} />}
               {activeSection === 'account' && <AccountSection user={user} />}
             </div>

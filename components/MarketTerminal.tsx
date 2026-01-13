@@ -1,9 +1,11 @@
+
 import React, {
   useState,
   useEffect,
   useMemo,
   useCallback,
-  useRef
+  useRef,
+  useLayoutEffect
 } from "react";
 import { StockNews } from "../types";
 
@@ -63,7 +65,6 @@ const NewsCard: React.FC<{
   const [isRead, setIsRead] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Highlighting logic: news is "new" if it's < 10 mins old and hasn't been clicked (isRead is false)
   const isNew = useMemo(() => {
     if (isRead) return false;
     const publishedAt = new Date(news.rawPublishedAt).getTime();
@@ -345,12 +346,13 @@ const NewsCard: React.FC<{
   );
 };
 
-const MarketTerminal: React.FC = () => {
+const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }> = ({ onToggleFullScreen }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("ALL FEEDS");
   const [news, setNews] = useState<StockNews[]>([]);
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [sortOrder, setSortOrder] = useState<"TIME" | "SENTIMENT" | "CHANGE">(
     "TIME"
   );
@@ -363,11 +365,13 @@ const MarketTerminal: React.FC = () => {
     change?: number;
   } | null>(null);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [filterDropdownSide, setFilterDropdownSide] = useState<"left" | "right">("right");
 
   const [displayLimit, setDisplayLimit] = useState(20);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const filterBtnRef = useRef<HTMLButtonElement>(null);
+  const filterPanelRef = useRef<HTMLDivElement>(null);
 
-  const filterRef = useRef<HTMLDivElement>(null);
   const [fromDateInput, setFromDateInput] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -389,8 +393,10 @@ const MarketTerminal: React.FC = () => {
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        filterRef.current &&
-        !filterRef.current.contains(event.target as Node)
+        filterPanelRef.current &&
+        !filterPanelRef.current.contains(event.target as Node) &&
+        filterBtnRef.current && 
+        !filterBtnRef.current.contains(event.target as Node)
       ) {
         setIsFilterPanelOpen(false);
       }
@@ -398,6 +404,19 @@ const MarketTerminal: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useLayoutEffect(() => {
+    if (isFilterPanelOpen && filterBtnRef.current) {
+      const rect = filterBtnRef.current.getBoundingClientRect();
+      const windowWidth = window.innerWidth;
+      // Panel width is roughly 288px (w-72)
+      if (rect.right + 300 > windowWidth) {
+        setFilterDropdownSide("left");
+      } else {
+        setFilterDropdownSide("right");
+      }
+    }
+  }, [isFilterPanelOpen]);
 
   const fetchNews = useCallback(async () => {
     if (activeTab === "WATCHLIST") return;
@@ -596,8 +615,16 @@ const MarketTerminal: React.FC = () => {
     alert(`Station: ${processedNews.length} dispatch titles copied.`);
   };
 
+  const toggleFullScreen = () => {
+    const next = !isFullScreen;
+    setIsFullScreen(next);
+    if (onToggleFullScreen) {
+      onToggleFullScreen(next);
+    }
+  };
+
   return (
-    <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a] overflow-x-hidden">
+    <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a] overflow-x-hidden relative">
       <div className="px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/5 flex flex-wrap items-center justify-between gap-y-3 gap-x-6">
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/5 shadow-inner shrink-0">
@@ -705,10 +732,7 @@ const MarketTerminal: React.FC = () => {
           )}
         </div>
 
-        <div
-          className="flex items-center gap-4 shrink-0 relative"
-          ref={filterRef}
-        >
+        <div className="flex items-center gap-4 shrink-0 relative">
           {activeQuote && (
             <div className="flex items-center bg-sky-500/20 border border-sky-500/30 rounded-lg px-3 py-1.5 animate-in slide-in-from-right-4">
               <span className="text-[9px] font-black text-white mr-2">
@@ -721,6 +745,7 @@ const MarketTerminal: React.FC = () => {
           )}
 
           <button
+            ref={filterBtnRef}
             onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
             className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-1.5 ${
               isFilterPanelOpen
@@ -764,8 +789,29 @@ const MarketTerminal: React.FC = () => {
             </svg>
           </button>
 
+          <button
+            onClick={toggleFullScreen}
+            className={`p-2 bg-slate-900 hover:bg-slate-800 rounded-lg border border-white/10 transition-all flex items-center justify-center ${
+              isFullScreen ? "text-emerald-500 border-emerald-500/50" : "text-slate-400 hover:text-white"
+            }`}
+            title={isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {isFullScreen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+              )}
+            </svg>
+          </button>
+
           {isFilterPanelOpen && (
-            <div className="absolute top-full right-0 mt-3 w-72 bg-[#161b27] border border-white/10 rounded-2xl shadow-2xl p-6 z-[100] animate-in fade-in zoom-in-95 duration-200">
+            <div 
+              ref={filterPanelRef}
+              className={`absolute top-full mt-3 w-72 bg-[#161b27] border border-white/10 rounded-2xl shadow-2xl p-6 z-[100] animate-in fade-in zoom-in-95 duration-200 ${
+                filterDropdownSide === "left" ? "right-0" : "left-0"
+              }`}
+            >
               <div className="space-y-6">
                 <div className="space-y-3">
                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">
