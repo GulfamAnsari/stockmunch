@@ -77,6 +77,8 @@ const AnimatedTooltip: React.FC<{
   );
 };
 
+const percentageMap = new Map();
+
 const NewsCard: React.FC<{
   news: StockNews;
   isWatchlist?: boolean;
@@ -99,7 +101,7 @@ const NewsCard: React.FC<{
 
   const shouldHighlight = isNew && !isRead;
 
-  const fetchLocalPercent = useCallback(async () => {
+  const fetchLocalPercent = useCallback(async (manualUpdate = false) => {
     const hasNse = news.symbol && news.symbol !== "NSE";
     const bse = (news as any).bseCode;
     const querySymbol = hasNse
@@ -111,15 +113,20 @@ const NewsCard: React.FC<{
     if (!querySymbol) return;
 
     try {
-      const resp = await fetch(
-        `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`
-      );
-      const data = await resp.json();
-      if (data && data.chart && data.chart.result && data.chart.result[0]) {
-        const { chartPreviousClose, regularMarketPrice } = data.chart.result[0].meta;
-        if (chartPreviousClose && regularMarketPrice) {
-          const pct = ((regularMarketPrice - chartPreviousClose) / chartPreviousClose) * 100;
-          onPriceUpdate(news.id, pct);
+      if (percentageMap.has(querySymbol) && !manualUpdate) {
+        onPriceUpdate(news.id, percentageMap.get(querySymbol));
+      } else {
+        const resp = await fetch(
+          `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`
+        );
+        const data = await resp.json();
+        if (data && data.chart && data.chart.result && data.chart.result[0]) {
+          const { chartPreviousClose, regularMarketPrice } = data.chart.result[0].meta;
+          if (chartPreviousClose && regularMarketPrice) {
+            const pct = ((regularMarketPrice - chartPreviousClose) / chartPreviousClose) * 100;
+            onPriceUpdate(news.id, pct);
+            percentageMap.set(querySymbol, pct);
+          }
         }
       }
     } catch (e) {
@@ -336,7 +343,7 @@ const NewsCard: React.FC<{
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                fetchLocalPercent();
+                fetchLocalPercent(true);
               }}
               className="p-1.5 bg-white/5 hover:bg-sky-500/10 text-slate-300 hover:text-sky-500 rounded-lg border border-white/10 transition-all"
               title="Refresh price"
