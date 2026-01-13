@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { StockNews } from '../types';
 
@@ -26,6 +27,7 @@ const AnimatedTooltip: React.FC<{ text: string; children: React.ReactNode; label
     >
       {children}
       <div className={`absolute z-[100] top-0 ${position === 'right' ? 'left-full ml-4' : 'right-full mr-4'} px-4 py-4 bg-[#1a2235]/98 backdrop-blur-2xl text-slate-200 text-[11px] font-medium rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-72 pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 ease-out text-left leading-relaxed`}>
+        <div className="text-emerald-500 font-black text-[9px] uppercase tracking-widest mb-2 border-b border-white/10 pb-1">Full {label}</div>
         {text}
         {/* Arrow pointing to the trigger */}
         <div className={`absolute top-4 ${position === 'right' ? '-left-2 border-r-white/10 border-r-8' : '-right-2 border-l-white/10 border-l-8'} border-y-transparent border-y-8`}></div>
@@ -78,9 +80,9 @@ const NewsCard: React.FC<{
 
   const getSentimentStyles = (sentiment: string) => {
     switch (sentiment) {
-      case 'bullish': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-      case 'bearish': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-      default: return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      case 'bullish': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      case 'bearish': return 'bg-rose-500/10 text-rose-500 border-rose-500/20';
+      default: return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
     }
   };
 
@@ -99,40 +101,40 @@ const NewsCard: React.FC<{
       )}
 
       <div className="p-4 flex flex-col flex-grow">
-        <div className="flex items-start justify-between mb-3 gap-2">
-          <div className="flex items-center space-x-3 min-w-0">
-            <div className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-white text-[11px] font-black shadow-inner overflow-hidden border border-white/10`}>
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center space-x-3">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-white text-[11px] font-black shadow-inner overflow-hidden border border-white/5`}>
               {news.logoUrl ? (
                 <img src={news.logoUrl} alt={news.symbol} className="w-full h-full object-contain p-1 bg-white/5" />
               ) : (
                 news.symbol.substring(0, 2)
               )}
             </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-x-2">
-                <h3 className="text-[11px] font-black text-blue-400 tracking-tight uppercase leading-none truncate max-w-[120px]">{news.companyName}</h3>
-                <span className={`text-[9px] font-bold flex items-center ${livePercentage !== null ? (livePercentage >= 0 ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-500'}`}>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h3 className="text-[11px] font-black text-white tracking-wider uppercase leading-none">{news.companyName}</h3>
+                <span className={`text-[9px] font-bold flex items-center ${livePercentage !== null ? (livePercentage >= 0 ? 'text-emerald-500' : 'text-rose-500') : 'text-slate-600'}`}>
                    {livePercentage !== null ? (livePercentage >= 0 ? '↑' : '↓') : '•'} {livePercentage !== null ? Math.abs(livePercentage).toFixed(2) : '0.00'}%
                 </span>
               </div>
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider truncate max-w-[140px] mt-1">{news.symbol || news?.bseCode}</p>
+              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight truncate max-w-[120px]">{news.symbol || news?.bseCode}</p>
             </div>
           </div>
-          <div className="text-right shrink-0">
-            <p className="text-[9.5px] text-slate-200 font-mono font-bold uppercase tracking-tight leading-none mb-1">{news.timestamp.split(',')[1]?.trim() || ''}</p>
-            <p className="text-[8.5px] text-slate-400 font-mono uppercase tracking-tight">{news.timestamp.split(',')[0]?.trim() || ''}</p>
+          <div className="text-right">
+            <p className="text-[8px] text-slate-500 font-mono uppercase tracking-tighter leading-none">{news.timestamp.split(',')[1]?.trim() || ''}</p>
+            <p className="text-[8px] text-slate-600 font-mono uppercase tracking-tighter">{news.timestamp.split(',')[0]?.trim() || ''}</p>
           </div>
         </div>
 
         <AnimatedTooltip text={news.title} label="Title">
-          <h4 className="text-[13px] font-bold text-white leading-snug mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors">
+          <h4 className="text-[12px] font-bold text-slate-100 leading-snug mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors">
             {news.title}
           </h4>
         </AnimatedTooltip>
 
         <div className="flex-grow">
           <AnimatedTooltip text={news.content} label="Description">
-            <p className="text-[11px] text-slate-300 line-clamp-4 leading-relaxed mb-4 font-medium italic border-l-2 border-emerald-500/50 pl-3 transition-colors group-hover:text-white">
+            <p className="text-[10px] text-slate-400 line-clamp-4 leading-relaxed mb-4 opacity-80 font-medium italic border-l-2 border-emerald-500/30 pl-3 transition-colors group-hover:text-slate-200">
               {news.content}
             </p>
           </AnimatedTooltip>
@@ -142,22 +144,22 @@ const NewsCard: React.FC<{
         <div className="mt-auto">
           {news.aiAnalysis && (
             <div className="mb-3 p-3 bg-white/5 rounded-lg border border-white/10">
-               <span className="text-[8.5px] font-black text-emerald-500 uppercase tracking-widest block mb-1">AI Deep Analysis</span>
+               <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest block mb-1">AI Deep Analysis</span>
                <AnimatedTooltip text={news.aiAnalysis} label="AI Analysis">
-                 <p className="text-[9.5px] text-slate-200 leading-tight line-clamp-2 font-medium">
+                 <p className="text-[9px] text-slate-300 leading-tight line-clamp-2">
                    {news.aiAnalysis}
                  </p>
                </AnimatedTooltip>
             </div>
           )}
 
-          <div className="flex items-center gap-2 mb-4">
-            <div className={`px-2 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-widest inline-flex items-center ${getSentimentStyles(news.sentiment)}`}>
-              <div className={`w-1.5 h-1.5 rounded-full mr-2 ${news.sentiment === 'bullish' ? 'bg-emerald-500' : news.sentiment === 'bearish' ? 'bg-rose-500' : 'bg-amber-500'} animate-pulse`}></div>
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div className={`px-2 py-1.5 rounded-lg border text-[8px] font-black uppercase tracking-[0.15em] inline-flex items-center flex-grow justify-center ${getSentimentStyles(news.sentiment)}`}>
+              <div className={`w-1 h-1 rounded-full mr-2 ${news.sentiment === 'bullish' ? 'bg-emerald-500' : news.sentiment === 'bearish' ? 'bg-rose-500' : 'bg-amber-500'} animate-pulse`}></div>
               AI ANALYSIS: {news.sentiment}
             </div>
-            <div className="bg-white/5 border border-white/10 px-2 py-1.5 rounded-lg text-[9px] font-mono text-slate-200 uppercase tracking-tight whitespace-nowrap">
-              Confidence: <span className="text-white font-bold">{news.sentimentScore}%</span>
+            <div className="bg-white/5 border border-white/10 px-2 py-1.5 rounded-lg text-[8px] font-mono text-slate-400 uppercase tracking-tighter whitespace-nowrap">
+              Impact: <span className="text-white font-bold">{news.sentimentScore}%</span>
             </div>
           </div>
         </div>
@@ -166,7 +168,7 @@ const NewsCard: React.FC<{
           <div className="flex items-center gap-1.5 relative" ref={dropdownRef}>
             <button 
               onClick={() => setShowWatchlistOpts(!showWatchlistOpts)}
-              className="px-3 py-1.5 bg-white/5 hover:bg-emerald-500/10 text-slate-300 hover:text-emerald-500 border border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
+              className="px-3 py-1.5 bg-white/5 hover:bg-emerald-500/10 text-slate-400 hover:text-emerald-500 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
             >
               + WATCHLIST
             </button>
@@ -175,13 +177,13 @@ const NewsCard: React.FC<{
               <div className="absolute bottom-full left-0 mb-2 w-32 bg-[#1c2230] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2">
                 <button 
                   onClick={() => { onWatchlistAdd({ ...news, userSentiment: 'BULLISH' }); setShowWatchlistOpts(false); }}
-                  className="w-full text-left px-4 py-2.5 text-[9.5px] font-black text-emerald-500 hover:bg-emerald-500/10 uppercase tracking-widest border-b border-white/5"
+                  className="w-full text-left px-4 py-2.5 text-[9px] font-black text-emerald-500 hover:bg-emerald-500/10 uppercase tracking-widest border-b border-white/5"
                 >
                   BULLISH
                 </button>
                 <button 
                   onClick={() => { onWatchlistAdd({ ...news, userSentiment: 'BEARISH' }); setShowWatchlistOpts(false); }}
-                  className="w-full text-left px-4 py-2.5 text-[9.5px] font-black text-rose-500 hover:bg-rose-500/10 uppercase tracking-widest"
+                  className="w-full text-left px-4 py-2.5 text-[9px] font-black text-rose-500 hover:bg-rose-500/10 uppercase tracking-widest"
                 >
                   BEARISH
                 </button>
@@ -190,7 +192,7 @@ const NewsCard: React.FC<{
 
             <button 
               onClick={() => fetchPrice(news.symbol, (news as any).bseCode)}
-              className="p-1.5 bg-white/5 hover:bg-sky-500/10 text-slate-300 hover:text-sky-500 rounded-lg border border-white/10 transition-all"
+              className="p-1.5 bg-white/5 hover:bg-sky-500/10 text-slate-500 hover:text-sky-500 rounded-lg border border-white/10 transition-all"
               title="Live Quote"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,7 +202,7 @@ const NewsCard: React.FC<{
           </div>
           
           <div className="flex items-center space-x-2">
-            <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{news.source}</span>
+            <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest">{news.source}</span>
           </div>
         </div>
       </div>
@@ -225,8 +227,8 @@ const MarketTerminal: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const filterRef = useRef<HTMLDivElement>(null);
-  const [fromDateInput, setFromDateInput] = useState(new Date().toISOString().split('T')[0]);
-  const [toDateInput, setToDateInput] = useState(new Date().toISOString().split('T')[0]);
+  const [fromDateInput, setFromDateInput] = useState('2026-01-11');
+  const [toDateInput, setToDateInput] = useState('2026-01-12');
 
   const isFiltered = useMemo(() => {
     return sentimentFilters.some(f => f !== 'ALL') || timeRange.from !== 0 || timeRange.to !== 24;
