@@ -81,9 +81,10 @@ const NewsCard: React.FC<{
   news: StockNews;
   isWatchlist?: boolean;
   onWatchlistAdd: (item: any) => void;
-}> = ({ news, isWatchlist, onWatchlistAdd }) => {
+  onPriceUpdate: (id: string, pct: number) => void;
+  autoRefresh: boolean;
+}> = ({ news, isWatchlist, onWatchlistAdd, onPriceUpdate, autoRefresh }) => {
   const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
-  const [livePercentage, setLivePercentage] = useState<number | null>(null);
   const [isRead, setIsRead] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -94,7 +95,7 @@ const NewsCard: React.FC<{
     return now - publishedAt < 10 * 60 * 1000;
   }, [news.rawPublishedAt, isRead]);
 
-  const fetchLocalPercent = async () => {
+  const fetchLocalPercent = useCallback(async () => {
     const hasNse = news.symbol && news.symbol !== "NSE";
     const bse = (news as any).bseCode;
     const querySymbol = hasNse
@@ -110,21 +111,23 @@ const NewsCard: React.FC<{
         `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`
       );
       const data = await resp.json();
-      if (data) {
-        const { chartPreviousClose, regularMarketPrice } = data?.chart?.result?.[0]?.meta;
-        const pct =
-          ((regularMarketPrice - chartPreviousClose) /
-            chartPreviousClose) *
-          100;
-        setLivePercentage(pct);
+      if (data && data.chart && data.chart.result && data.chart.result[0]) {
+        const { chartPreviousClose, regularMarketPrice } = data.chart.result[0].meta;
+        if (chartPreviousClose && regularMarketPrice) {
+          const pct = ((regularMarketPrice - chartPreviousClose) / chartPreviousClose) * 100;
+          onPriceUpdate(news.id, pct);
+        }
       }
     } catch (e) {
       console.warn(`Could not fetch live percentage for ${querySymbol}`);
     }
-  };
+  }, [news.id, news.symbol, (news as any).bseCode, onPriceUpdate]);
+
   useEffect(() => {
-    fetchLocalPercent();
-  }, [news.symbol, (news as any).bseCode]);
+    if (!autoRefresh) {
+      fetchLocalPercent();
+    }
+  }, [fetchLocalPercent, autoRefresh]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -210,22 +213,15 @@ const NewsCard: React.FC<{
                 </h3>
                 <span
                   className={`text-[9px] font-bold flex items-center ${
-                    livePercentage !== null
-                      ? livePercentage >= 0
+                    news.priceChange !== 0
+                      ? news.priceChange >= 0
                         ? "text-emerald-400"
                         : "text-rose-400"
                       : "text-slate-500"
                   }`}
                 >
-                  {livePercentage !== null
-                    ? livePercentage >= 0
-                      ? "↑"
-                      : "↓"
-                    : "•"}{" "}
-                  {livePercentage !== null
-                    ? Math.abs(livePercentage).toFixed(2)
-                    : "0.00"}
-                  %
+                  {news.priceChange !== 0 ? (news.priceChange >= 0 ? "↑" : "↓") : "•"}{" "}
+                  {Math.abs(news.priceChange).toFixed(2)}%
                 </span>
               </div>
               <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider truncate max-w-[140px] mt-1">
@@ -383,11 +379,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
   const [sentimentFilters, setSentimentFilters] = useState<string[]>(["ALL"]);
   const [timeRange, setTimeRange] = useState({ from: 0, to: 24 });
   const [watchlist, setWatchlist] = useState<any[]>([]);
-  const [activeQuote, setActiveQuote] = useState<{
-    symbol: string;
-    price?: number;
-    change?: number;
-  } | null>(null);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [filterDropdownSide, setFilterDropdownSide] = useState<"left" | "right">("right");
 
@@ -441,6 +432,24 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
       }
     }
   }, [isFilterPanelOpen]);
+
+  const updatePriceChange = useCallback((id: string, pct: number) => {
+    setNews((prev) => {
+      const idx = prev.findIndex((n) => n.id === id);
+      if (idx === -1 || prev[idx].priceChange === pct) return prev;
+      const next = [...prev];
+      next[idx] = { ...next[idx], priceChange: pct };
+      return next;
+    });
+    setWatchlist((prev) => {
+      const idx = prev.findIndex((n) => n.id === id);
+      if (idx === -1 || prev[idx].priceChange === pct) return prev;
+      const next = [...prev];
+      next[idx] = { ...next[idx], priceChange: pct };
+      localStorage.setItem("stockmanch_watchlist", JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const fetchNews = useCallback(async () => {
     if (activeTab === "WATCHLIST") return;
@@ -502,7 +511,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
           allItems.push(...mappedItems);
         });
         setNews(allItems);
-        setDisplayLimit(20);
       }
     } catch (error) {
       console.error("Terminal API Error:", error);
@@ -545,7 +553,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
   };
 
   const handleSentimentToggle = (val: string) => {
-    setDisplayLimit(20);
     if (val === "ALL") {
       setSentimentFilters(["ALL"]);
       return;
@@ -593,7 +600,8 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
     } else if (sortOrder === "SENTIMENT") {
       list.sort((a, b) => b.sentimentScore - a.sentimentScore);
     } else if (sortOrder === "CHANGE") {
-      list.sort((a, b) => Math.abs(b.priceChange) - Math.abs(a.priceChange));
+      // Modified sort: positive first, negative last
+      list.sort((a, b) => b.priceChange - a.priceChange);
     }
 
     return list;
@@ -652,7 +660,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
                 key={tab}
                 onClick={() => {
                   setActiveTab(tab);
-                  setDisplayLimit(20);
                   setIsFilterPanelOpen(false);
                 }}
                 className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${
@@ -688,7 +695,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setDisplayLimit(20);
               }}
               className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-all font-mono"
             />
@@ -701,7 +707,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
                   value={fromDateInput}
                   onChange={(e) => {
                     setFromDateInput(e.target.value);
-                    setDisplayLimit(20);
                   }}
                   className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-full sm:w-[110px] cursor-pointer"
                 />
@@ -711,7 +716,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
                   value={toDateInput}
                   onChange={(e) => {
                     setToDateInput(e.target.value);
-                    setDisplayLimit(20);
                   }}
                   className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-full sm:w-[110px] cursor-pointer"
                 />
@@ -766,12 +770,16 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
             <button
               ref={filterBtnRef}
               onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-              className={`px-3 sm:px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-1.5 ${
+              className={`px-3 sm:px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-1.5 relative ${
                 isFilterPanelOpen
                   ? "bg-emerald-500 text-slate-950 border-emerald-500"
                   : "bg-slate-900 border-white/10 text-slate-400 hover:text-white"
               }`}
             >
+              {/* Filter active indicator dot */}
+              {isFiltered && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0d121f] z-10 animate-pulse"></span>
+              )}
               <svg
                 className="w-3.5 h-3.5"
                 fill="none"
@@ -880,7 +888,6 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
                     value={sortOrder}
                     onChange={(e) => {
                       setSortOrder(e.target.value as any);
-                      setDisplayLimit(20);
                     }}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-white font-mono uppercase focus:outline-none"
                   >
@@ -922,6 +929,8 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
                     news={newsItem}
                     isWatchlist={activeTab === "WATCHLIST"}
                     onWatchlistAdd={handleWatchlistAdd}
+                    onPriceUpdate={updatePriceChange}
+                    autoRefresh={autoRefresh}
                   />
                   {activeTab === "WATCHLIST" && (
                     <button
