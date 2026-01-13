@@ -41,16 +41,14 @@ const NewsCard: React.FC<{
 }> = ({ news, isWatchlist, onWatchlistAdd, fetchPrice }) => {
   const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
   const [livePercentage, setLivePercentage] = useState<number | null>(null);
-  const [isRead, setIsRead] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Highlighting logic: news is "new" if it's < 10 mins old and hasn't been clicked (isRead is false)
+  // New Highlight Logic: If news is less than 10 minutes old
   const isNew = useMemo(() => {
-    if (isRead) return false;
     const publishedAt = new Date(news.rawPublishedAt).getTime();
     const now = Date.now();
     return (now - publishedAt) < (10 * 60 * 1000); 
-  }, [news.rawPublishedAt, isRead]);
+  }, [news.rawPublishedAt]);
 
   useEffect(() => {
     const fetchLocalPercent = async () => {
@@ -93,10 +91,7 @@ const NewsCard: React.FC<{
   };
 
   return (
-    <div 
-      onClick={() => setIsRead(true)}
-      className={`bg-[#111621] border ${isNew ? 'border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'border-white/5'} rounded-xl flex flex-col h-full hover:border-emerald-500/30 transition-all group shadow-2xl relative cursor-pointer`}
-    >
+    <div className={`bg-[#111621] border ${isNew ? 'border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-white/5'} rounded-xl flex flex-col h-full hover:border-emerald-500/30 transition-all group shadow-2xl relative`}>
       {isNew && (
         <div className="absolute -top-2 right-2 px-2 py-0.5 bg-emerald-500 text-slate-950 text-[8px] font-black uppercase rounded z-20 shadow-lg animate-pulse">
           New Alert
@@ -181,7 +176,7 @@ const NewsCard: React.FC<{
         <div className="pt-4 flex items-center justify-between border-t border-white/5 gap-2">
           <div className="flex items-center gap-1.5 relative" ref={dropdownRef}>
             <button 
-              onClick={(e) => { e.stopPropagation(); setShowWatchlistOpts(!showWatchlistOpts); }}
+              onClick={() => setShowWatchlistOpts(!showWatchlistOpts)}
               className="px-3 py-1.5 bg-white/5 hover:bg-emerald-500/10 text-slate-300 hover:text-emerald-500 border border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
             >
               + WATCHLIST
@@ -190,13 +185,13 @@ const NewsCard: React.FC<{
             {showWatchlistOpts && (
               <div className="absolute bottom-full left-0 mb-2 w-32 bg-[#1c2230] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2">
                 <button 
-                  onClick={(e) => { e.stopPropagation(); onWatchlistAdd({ ...news, userSentiment: 'BULLISH' }); setShowWatchlistOpts(false); }}
+                  onClick={() => { onWatchlistAdd({ ...news, userSentiment: 'BULLISH' }); setShowWatchlistOpts(false); }}
                   className="w-full text-left px-4 py-2.5 text-[9.5px] font-black text-emerald-500 hover:bg-emerald-500/10 uppercase tracking-widest border-b border-white/5"
                 >
                   BULLISH
                 </button>
                 <button 
-                  onClick={(e) => { e.stopPropagation(); onWatchlistAdd({ ...news, userSentiment: 'BEARISH' }); setShowWatchlistOpts(false); }}
+                  onClick={() => { onWatchlistAdd({ ...news, userSentiment: 'BEARISH' }); setShowWatchlistOpts(false); }}
                   className="w-full text-left px-4 py-2.5 text-[9.5px] font-black text-rose-500 hover:bg-rose-500/10 uppercase tracking-widest"
                 >
                   BEARISH
@@ -205,7 +200,7 @@ const NewsCard: React.FC<{
             )}
 
             <button 
-              onClick={(e) => { e.stopPropagation(); fetchPrice(news.symbol, (news as any).bseCode); }}
+              onClick={() => fetchPrice(news.symbol, (news as any).bseCode)}
               className="p-1.5 bg-white/5 hover:bg-sky-500/10 text-slate-300 hover:text-sky-500 rounded-lg border border-white/10 transition-all"
               title="Live Quote"
             >
@@ -448,45 +443,14 @@ const MarketTerminal: React.FC = () => {
               className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-all font-mono"
             />
           </div>
-          {activeTab !== 'WATCHLIST' && (
-          <div className="flex items-center space-x-3 shrink-0">
-            <div className="flex items-center space-x-2 bg-slate-900/50 p-1 rounded-lg border border-white/10">
-              <input 
-                type="date" 
-                value={fromDateInput} 
-                onChange={(e) => setFromDateInput(e.target.value)} 
-                className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[115px] cursor-pointer" 
-              />
-              <span className="text-slate-400 text-[10px]">→</span>
-              <input 
-                type="date" 
-                value={toDateInput} 
-                onChange={(e) => setToDateInput(e.target.value)} 
-                className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-[115px] cursor-pointer" 
-              />
-              <button 
-                onClick={fetchNews} 
-                disabled={loading}
-                className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-md border border-emerald-500/30 hover:bg-emerald-500/30 transition-all flex items-center justify-center min-w-[32px]"
-                title="Sync Feed"
-              >
-                {loading ? <div className="w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div> : (
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                )}
-              </button>
-            </div>
-            <button 
+
+          <button 
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 ${autoRefresh ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'}`}
           >
             <div className={`w-2 h-2 rounded-full ${autoRefresh ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]' : 'bg-slate-600'}`}></div>
             <span>Live Monitor</span>
           </button>
-          </div>
-          
-        )}
         </div>
 
         <div className="flex items-center gap-4 shrink-0 relative" ref={filterRef}>
