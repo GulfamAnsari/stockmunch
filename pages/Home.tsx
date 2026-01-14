@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import Hero from '../components/Hero';
 import Terminal from '../components/Terminal';
 import AlertShowcase from '../components/AlertShowcase';
+import PricingCard from '../components/PricingCard';
 import { FAQ_DATA } from '../constants';
 
 const FAQItem: React.FC<{ question: string, answer: string }> = ({ question, answer }) => {
@@ -136,59 +136,17 @@ const Home: React.FC<HomeProps> = ({
           <p className="text-slate-400 mb-20 text-lg font-medium max-w-2xl mx-auto">Get professional alerts and dashboard access. Instant Telegram delivery for serious traders.</p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
-            {pricingPlans.map((plan) => {
-              const isActive = hoveredPlanId ? hoveredPlanId === plan.id : plan.popular;
-              const isJoining = journeyStep[plan.id];
-
-              return (
-                <div 
-                  key={plan.id}
-                  onMouseEnter={() => setHoveredPlanId(plan.id)}
-                  onMouseLeave={() => setHoveredPlanId(null)}
-                  className={`relative p-12 rounded-[2.5rem] border transition-all duration-500 flex flex-col ${
-                    isActive 
-                      ? 'border-[#1fa84f] bg-[#161b27] shadow-[0_32px_64px_-16px_rgba(31,168,79,0.3)] scale-105 z-10 translate-y-[-8px]' 
-                      : 'border-white/5 bg-[#161b27]/40 scale-100'
-                  }`}
-                >
-                  <div className="absolute top-4 right-6 bg-emerald-500/20 text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter border border-emerald-500/30">
-                    30-Day Trial
-                  </div>
-                  
-                  {isActive && (
-                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-[#1fa84f] text-slate-900 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl animate-in fade-in slide-in-from-bottom-2">
-                      {hoveredPlanId ? 'Selected' : 'Best Value'}
-                    </div>
-                  )}
-                  <h3 className="text-3xl font-bold text-white mb-3 uppercase tracking-tight">{plan.name}</h3>
-                  <div className="flex items-center justify-center mb-10">
-                    <span className="text-3xl text-slate-500 mr-2 font-black">₹</span>
-                    <span className="text-7xl font-black text-white tracking-tighter">{plan.price}</span>
-                    <span className="text-slate-600 ml-3 text-lg font-bold">/mo</span>
-                  </div>
-                  <ul className="space-y-5 mb-12 text-left flex-grow">
-                    {plan.features.map((f: string, i: number) => (
-                      <li key={i} className="flex items-start text-sm text-slate-300 font-medium">
-                        <svg className={`w-5 h-5 ${f.includes('Trial') ? 'text-sky-400' : 'text-[#1fa84f]'} mr-4 flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <button 
-                  onClick={() => handleStartJourney(plan.id)}
-                  disabled={isJoining}
-                  className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest transition-all ${
-                    isActive 
-                      ? 'bg-[#1fa84f] text-slate-900 hover:bg-[#1fa84f]/90 shadow-2xl shadow-[#1fa84f]/20' 
-                      : 'bg-slate-800 text-slate-400 hover:text-white border border-white/5'
-                  } ${isJoining ? 'animate-pulse cursor-wait' : ''}`}
-                >
-                  {isJoining ? 'Initializing...' : plan.cta}
-                </button>
-              </div>
-            )})}
+            {pricingPlans.map((plan) => (
+              <PricingCard
+                key={plan.id}
+                plan={plan}
+                isActive={hoveredPlanId ? hoveredPlanId === plan.id : plan.popular}
+                isLoading={journeyStep[plan.id]}
+                onSelect={handleStartJourney}
+                onMouseEnter={() => setHoveredPlanId(plan.id)}
+                onMouseLeave={() => setHoveredPlanId(null)}
+              />
+            ))}
           </div>
         </div>
       </section>
