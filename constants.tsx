@@ -147,102 +147,6 @@ export const MOCK_NEWS: StockNews[] = [
     logoColor: 'bg-orange-600',
     rawPublishedAt: '2026-01-10T17:15:00Z',
     bseCode: '543455'
-  },
-  {
-    id: '7',
-    symbol: 'RELIANCE',
-    companyName: 'Reliance Industries',
-    title: 'Reliance Retail to accelerate expansion',
-    content: 'Reliance Industries reported a strong performance in its retail segment. The company plans to add 2,500 new stores over the next 18 months to dominate the grocery and electronics market.',
-    timestamp: '10 Jan 2026 04:30PM',
-    priceChange: 1.25,
-    sentiment: 'bullish',
-    sentimentScore: 89,
-    source: 'BSE',
-    platform: 'Groww',
-    logoColor: 'bg-blue-900',
-    rawPublishedAt: '2026-01-10T16:30:00Z',
-    bseCode: '500325'
-  },
-  {
-    id: '8',
-    symbol: 'TCS',
-    companyName: 'Tata Consultancy Services',
-    title: 'TCS wins $1B multi-year cloud contract',
-    content: 'Tata Consultancy Services has secured a massive $1 billion contract from a European banking major for end-to-end cloud transformation and core banking modernization.',
-    timestamp: '10 Jan 2026 04:15PM',
-    priceChange: 0.85,
-    sentiment: 'bullish',
-    sentimentScore: 94,
-    source: 'BSE',
-    platform: 'Groww',
-    logoColor: 'bg-blue-600',
-    rawPublishedAt: '2026-01-10T16:15:00Z',
-    bseCode: '532540'
-  },
-  {
-    id: '9',
-    symbol: 'HDFCBANK',
-    companyName: 'HDFC Bank',
-    title: 'HDFC Bank Q3 profits beat estimates',
-    content: 'HDFC Bank posted an 18% growth in standalone net profit for the third quarter, driven by strong loan growth and improved net interest margins across segments.',
-    timestamp: '10 Jan 2026 03:50PM',
-    priceChange: 2.10,
-    sentiment: 'bullish',
-    sentimentScore: 91,
-    source: 'NSE',
-    platform: 'Groww',
-    logoColor: 'bg-blue-800',
-    rawPublishedAt: '2026-01-10T15:50:00Z',
-    bseCode: '500180'
-  },
-  {
-    id: '10',
-    symbol: 'INFY',
-    companyName: 'Infosys',
-    title: 'Infosys signs ESG collaboration with Microsoft',
-    content: 'Infosys and Microsoft have announced a joint solution to help enterprises track and reduce their carbon footprint using cloud-native AI and sustainability data analytics.',
-    timestamp: '10 Jan 2026 03:20PM',
-    priceChange: -0.45,
-    sentiment: 'neutral',
-    sentimentScore: 78,
-    source: 'BSE',
-    platform: 'Groww',
-    logoColor: 'bg-blue-400',
-    rawPublishedAt: '2026-01-10T15:20:00Z',
-    bseCode: '500209'
-  },
-  {
-    id: '11',
-    symbol: 'SBIN',
-    companyName: 'State Bank of India',
-    title: 'SBI raises ₹5,000 Cr via infrastructure bonds',
-    content: 'The State Bank of India successfully raised ₹5,000 crore through its third infrastructure bond issuance, which was oversubscribed by 3.5 times at a coupon rate of 7.54%.',
-    timestamp: '10 Jan 2026 02:45PM',
-    priceChange: 1.15,
-    sentiment: 'bullish',
-    sentimentScore: 88,
-    source: 'BSE',
-    platform: 'Groww',
-    logoColor: 'bg-blue-700',
-    rawPublishedAt: '2026-01-10T14:45:00Z',
-    bseCode: '500112'
-  },
-  {
-    id: '12',
-    symbol: 'BHARTIARTL',
-    companyName: 'Bharti Airtel',
-    title: 'Airtel hits 10M 5G subscriber milestone',
-    content: 'Bharti Airtel announced that it has crossed 10 million unique 5G customers on its network within months of launch. The company plans to cover all urban areas by March 2026.',
-    timestamp: '10 Jan 2026 02:10PM',
-    priceChange: 0.65,
-    sentiment: 'bullish',
-    sentimentScore: 85,
-    source: 'BSE',
-    platform: 'Groww',
-    logoColor: 'bg-red-600',
-    rawPublishedAt: '2026-01-10T14:10:00Z',
-    bseCode: '532454'
   }
 ];
 
@@ -264,10 +168,10 @@ export const PRICING_PLANS: PricingPlan[] = [
     price: 150,
     features: [
       '30-Day Free Trial',
-      'Real-time Telegram alerts',
-      'Custom Alert Keywords',
-      'Instant Market Dispatch',
-      'Email support'
+      'Real-time Telegram Alerts',
+      'Personal Watchlist up to 50',
+      'Instant Market Dispatch Alert',
+      'Email Support'
     ],
     cta: 'Start Free Trial'
   },
@@ -277,11 +181,11 @@ export const PRICING_PLANS: PricingPlan[] = [
     price: 150,
     features: [
       '30-Day Free Trial',
-      'Full Terminal access',
-      'Personal Watchlist',
-      'Historical archive (2 years)',
-      'Advanced News Filtering',
-      'Institutional Charting'
+      'Full Terminal Access',
+      'Personal Watchlist up to 50',
+      'Instant Market Dispatch Alert',
+      'Historical Data',
+      'Email Support'
     ],
     cta: 'Start Free Trial'
   },
@@ -291,12 +195,12 @@ export const PRICING_PLANS: PricingPlan[] = [
     price: 250,
     features: [
       '30-Day Free Trial',
-      'Real-time Telegram alerts',
-      'Full Terminal access',
-      'Personal Watchlist Pro',
-      'Sentiment Analysis AI',
-      'Priority Alert Dispatch',
-      'Unlimited Watchlist Slots'
+      'Real-time Telegram Alerts',
+      'Full Terminal Access',
+      'Unlimited Watchlist',
+      'Instant Market Dispatch Alert',
+      'Historical Data',
+      'Email Support'
     ],
     cta: 'Start Free Trial',
     popular: true
@@ -310,7 +214,7 @@ export const FAQ_DATA = [
   },
   {
     question: "What is the Personal Watchlist?",
-    answer: "The Watchlist allows you to pin specific stocks to your terminal. You'll receive prioritized alerts and a dedicated news feed for only those companies."
+    answer: "The Personal Watchlist is a dedicated feature that allows you to save or pin specific news dispatches that you find important for future reference or deep study. It acts as your private repository of market intelligence and is completely independent of the real-time Telegram alert system."
   },
   {
     question: "Is there a free trial available?",
@@ -326,7 +230,7 @@ export const FAQ_DATA = [
   },
   {
     question: "What data sources does StockManch use?",
-    answer: "We pull data directly from official exchange feeds (NSE/BSE), corporate filing repositories, and verified financial news outlets to ensure the highest fidelity and speed."
+    answer: "We fetch news and market updates directly from leading financial news media houses and verified journalistic sources to ensure you get comprehensive coverage of the market landscape."
   },
   {
     question: "Can I access the dashboard on my mobile phone?",
@@ -334,7 +238,7 @@ export const FAQ_DATA = [
   },
   {
     question: "How does the AI Sentiment Analysis work?",
-    answer: "Our engine uses advanced Large Language Models (Gemini) to process news context in real-time. It evaluates the potential impact on stock price to label news as Bullish, Bearish, or Neutral."
+    answer: "Our engine uses advanced Large Language Models to process news context in real-time. It evaluates the linguistic tone and potential impact on stock price to label news as Bullish, Bearish, or Neutral."
   },
   {
     question: "What happens after my 30-day free trial ends?",

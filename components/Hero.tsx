@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface HeroProps {
@@ -9,35 +8,111 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
   return (
     <div className="relative min-h-[90vh] md:min-h-screen flex flex-col items-center justify-center overflow-hidden pt-20">
+      {/* Institutional High-Fidelity Background */}
       <div className="absolute inset-0 -z-10 bg-[#0b0f1a]">
-        <div className="absolute inset-0 opacity-10" style={{ 
-          backgroundImage: `linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)`,
-          backgroundSize: '40px 40px' 
-        }}></div>
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-[400px] bg-emerald-500/10 blur-[100px] md:blur-[150px] rounded-full"></div>
+        {/* Animated Perspective Grid Floor */}
+        <div className="absolute bottom-0 left-0 right-0 h-[60%] perspective-1000 overflow-hidden">
+          <div className="absolute inset-0 opacity-20" 
+               style={{ 
+                 backgroundImage: `linear-gradient(to bottom, transparent, #0b0f1a), 
+                                   linear-gradient(#1e293b 1px, transparent 1px), 
+                                   linear-gradient(90deg, #1e293b 1px, transparent 1px)`,
+                 backgroundSize: '100% 100%, 40px 40px, 40px 40px',
+                 transform: 'rotateX(60deg) translateY(0)',
+                 transformOrigin: 'top',
+                 animation: 'grid-run 20s linear infinite'
+               }}>
+          </div>
+        </div>
+
+        {/* Floating Data Particles */}
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute w-1 h-1 bg-emerald-500/40 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animation: `float-particle ${5 + Math.random() * 10}s linear infinite`,
+                animationDelay: `${Math.random() * 5}s`,
+                opacity: Math.random()
+              }}
+            ></div>
+          ))}
+        </div>
+
+        {/* Multi-layered Aurora Glows */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-500/10 blur-[120px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-sky-500/10 blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[800px] h-[400px] bg-emerald-500/5 blur-[100px] rounded-full"></div>
+
+        {/* Large Decorative Bell Icon (Floating) */}
+        <div className="absolute top-[15%] right-[10%] hidden xl:block animate-[float-icon_6s_ease-in-out_infinite]">
+          <div className="relative group">
+            <div className="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full scale-150 group-hover:bg-emerald-500/30 transition-all duration-700"></div>
+            <svg className="w-32 h-32 text-emerald-500/40 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Floating Candlestick UI Elements */}
+        <div className="absolute bottom-[25%] left-[10%] hidden xl:flex space-x-8 items-end animate-[float-icon_8s_ease-in-out_infinite_reverse]">
+          <div className="flex flex-col items-center opacity-40">
+            <div className="w-0.5 h-16 bg-emerald-500"></div>
+            <div className="w-5 h-24 bg-emerald-500/20 border border-emerald-500/50 rounded-sm shadow-[0_0_30px_rgba(16,185,129,0.2)]"></div>
+            <div className="w-0.5 h-10 bg-emerald-500"></div>
+          </div>
+          <div className="flex flex-col items-center mb-8 opacity-40">
+            <div className="w-0.5 h-10 bg-rose-500"></div>
+            <div className="w-5 h-36 bg-rose-500/20 border border-rose-500/50 rounded-sm shadow-[0_0_30px_rgba(244,63,94,0.2)]"></div>
+            <div className="w-0.5 h-20 bg-rose-500"></div>
+          </div>
+        </div>
       </div>
 
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes grid-run {
+          from { background-position: 0 0, 0 0, 0 0; }
+          to { background-position: 0 0, 0 40px, 0 0; }
+        }
+        @keyframes float-particle {
+          from { transform: translateY(0); opacity: 0; }
+          20% { opacity: 0.5; }
+          80% { opacity: 0.5; }
+          to { transform: translateY(-100vh); opacity: 0; }
+        }
+        @keyframes float-icon {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-30px) rotate(2deg); }
+        }
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+      `}} />
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center z-10">
-        <div className="inline-flex items-center px-4 py-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[10px] md:text-xs font-medium mb-6 tracking-wide">
-          <svg className="w-3 h-3 mr-2" viewBox="0 0 24 24" fill="currentColor">
+        <div className="inline-flex items-center px-4 py-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[10px] md:text-xs font-black mb-6 tracking-widest uppercase shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+          <svg className="w-3 h-3 mr-2 animate-pulse" viewBox="0 0 24 24" fill="currentColor">
             <path d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           India's definitive real-time stock alert engine
         </div>
         
-        <h1 className="text-4xl sm:text-6xl md:text-8xl font-extrabold text-white mb-6 md:mb-8 tracking-tight leading-[1.1] md:leading-[1] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-          Never Miss a <span className="text-emerald-500">Market</span> <br className="hidden sm:block" />
-          <span className="text-emerald-500">Move</span> Again
+        <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white mb-6 md:mb-8 tracking-tighter leading-[0.95] md:leading-[0.9] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 uppercase">
+          Never Miss a <span className="text-emerald-500 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]">Market</span> <br className="hidden sm:block" />
+          <span className="text-emerald-500 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]">Move</span> Again
         </h1>
         
-        <p className="text-sm sm:text-base md:text-xl text-slate-400 mb-8 md:mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+        <p className="text-sm sm:text-base md:text-xl text-slate-400 mb-8 md:mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 font-medium">
           Institutional-grade stock market news alerts delivered via Telegram. Stay ahead of the crowd with real-time notifications and professional terminals.
         </p>
         
-        <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
           <button 
             onClick={onOpenPricing}
-            className="w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-xl transition-all shadow-2xl shadow-emerald-500/25 flex flex-col items-center justify-center group"
+            className="w-full md:w-auto px-8 md:px-10 py-4 md:py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-xl transition-all shadow-2xl shadow-emerald-500/25 flex flex-col items-center justify-center group shrink-0"
           >
             <span className="flex items-center">
               30-Day Free Trial
@@ -50,19 +125,26 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
           
           <button 
             onClick={() => onScrollToSection('alerts')}
-            className="w-full sm:w-auto px-8 py-4 md:py-5 bg-transparent hover:bg-emerald-500/5 text-emerald-500 font-bold rounded-xl border border-emerald-500/50 transition-all flex items-center justify-center"
+            className="w-full md:w-auto px-8 py-4 md:py-5 bg-transparent hover:bg-emerald-500/5 text-emerald-500 font-bold rounded-xl border border-emerald-500/50 transition-all flex items-center justify-center"
           >
-            Showcase Alerts
+            Explore Alerts
+          </button>
+
+          <button 
+            onClick={() => onScrollToSection('dashboard')}
+            className="w-full md:w-auto px-8 py-4 md:py-5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center"
+          >
+            Live Terminal
           </button>
         </div>
 
         <div className="mt-16 md:mt-24 flex flex-col sm:flex-row justify-center items-center space-y-8 sm:space-y-0 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-500">
           <div className="text-center px-6 md:px-12 sm:border-x border-white/5">
-            <div className="text-3xl md:text-5xl font-extrabold text-emerald-500 mb-1 md:mb-2 tracking-tighter uppercase">99.9%</div>
+            <div className="text-3xl md:text-5xl font-black text-emerald-500 mb-1 md:mb-2 tracking-tighter uppercase">99.9%</div>
             <div className="text-slate-400 text-[10px] font-black uppercase tracking-widest opacity-60">Accuracy</div>
           </div>
           <div className="text-center px-6 md:px-12 sm:border-r border-white/5">
-            <div className="text-3xl md:text-5xl font-extrabold text-emerald-500 mb-1 md:mb-2 tracking-tighter uppercase">30 Days</div>
+            <div className="text-3xl md:text-5xl font-black text-emerald-500 mb-1 md:mb-2 tracking-tighter uppercase">30 Days</div>
             <div className="text-slate-400 text-[10px] font-black uppercase tracking-widest opacity-60">Trial Period</div>
           </div>
         </div>
