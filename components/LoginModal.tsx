@@ -10,8 +10,7 @@ interface LoginModalProps {
 const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
 
 const setAuthCookie = (token: string) => {
-  // Enhanced attributes to ensure transmission in cross-site/modern environments
-  document.cookie = `sm_token=${token}; max-age=300; path=/; SameSite=None; Secure`;
+  document.cookie = `sm_token=${token}; max-age=300; path=/; SameSite=Lax`;
 };
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
@@ -44,8 +43,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         const resp = await fetch(`${API_BASE}/send-otp-login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: formData.phone }),
-          credentials: 'include'
+          body: JSON.stringify({ phone: formData.phone })
         });
         const data = await resp.json();
         if (data.status === 'otp_sent' || data.status === 'success') {
@@ -58,8 +56,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         const resp = await fetch(`${API_BASE}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: formData.phone, password: formData.password }),
-          credentials: 'include'
+          body: JSON.stringify({ phone: formData.phone, password: formData.password })
         });
         const data = await resp.json();
         if (data.token) {
@@ -73,8 +70,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         const resp = await fetch(`${API_BASE}/send-otp-reset`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: formData.phone }),
-          credentials: 'include'
+          body: JSON.stringify({ phone: formData.phone })
         });
         const data = await resp.json();
         if (data.status === 'otp_sent' || data.status === 'success') {
@@ -100,8 +96,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         const resp = await fetch(`${API_BASE}/reset-password`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: formData.phone, otp: formData.otp, password: formData.password }),
-          credentials: 'include'
+          body: JSON.stringify({ phone: formData.phone, otp: formData.otp, password: formData.password })
         });
         const data = await resp.json();
         if (data.status === 'password_reset' || data.status === 'success') {
@@ -114,8 +109,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         const resp = await fetch(`${API_BASE}/verify-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: formData.phone, otp: formData.otp, purpose: 'login' }),
-          credentials: 'include'
+          body: JSON.stringify({ phone: formData.phone, otp: formData.otp, purpose: 'login' })
         });
         const data = await resp.json();
         if (data.verified) {
@@ -143,12 +137,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           </div>
           <div className="mb-10 text-center">
             <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">{method === 'RESET' ? 'Reset Password' : 'Sign In'}</h2>
-            <p className="text-slate-500 text-sm">Enter details to sign in to StockManch.</p>
+            <p className="text-slate-500 text-sm">Enter your details to access StockManch.</p>
           </div>
           {error && <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-xs font-bold text-center">{error}</div>}
           {method !== 'RESET' && step !== 'SUCCESS' && (
             <div className="flex bg-slate-950/50 rounded-2xl p-1 mb-10 border border-white/5">
-              <button onClick={() => { setMethod('OTP'); setStep('INPUT'); setError(null); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'OTP' ? 'bg-emerald-500 text-slate-900 shadow-lg' : 'text-slate-500'}`}>Login Code</button>
+              <button onClick={() => { setMethod('OTP'); setStep('INPUT'); setError(null); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'OTP' ? 'bg-emerald-500 text-slate-900 shadow-lg' : 'text-slate-500'}`}>Mobile Code</button>
               <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'PASSWORD' ? 'bg-emerald-500 text-slate-900 shadow-lg' : 'text-slate-500'}`}>Password</button>
             </div>
           )}
@@ -158,7 +152,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 <label className="text-[10px] font-black text-slate-600 uppercase px-1">Mobile Number</label>
                 <div className="relative">
                   <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black">+91</span>
-                  <input required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none focus:border-emerald-500 font-mono" />
+                  <input required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none focus:border-emerald-500" />
                 </div>
               </div>
               {method === 'PASSWORD' && (
@@ -170,12 +164,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500" />
                 </div>
               )}
-              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl transition-all hover:bg-emerald-400">{loading ? 'Sending...' : (method === 'OTP' ? 'Send Code' : 'Sign In')}</button>
+              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl">{loading ? 'Sending...' : (method === 'OTP' ? 'Send Login Code' : 'Sign In')}</button>
             </form>
           ) : step === 'VERIFY' ? (
             <form onSubmit={handleVerify} className="space-y-8">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-600 uppercase text-center block">Enter Code</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase text-center block">Enter 6-digit Code</label>
                 <div className="flex justify-between gap-3">
                   {Array(6).fill(0).map((_, i) => (
                     <input key={i} maxLength={1} required className="w-full h-14 bg-slate-950/50 border border-white/10 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500" placeholder="•" onChange={(e) => {
@@ -185,14 +179,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   ))}
                 </div>
               </div>
-              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl">{loading ? 'Wait...' : 'Sign In'}</button>
-              <button type="button" onClick={() => setStep('INPUT')} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest transition-colors hover:text-white">Change Phone</button>
+              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl">{loading ? 'Wait...' : 'Login'}</button>
+              <button type="button" onClick={() => setStep('INPUT')} className="w-full text-[10px] font-black text-slate-600 uppercase">Change Phone</button>
             </form>
           ) : (
             <div className="text-center py-6">
-              <h3 className="text-2xl font-black text-white uppercase mb-4 tracking-tighter">Updated</h3>
-              <p className="text-slate-500 text-sm mb-10 leading-relaxed">Password changed successfully. Please sign in again.</p>
-              <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); }} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl">Sign In</button>
+              <h3 className="text-2xl font-black text-white uppercase mb-4">Password Changed</h3>
+              <p className="text-slate-500 text-sm mb-10">Please use your new password to sign in.</p>
+              <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); }} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl">Sign In</button>
             </div>
           )}
         </div>
