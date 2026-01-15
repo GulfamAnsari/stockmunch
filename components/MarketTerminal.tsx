@@ -112,10 +112,7 @@ const NewsCard: React.FC<{
         onPriceUpdate(news.id, percentageMap.get(querySymbol));
       } else {
         const resp = await fetch(
-          `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`,
-          { 
-            headers: { 'Authorization': `Bearer ${getAuthToken()}` }
-          }
+          `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`
         );
         const data = await resp.json();
         if (data && data.chart && data.chart.result && data.chart.result[0]) {
@@ -361,9 +358,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
       };
       const url = `https://droidtechknow.com/admin/api/stocks/news/save.php?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}&source=g`;
-      const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${getAuthToken()}` }
-      });
+      const response = await fetch(url);
       const json = await response.json();
       if (json.status === "success" && json.data) {
         const allItems: StockNews[] = [];
@@ -490,7 +485,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
           </div>
           <div className="relative w-full sm:w-48 lg:w-72 shrink-0">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
-            <input type="text" placeholder="SEARCH SYMBOL..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); }} className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white focus:outline-none focus:border-emerald-500 transition-all font-mono placeholder:text-slate-700/50" />
+            <input type="text" placeholder="SEARCH SYMBOL..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); }} className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white focus:outline-none focus:border-emerald-500 transition-all font-mono placeholder:text-slate-700/30" />
           </div>
           {activeTab !== "WATCHLIST" && (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">

@@ -95,9 +95,10 @@ const Login: React.FC = () => {
         const data = await resp.json();
         if (data.token) {
           setAuthCookie(data.token);
+          // Landing on dashboard defaults to Control Center (overview)
           navigate('/dashboard');
         } else {
-          setError(data.message || "Incorrect password or number.");
+          setError(data.message || "Incorrect details.");
         }
       } else if (method === 'RESET') {
         const resp = await fetch(`${API_BASE}/send-otp-reset`, {
@@ -156,6 +157,7 @@ const Login: React.FC = () => {
         const data = await resp.json();
         if (data.verified) {
           if (data.token) setAuthCookie(data.token);
+          // Landing on dashboard defaults to Control Center (overview)
           navigate('/dashboard');
         } else {
           setError(data.message || "Incorrect code.");
@@ -194,7 +196,7 @@ const Login: React.FC = () => {
               <label className="text-[10px] font-black text-slate-600 uppercase px-1">Mobile Number</label>
               <div className="relative">
                 <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black">+91</span>
-                <input required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none focus:border-emerald-500 font-mono placeholder:text-slate-700/50" />
+                <input required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none focus:border-emerald-500 font-mono placeholder:text-slate-700/30" />
               </div>
             </div>
             {method === 'PASSWORD' && (
@@ -203,7 +205,7 @@ const Login: React.FC = () => {
                   <label className="text-[10px] font-black text-slate-600 uppercase">Password</label>
                   <button type="button" onClick={() => { setMethod('RESET'); setStep('INPUT'); setError(null); }} className="text-[9px] font-black text-emerald-500 uppercase">Forgot?</button>
                 </div>
-                <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/50" />
+                <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/30" />
               </div>
             )}
             <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl">{loading ? 'Please wait...' : (method === 'OTP' ? 'Send Code' : 'Sign In')}</button>
@@ -214,7 +216,7 @@ const Login: React.FC = () => {
               <label className="text-[10px] font-black text-slate-600 uppercase text-center block">Enter Code</label>
               <div className="flex justify-between gap-2">
                 {Array(6).fill(0).map((_, i) => (
-                  <input key={i} maxLength={1} required className="w-12 h-14 bg-slate-950/50 border border-white/5 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/50" placeholder="•" onChange={(e) => {
+                  <input key={i} maxLength={1} required className="w-12 h-14 bg-slate-950/50 border border-white/5 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/30" placeholder="•" onChange={(e) => {
                     const val = e.target.value; if (val && i < 5) (e.currentTarget.nextElementSibling as HTMLInputElement)?.focus();
                     const newOtp = formData.otp.split(''); newOtp[i] = val; setFormData({...formData, otp: newOtp.join('')});
                   }} />
@@ -224,7 +226,7 @@ const Login: React.FC = () => {
             {method === 'RESET' && (
               <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
                 <label className="text-[10px] font-black text-slate-600 uppercase px-1">New Password</label>
-                <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/50" />
+                <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/30" />
               </div>
             )}
             <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl shadow-xl">{loading ? 'Verifying...' : 'Sign In'}</button>

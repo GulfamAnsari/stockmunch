@@ -29,8 +29,6 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
   const [error, setError] = useState<string | null>(null);
   const [userExists, setUserExists] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
-  
-  const needsDashboard = planName.toLowerCase().includes('dashboard');
 
   useEffect(() => {
     if (!isOpen) {
@@ -75,13 +73,13 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
         const msg = data.message || "Failed to send code.";
         if (msg.toLowerCase().includes('exist')) {
           setUserExists(true);
-          setError("Account already exists with this number.");
+          setError("This mobile number is already registered.");
         } else {
           setError(msg);
         }
       }
     } catch (err) {
-      setError("Network error.");
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -142,7 +140,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-2xl">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-2xl">
       <div className="w-full max-w-lg bg-[#0b0f1a] border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in">
         <div className="p-10 md:p-14">
           <div className="flex justify-between items-start mb-10">
@@ -156,9 +154,9 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
               {userExists && onSwitchToLogin && (
                 <button 
                   onClick={onSwitchToLogin}
-                  className="px-6 py-2 bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-all shadow-lg"
+                  className="px-6 py-2 bg-emerald-500 text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 transition-all shadow-lg"
                 >
-                  Sign In Now
+                  Sign In to Your Account
                 </button>
               )}
             </div>
@@ -167,13 +165,13 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
           {step === 'PHONE' && (
             <div className="animate-in slide-in-from-right">
               <h2 className="text-4xl font-black text-white uppercase mb-4 tracking-tighter">Start <span className="text-emerald-500">Trial</span></h2>
-              <p className="text-slate-400 text-sm mb-10 leading-relaxed">Enter your number to get a 30-day trial for <span className="text-white font-bold">{planName}</span>.</p>
+              <p className="text-slate-400 text-sm mb-10 leading-relaxed">Enter your mobile number to get a 30-day trial for <span className="text-white font-bold">{planName}</span>.</p>
               <form onSubmit={handlePhoneSubmit} className="space-y-6">
                 <div>
                   <label className="block text-[10px] font-black text-slate-600 uppercase mb-3 px-1">Mobile Number</label>
                   <div className="relative">
                     <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black">+91</span>
-                    <input required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl pl-16 pr-6 py-5 text-xl text-white focus:outline-none focus:border-emerald-500 transition-all font-mono placeholder:text-slate-700/50" />
+                    <input required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl pl-16 pr-6 py-5 text-xl text-white focus:outline-none focus:border-emerald-500 transition-all font-mono placeholder:text-slate-700/30" />
                   </div>
                 </div>
                 <button type="submit" disabled={loading || formData.phone.length < 10} className="w-full py-5 bg-emerald-500 text-slate-950 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all hover:bg-emerald-400">
@@ -190,7 +188,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
               <form onSubmit={handleOtpSubmit} className="space-y-8">
                 <div className="flex justify-between gap-3">
                   {Array(6).fill(0).map((_, i) => (
-                    <input key={i} maxLength={1} className="w-full h-16 bg-slate-900/50 border border-white/10 rounded-xl text-center text-2xl font-black text-emerald-500 focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/50" placeholder="•" onChange={(e) => {
+                    <input key={i} maxLength={1} className="w-full h-16 bg-slate-900/50 border border-white/10 rounded-xl text-center text-2xl font-black text-emerald-500 focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/30" placeholder="•" onChange={(e) => {
                       const val = e.target.value; if (val && i < 5) (e.currentTarget.nextElementSibling as HTMLInputElement)?.focus();
                       const newOtp = formData.otp.split(''); newOtp[i] = val; setFormData({...formData, otp: newOtp.join('')});
                     }} />
@@ -207,9 +205,9 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
             <div className="animate-in slide-in-from-right">
               <h2 className="text-4xl font-black text-white uppercase mb-4 tracking-tighter">Setup <span className="text-emerald-500">Account</span></h2>
               <form onSubmit={handleProfileSubmit} className="space-y-4">
-                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Full Name</label><input required type="text" placeholder="Your Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/50" /></div>
-                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Email Address</label><input required type="email" placeholder="name@email.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/50" /></div>
-                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Password</label><input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/50" /></div>
+                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Full Name</label><input required type="text" placeholder="Your Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/30" /></div>
+                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Email Address</label><input required type="email" placeholder="name@email.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/30" /></div>
+                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Password</label><input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/30" /></div>
                 <button type="submit" className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl shadow-xl mt-4">Complete Setup</button>
               </form>
             </div>
