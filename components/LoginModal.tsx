@@ -12,11 +12,6 @@ const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
 const setAuthCookie = (token: string) => {
   // Set expiry to 300 seconds (5 minutes) in cookie
   document.cookie = `sm_token=${token}; max-age=300; path=/; SameSite=Lax`;
-  
-  // LocalStorage tracking for robust checks
-  const expiryTime = Date.now() + 300 * 1000;
-  localStorage.setItem('sm_token', token);
-  localStorage.setItem('sm_token_expiry', expiryTime.toString());
 };
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {

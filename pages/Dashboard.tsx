@@ -6,32 +6,12 @@ import { User, PricingPlan } from '../types';
 import { Logo, PRICING_PLANS } from '../constants';
 
 const getAuthToken = () => {
-  // 1. Try to get from Cookie
-  const name = "sm_token=";
-  const decodedCookie = decodeURIComponent(document.cookie);
-  const ca = decodedCookie.split(';');
-  let cookieToken = null;
-  
-  for(let i = 0; i < ca.length; i++) {
-    let c = ca[i].trim();
-    if (c.indexOf(name) === 0) {
-      cookieToken = c.substring(name.length, c.length);
-      break;
-    }
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; sm_token=`);
+  if (parts.length === 2) {
+    return parts.pop()?.split(';').shift() || null;
   }
-
-  // 2. Cross-check with LocalStorage and its specific 5-min expiry
-  const localToken = localStorage.getItem('sm_token');
-  const expiry = localStorage.getItem('sm_token_expiry');
-  const now = Date.now();
-
-  // If we have a local token and it hasn't expired yet (5 mins)
-  if (localToken && expiry && parseInt(expiry) > now) {
-    return localToken;
-  }
-
-  // Fallback to cookie if local storage is missing but cookie exists
-  return cookieToken;
+  return null;
 };
 
 const OverviewSection: React.FC<{ user: User; onNavigate: (section: any) => void }> = ({ user, onNavigate }) => (
@@ -392,7 +372,7 @@ const AccountSection: React.FC<{ user: User; onNavigate: (s: any) => void }> = (
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  // Changed initial state from 'terminal' to 'overview' to satisfy requirements
+  // Land always on 'overview' (Control Center) tab
   const [activeSection, setActiveSection] = useState<'overview' | 'terminal' | 'account' | 'notifications' | 'settings' | 'billing'>('overview');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -412,18 +392,15 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     document.title = "Terminal Dashboard | StockManch";
-    // Security: Check for valid auth using enhanced helper
-    const token = getAuthToken();
-    if (!token) {
+    // Security check: Only token from cookie matters
+    if (!getAuthToken()) {
       navigate('/login');
     }
   }, [navigate]);
 
   const handleLogout = () => {
-    // Clear all auth markers
+    // Standard cleanup
     document.cookie = "sm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    localStorage.removeItem('sm_token');
-    localStorage.removeItem('sm_token_expiry');
     navigate('/login');
   };
 

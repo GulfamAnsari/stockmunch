@@ -1,3 +1,4 @@
+
 import React, {
   useState,
   useEffect,
@@ -117,7 +118,8 @@ const NewsCard: React.FC<{
         onPriceUpdate(news.id, percentageMap.get(querySymbol));
       } else {
         const resp = await fetch(
-          `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`
+          `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`,
+          { credentials: 'include' }
         );
         const data = await resp.json();
         if (data && data.chart && data.chart.result && data.chart.result[0]) {
@@ -472,7 +474,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
       const url = `https://droidtechknow.com/admin/api/stocks/news/save.php?from=${toApiDate(
         fromDateInput
       )}&to=${toApiDate(toDateInput)}&source=g`;
-      const response = await fetch(url);
+      const response = await fetch(url, { credentials: 'include' });
       const json = await response.json();
 
       if (json.status === "success" && json.data) {

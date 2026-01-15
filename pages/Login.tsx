@@ -5,13 +5,8 @@ import { Logo } from '../constants';
 const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
 
 const setAuthCookie = (token: string) => {
-  // Set expiry to 300 seconds (5 minutes) in cookie
+  // Set expiry to 300 seconds (5 minutes) in cookie as per requirements
   document.cookie = `sm_token=${token}; max-age=300; path=/; SameSite=Lax`;
-  
-  // Also store in localStorage with an explicit JS-readable timestamp to prevent bounce redirects
-  const expiryTime = Date.now() + 300 * 1000;
-  localStorage.setItem('sm_token', token);
-  localStorage.setItem('sm_token_expiry', expiryTime.toString());
 };
 
 const Login: React.FC = () => {
@@ -286,7 +281,7 @@ const Login: React.FC = () => {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 transition-all placeholder:text-slate-800 shadow-inner"
+                  className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 transition-all placeholder:text-slate-800 shadow-inner"
                 />
               </div>
             )}

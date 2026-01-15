@@ -16,11 +16,6 @@ const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
 const setAuthCookie = (token: string) => {
   // Set expiry to 300 seconds (5 minutes) in cookie
   document.cookie = `sm_token=${token}; max-age=300; path=/; SameSite=Lax`;
-  
-  // LocalStorage tracking for robust checks
-  const expiryTime = Date.now() + 300 * 1000;
-  localStorage.setItem('sm_token', token);
-  localStorage.setItem('sm_token_expiry', expiryTime.toString());
 };
 
 const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planName }) => {
@@ -376,7 +371,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                       onClick={() => navigate('/dashboard')}
                       className="w-full py-5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl transition-all border border-white/10"
                     >
-                      Enter Market Dashboard
+                      Enter Control Center
                     </button>
                   )}
                 </div>
