@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -173,7 +172,15 @@ const App: React.FC = () => {
       )}
 
       <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} onSelectPlan={handleStartJourney} />
-      <TrialFlowModal isOpen={isTrialModalOpen} onClose={() => setIsTrialModalOpen(false)} planName={selectedPlan} />
+      <TrialFlowModal 
+        isOpen={isTrialModalOpen} 
+        onClose={() => setIsTrialModalOpen(false)} 
+        planName={selectedPlan} 
+        onSwitchToLogin={() => {
+          setIsTrialModalOpen(false);
+          setIsLoginModalOpen(true);
+        }}
+      />
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </div>
   );
