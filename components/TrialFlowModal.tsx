@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Logo } from '../constants';
 
@@ -8,63 +7,112 @@ interface TrialFlowModalProps {
   planName: string;
 }
 
-type Step = 'PHONE' | 'OTP' | 'PASSWORD' | 'SUCCESS';
+type Step = 'PHONE' | 'OTP' | 'PROFILE' | 'SUCCESS';
+
+const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
 
 const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planName }) => {
   const [step, setStep] = useState<Step>('PHONE');
   const [formData, setFormData] = useState({ 
     phone: '', 
     otp: '', 
-    password: ''
+    password: '',
+    name: '',
+    email: ''
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const needsDashboard = planName.toLowerCase().includes('dashboard');
 
   useEffect(() => {
     if (!isOpen) {
       setStep('PHONE');
-      setFormData({ phone: '', otp: '', password: '' });
+      setFormData({ phone: '', otp: '', password: '', name: '', email: '' });
+      setError(null);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handlePhoneSubmit = (e: React.FormEvent) => {
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setStep('OTP');
-    }, 1000);
-  };
-
-  const handleOtpSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      if (needsDashboard) {
-        setStep('PASSWORD');
+    setError(null);
+    try {
+      const resp = await fetch(`${API_BASE}/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formData.phone })
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        setStep('OTP');
       } else {
-        setStep('SUCCESS');
+        setError(data.message || "Failed to send OTP. Please try again.");
       }
-    }, 800);
+    } catch (err) {
+      setError("Network error. Please check your connection.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    setError(null);
+    try {
+      const resp = await fetch(`${API_BASE}/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formData.phone, otp: formData.otp })
+      });
+      const data = await resp.json();
+      if (data.verified) {
+        setStep('PROFILE');
+      } else {
+        setError(data.message || "Invalid OTP entered.");
+      }
+    } catch (err) {
+      setError("Verification failed. Please try again.");
+    } finally {
       setLoading(false);
-      setStep('SUCCESS');
-    }, 1200);
+    }
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      const resp = await fetch(`${API_BASE}/set-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: formData.phone,
+          password: formData.password,
+          name: formData.name,
+          email: formData.email
+        })
+      });
+      const data = await resp.json();
+      if (data.status === 'password_set') {
+        setStep('SUCCESS');
+      } else {
+        setError(data.message || "Could not set password.");
+      }
+    } catch (err) {
+      setError("Signup failed. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const stepsInfo = {
     PHONE: { progress: '25%' },
     OTP: { progress: '50%' },
-    PASSWORD: { progress: '75%' },
+    PROFILE: { progress: '75%' },
     SUCCESS: { progress: '100%' },
   };
 
@@ -93,6 +141,11 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
           </div>
 
           <div className="min-h-[320px] flex flex-col justify-center">
+            {error && (
+              <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-xs font-bold animate-in fade-in">
+                {error}
+              </div>
+            )}
             
             {step === 'PHONE' && (
               <div className="animate-in fade-in slide-in-from-right-8 duration-500">
@@ -170,33 +223,56 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                   >
                     {loading ? <LoadingSpinner /> : "Verify & Continue"}
                   </button>
+                  <button type="button" onClick={() => setStep('PHONE')} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Phone Number</button>
                 </form>
               </div>
             )}
 
-            {step === 'PASSWORD' && (
+            {step === 'PROFILE' && (
               <div className="animate-in fade-in slide-in-from-right-8 duration-500">
                 <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">
-                  Account <span className="text-emerald-500">Security</span>
+                  Setup <span className="text-emerald-500">Profile</span>
                 </h2>
-                <p className="text-slate-400 text-sm font-medium mb-10">
-                  Set a password for your professional terminal access and personalized watchlist.
+                <p className="text-slate-400 text-sm font-medium mb-6">
+                  Finalize your details to unlock the StockManch terminal.
                 </p>
-                <form onSubmit={handlePasswordSubmit} className="space-y-6">
+                <form onSubmit={handleProfileSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3 px-1">New Terminal Password</label>
+                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2 px-1">Full Name</label>
+                    <input 
+                      required
+                      type="text"
+                      placeholder="e.g. Mohd Gulfam"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder-slate-800 focus:outline-none focus:border-emerald-500 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2 px-1">Email Address</label>
+                    <input 
+                      required
+                      type="email"
+                      placeholder="e.g. trader@example.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder-slate-800 focus:outline-none focus:border-emerald-500 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2 px-1">Terminal Password</label>
                     <input 
                       required
                       type="password"
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
-                      className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-5 text-white placeholder-slate-800 focus:outline-none focus:border-emerald-500 transition-all"
+                      className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder-slate-800 focus:outline-none focus:border-emerald-500 transition-all"
                     />
                   </div>
                   <button 
                     type="submit"
-                    className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl"
+                    className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl mt-4"
                   >
                     {loading ? <LoadingSpinner /> : "Finalize Activation"}
                   </button>
