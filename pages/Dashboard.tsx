@@ -5,6 +5,35 @@ import PricingCard from '../components/PricingCard';
 import { User, PricingPlan } from '../types';
 import { Logo, PRICING_PLANS } from '../constants';
 
+const getAuthToken = () => {
+  // 1. Try to get from Cookie
+  const name = "sm_token=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  let cookieToken = null;
+  
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i].trim();
+    if (c.indexOf(name) === 0) {
+      cookieToken = c.substring(name.length, c.length);
+      break;
+    }
+  }
+
+  // 2. Cross-check with LocalStorage and its specific 5-min expiry
+  const localToken = localStorage.getItem('sm_token');
+  const expiry = localStorage.getItem('sm_token_expiry');
+  const now = Date.now();
+
+  // If we have a local token and it hasn't expired yet (5 mins)
+  if (localToken && expiry && parseInt(expiry) > now) {
+    return localToken;
+  }
+
+  // Fallback to cookie if local storage is missing but cookie exists
+  return cookieToken;
+};
+
 const OverviewSection: React.FC<{ user: User; onNavigate: (section: any) => void }> = ({ user, onNavigate }) => (
   <div className="flex-grow overflow-y-auto p-4 md:p-8 custom-scrollbar space-y-6 md:space-y-8 animate-in fade-in duration-500">
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6">
@@ -36,7 +65,7 @@ const OverviewSection: React.FC<{ user: User; onNavigate: (section: any) => void
             className="p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all text-left group"
           >
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-3 group-hover:scale-110 transition-transform">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
             </div>
             <span className="text-[10px] font-black text-white uppercase tracking-widest block">Live Terminal</span>
             <span className="text-[9px] text-slate-500 font-bold uppercase">Real-time Feed</span>
@@ -363,7 +392,8 @@ const AccountSection: React.FC<{ user: User; onNavigate: (s: any) => void }> = (
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState<'overview' | 'terminal' | 'account' | 'notifications' | 'settings' | 'billing'>('terminal');
+  // Changed initial state from 'terminal' to 'overview' to satisfy requirements
+  const [activeSection, setActiveSection] = useState<'overview' | 'terminal' | 'account' | 'notifications' | 'settings' | 'billing'>('overview');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isFullScreenMode, setIsFullScreenMode] = useState(false);
@@ -382,9 +412,18 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     document.title = "Terminal Dashboard | StockManch";
-  }, []);
+    // Security: Check for valid auth using enhanced helper
+    const token = getAuthToken();
+    if (!token) {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const handleLogout = () => {
+    // Clear all auth markers
+    document.cookie = "sm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    localStorage.removeItem('sm_token');
+    localStorage.removeItem('sm_token_expiry');
     navigate('/login');
   };
 
@@ -397,7 +436,7 @@ const Dashboard: React.FC = () => {
 
   const menuItems = [
     { id: 'overview', label: 'Control Center', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
-    { id: 'terminal', label: 'Live Terminal', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+    { id: 'terminal', label: 'Live Terminal', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
     { id: 'notifications', label: 'Alert Center', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
     { id: 'account', label: 'Trader Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
     { id: 'billing', label: 'Billing Node', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
@@ -453,7 +492,7 @@ const Dashboard: React.FC = () => {
               <p className="text-[8px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-2">Package: Active</p>
               <h4 className="text-[10px] font-black text-white uppercase mb-3 leading-tight truncate">{user.planName}</h4>
               <div className="flex items-center justify-between">
-                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter truncate max-w-[80px]">Pro Member</span>
+                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter truncate max-w-[120px]">Pro Member</span>
                 <span className="text-[9px] text-emerald-500 font-black tracking-widest">VERIFIED</span>
               </div>
             </div>

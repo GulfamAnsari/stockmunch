@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+// Added useNavigate to resolve the missing navigate reference in the success step
+import { useNavigate } from 'react-router-dom';
 import { Logo } from '../constants';
 
 interface TrialFlowModalProps {
@@ -11,7 +13,19 @@ type Step = 'PHONE' | 'OTP' | 'PROFILE' | 'SUCCESS';
 
 const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
 
+const setAuthCookie = (token: string) => {
+  // Set expiry to 300 seconds (5 minutes) in cookie
+  document.cookie = `sm_token=${token}; max-age=300; path=/; SameSite=Lax`;
+  
+  // LocalStorage tracking for robust checks
+  const expiryTime = Date.now() + 300 * 1000;
+  localStorage.setItem('sm_token', token);
+  localStorage.setItem('sm_token_expiry', expiryTime.toString());
+};
+
 const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planName }) => {
+  // Initializing navigate hook for redirection
+  const navigate = useNavigate();
   const [step, setStep] = useState<Step>('PHONE');
   const [formData, setFormData] = useState({ 
     phone: '', 
@@ -22,6 +36,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resendTimer, setResendTimer] = useState(0);
   
   const needsDashboard = planName.toLowerCase().includes('dashboard');
 
@@ -30,26 +45,61 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
       setStep('PHONE');
       setFormData({ phone: '', otp: '', password: '', name: '', email: '' });
       setError(null);
+      setResendTimer(0);
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    let interval: number;
+    if (resendTimer > 0) {
+      interval = window.setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
   if (!isOpen) return null;
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const resp = await fetch(`${API_BASE}/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formData.phone, purpose: 'signup' })
+      });
+      const data = await resp.json();
+      if (data.status === 'success' || data.status === 'otp_sent') {
+        setResendTimer(60);
+      } else {
+        setError(data.message || "Resend failed.");
+      }
+    } catch (err) {
+      setError("Communication failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
-      const resp = await fetch(`${API_BASE}/send-otp`, {
+      const resp = await fetch(`${API_BASE}/send-otp-signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: formData.phone })
       });
       const data = await resp.json();
-      if (data.status === 'success') {
+      if (data.status === 'otp_sent' || data.status === 'success') {
         setStep('OTP');
+        setResendTimer(60);
       } else {
-        setError(data.message || "Failed to send OTP. Please try again.");
+        setError(data.message || "Could not process signup request.");
       }
     } catch (err) {
       setError("Network error. Please check your connection.");
@@ -66,13 +116,18 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
       const resp = await fetch(`${API_BASE}/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: formData.phone, otp: formData.otp })
+        body: JSON.stringify({ 
+          phone: formData.phone, 
+          otp: formData.otp,
+          purpose: 'signup'
+        })
       });
       const data = await resp.json();
       if (data.verified) {
+        if (data.token) setAuthCookie(data.token);
         setStep('PROFILE');
       } else {
-        setError(data.message || "Invalid OTP entered.");
+        setError(data.message || "Invalid verification code.");
       }
     } catch (err) {
       setError("Verification failed. Please try again.");
@@ -97,13 +152,14 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
         })
       });
       const data = await resp.json();
-      if (data.status === 'password_set') {
+      if (data.status === 'password_set' || data.status === 'success') {
+        if (data.token) setAuthCookie(data.token);
         setStep('SUCCESS');
       } else {
-        setError(data.message || "Could not set password.");
+        setError(data.message || "Failed to secure account.");
       }
     } catch (err) {
-      setError("Signup failed. Please try again later.");
+      setError("Configuration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -177,7 +233,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                     disabled={loading || formData.phone.length < 10}
                     className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-800 disabled:text-slate-600 text-slate-950 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-emerald-500/10 flex items-center justify-center"
                   >
-                    {loading ? <LoadingSpinner /> : "Send Verification Code"}
+                    {loading ? <LoadingSpinner /> : "Generate Signup Key"}
                   </button>
                 </form>
               </div>
@@ -217,13 +273,24 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                       />
                     ))}
                   </div>
-                  <button 
-                    type="submit"
-                    className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl"
-                  >
-                    {loading ? <LoadingSpinner /> : "Verify & Continue"}
-                  </button>
-                  <button type="button" onClick={() => setStep('PHONE')} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Phone Number</button>
+                  <div className="space-y-4">
+                    <button 
+                      type="submit"
+                      disabled={loading || formData.otp.length < 6}
+                      className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl"
+                    >
+                      {loading ? <LoadingSpinner /> : "Verify Identity"}
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={handleResendOtp}
+                      disabled={resendTimer > 0 || loading}
+                      className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors disabled:opacity-50"
+                    >
+                      {resendTimer > 0 ? `Resend Code in ${resendTimer}s` : 'Resend Credentials'}
+                    </button>
+                  </div>
+                  <button type="button" onClick={() => setStep('PHONE')} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Return to phone</button>
                 </form>
               </div>
             )}
@@ -231,10 +298,10 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
             {step === 'PROFILE' && (
               <div className="animate-in fade-in slide-in-from-right-8 duration-500">
                 <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">
-                  Setup <span className="text-emerald-500">Profile</span>
+                  Secure <span className="text-emerald-500">Account</span>
                 </h2>
                 <p className="text-slate-400 text-sm font-medium mb-6">
-                  Finalize your details to unlock the StockManch terminal.
+                  Initialize your trader credentials.
                 </p>
                 <form onSubmit={handleProfileSubmit} className="space-y-4">
                   <div>
@@ -260,7 +327,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2 px-1">Terminal Password</label>
+                    <label className="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2 px-1">Secure Password</label>
                     <input 
                       required
                       type="password"
@@ -274,7 +341,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                     type="submit"
                     className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl mt-4"
                   >
-                    {loading ? <LoadingSpinner /> : "Finalize Activation"}
+                    {loading ? <LoadingSpinner /> : "Deploy Profile"}
                   </button>
                 </form>
               </div>
@@ -288,10 +355,10 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                   </svg>
                 </div>
                 <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">
-                  Ready for <span className="text-emerald-500">Action</span>
+                  Account <span className="text-emerald-500">Live</span>
                 </h2>
                 <p className="text-slate-400 font-medium mb-10 max-w-sm mx-auto leading-relaxed">
-                  Your 30-day <span className="text-white font-bold">{planName}</span> trial is active. Get instant stock news alerts directly on your device via Telegram.
+                  Welcome to StockManch. Your 30-day trial for <span className="text-white font-bold">{planName}</span> has been initiated.
                 </p>
 
                 <div className="grid grid-cols-1 gap-4">
@@ -302,14 +369,14 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.25.38-.51 1.05-.78 4.12-1.79 6.87-2.97 8.24-3.54 3.92-1.63 4.73-1.91 5.26-1.92.12 0 .38.03.55.17.14.12.18.28.2.44.02.16.02.32 0 .44z" />
                     </svg>
-                    <span>Instant Telegram Alerts</span>
+                    <span>Connect Telegram Alerts</span>
                   </button>
                   {needsDashboard && (
                     <button 
-                      onClick={onClose}
+                      onClick={() => navigate('/dashboard')}
                       className="w-full py-5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl transition-all border border-white/10"
                     >
-                      Enter Market Terminal
+                      Enter Market Dashboard
                     </button>
                   )}
                 </div>
@@ -318,7 +385,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
           </div>
 
           <p className="mt-12 text-center text-[10px] text-slate-700 font-bold uppercase tracking-[0.3em]">
-            StockManch Secure Protocol v2.4
+            StockManch Dispatch Node v3.0-SECURE
           </p>
         </div>
       </div>
