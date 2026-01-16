@@ -362,7 +362,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         const parts = d.split("-");
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
       };
-      const url = `https://droidtechknow.com/admin/api/stocks/news/save.php?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}&source=g`;
+      const url = `https://lavender-goldfish-594505.hostingersite.com/api/terminal?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}&source=g`;
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`
