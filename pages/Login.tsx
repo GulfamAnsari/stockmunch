@@ -41,11 +41,7 @@ const Login: React.FC = () => {
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.phone.length !== 10) {
-      setError("Please enter a valid 10-digit mobile number.");
-      return;
-    }
-    if (method === 'PASSWORD' && formData.password.length <= 6) {
-      setError("Password must be more than 6 characters.");
+      setError("Mobile number must be exactly 10 digits.");
       return;
     }
     
@@ -70,7 +66,7 @@ const Login: React.FC = () => {
         } else {
           if (data.error === 'not_registered') {
             setNotRegistered(true);
-            setError("This mobile number is not registered with StockManch.");
+            setError("This mobile number is not registered.");
           } else {
             setError(data.message || data.error || "Failed to send OTP.");
           }
@@ -120,6 +116,10 @@ const Login: React.FC = () => {
     e.preventDefault();
     if (formData.otp.length < 6) {
       setError("Please enter the full 6-digit OTP.");
+      return;
+    }
+    if (method === 'RESET' && formData.password.length < 6) {
+      setError("New password must be at least 6 characters.");
       return;
     }
 
@@ -193,14 +193,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const goToSignup = () => {
-    navigate('/');
-    setTimeout(() => {
-      document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  };
-
-  const isInitialDisabled = formData.phone.length !== 10 || (method === 'PASSWORD' && formData.password.length <= 6);
+  const isInitialDisabled = formData.phone.length !== 10 || (method === 'PASSWORD' && formData.password.length === 0);
 
   return (
     <div className="min-h-screen bg-[#0b0f1a] flex flex-col items-center justify-center p-6">
@@ -210,19 +203,14 @@ const Login: React.FC = () => {
           <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
             {step === 'SUCCESS' ? 'Reset Done' : method === 'RESET' ? 'Reset Password' : 'Sign In'}
           </h1>
-          <p className="text-slate-500 text-sm opacity-60">{step === 'SUCCESS' ? 'Use your new password to sign in.' : 'Access your StockManch terminal.'}</p>
+          <p className="text-slate-500 text-sm opacity-60">{step === 'SUCCESS' ? 'Password updated.' : 'Access your StockManch terminal.'}</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex flex-col items-center animate-in slide-in-from-top-2">
-            <span className="text-rose-500 text-xs font-bold text-center mb-3">{error}</span>
+          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex flex-col items-center animate-shake">
+            <span className="text-rose-500 text-[10px] font-black uppercase tracking-widest text-center">{error}</span>
             {notRegistered && (
-              <button 
-                onClick={goToSignup}
-                className="px-6 py-2 bg-emerald-500 text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-all shadow-lg"
-              >
-                Sign Up
-              </button>
+              <button onClick={() => navigate('/#pricing')} className="mt-3 px-6 py-2 bg-emerald-500 text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-all shadow-lg">Sign Up</button>
             )}
           </div>
         )}
@@ -237,7 +225,7 @@ const Login: React.FC = () => {
         {step === 'INPUT' ? (
           <form onSubmit={handleInitialSubmit} className="space-y-8">
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-600 uppercase px-1">Mobile Number</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Mobile Number</label>
               <div className="relative">
                 <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black">+91</span>
                 <input 
@@ -253,7 +241,7 @@ const Login: React.FC = () => {
             {method === 'PASSWORD' && (
               <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
                 <div className="flex justify-between items-center px-1">
-                  <label className="text-[10px] font-black text-slate-600 uppercase">Password</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Password</label>
                   <button type="button" onClick={() => { setMethod('RESET'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className="text-[9px] font-black text-emerald-500 uppercase">Forgot?</button>
                 </div>
                 <input 
@@ -262,14 +250,14 @@ const Login: React.FC = () => {
                   placeholder="••••••••" 
                   value={formData.password} 
                   onChange={(e) => setFormData({...formData, password: e.target.value})} 
-                  className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length <= 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/5 focus:border-emerald-500'}`} 
+                  className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error ? 'border-rose-500 bg-rose-500/10' : 'border-white/5 focus:border-emerald-500'}`} 
                 />
               </div>
             )}
             <button 
               type="submit" 
               disabled={loading || isInitialDisabled} 
-              className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl ${isInitialDisabled ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
+              className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl ${isInitialDisabled ? 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
             >
               {loading ? 'Processing...' : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
             </button>
@@ -277,7 +265,7 @@ const Login: React.FC = () => {
         ) : step === 'VERIFY' ? (
           <form onSubmit={handleVerify} className="space-y-8 animate-in fade-in slide-in-from-right-4">
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-600 uppercase text-center block">Enter OTP</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Enter OTP</label>
               <div className="flex justify-between gap-2">
                 {Array(6).fill(0).map((_, i) => (
                   <input 
@@ -296,14 +284,14 @@ const Login: React.FC = () => {
             </div>
             {method === 'RESET' && (
               <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                <label className="text-[10px] font-black text-slate-600 uppercase px-1">Set New Password</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Set New Password (min 6 chars)</label>
                 <input 
                   required 
                   type="password" 
                   placeholder="••••••••" 
                   value={formData.password} 
                   onChange={(e) => setFormData({...formData, password: e.target.value})} 
-                  className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length <= 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/5 focus:border-emerald-500'}`} 
+                  className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length < 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/5 focus:border-emerald-500'}`} 
                 />
               </div>
             )}
@@ -315,14 +303,14 @@ const Login: React.FC = () => {
               >
                 {loading ? 'Verifying...' : "Verify OTP"}
               </button>
-              <button type="button" onClick={() => { setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Mobile Number</button>
+              <button type="button" onClick={() => { setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Number</button>
             </div>
           </form>
         ) : (
           <div className="text-center animate-in zoom-in py-6">
             <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-8 text-emerald-500"><svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg></div>
             <h3 className="text-2xl font-black text-white uppercase mb-4 tracking-tighter">Updated</h3>
-            <p className="text-slate-500 text-sm mb-10 leading-relaxed opacity-60">Password updated. Please sign in with your new credentials.</p>
+            <p className="text-slate-500 text-sm mb-10 leading-relaxed opacity-60">Credentials synced. Please sign in now.</p>
             <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl">Sign In</button>
           </div>
         )}

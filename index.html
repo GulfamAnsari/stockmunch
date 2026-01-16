@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,24 +25,6 @@
   <meta property="twitter:title" content="StockManch | Real-Time Stock Market Alerts & News Dashboard">
   <meta property="twitter:description" content="Get the edge with instant Telegram alerts and our live market terminal. NSE/BSE news processed by AI in milliseconds.">
   <meta property="twitter:image" content="https://stockmanch.com/twitter-image.jpg">
-
-  <!-- JSON-LD Structured Data -->
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "StockManch",
-      "url": "https://stockmanch.com/",
-      "description": "Real-time stock market news alerts and professional trading terminal.",
-      "applicationCategory": "FinanceApplication",
-      "operatingSystem": "All",
-      "offers": {
-        "@type": "Offer",
-        "price": "150.00",
-        "priceCurrency": "INR"
-      }
-    }
-  </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -87,7 +68,34 @@
     .animate-marquee:hover {
       animation-play-state: paused;
     }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+    .animate-shake {
+      animation: shake 0.2s ease-in-out 0s 2;
+    }
   </style>
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "StockManch",
+      "url": "https://stockmanch.com/",
+      "description": "Real-time stock market news alerts and professional trading terminal.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "150.00",
+        "priceCurrency": "INR"
+      }
+    }
+  </script>
+
   <script type="importmap">
   {
     "imports": {
