@@ -48,6 +48,16 @@ interface SettingsData {
   terminal_audio: boolean | number;
 }
 
+interface AlertData {
+  user_id: string | number;
+  title: string;
+  message: string;
+  channel: string;
+  delivery_status: string;
+  delivered_at: string;
+  created_at: string;
+}
+
 const Toggle: React.FC<{ 
   enabled: boolean; 
   onChange: (val: boolean) => void; 
@@ -278,7 +288,7 @@ const SettingsSection: React.FC<{
       <div className="flex-grow flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="w-10 h-10 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
-          <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Accessing Config...</p>
+          <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Syncing Preferences...</p>
         </div>
       </div>
     );
@@ -288,7 +298,7 @@ const SettingsSection: React.FC<{
     <div className="flex-grow flex items-center justify-center">
        <div className="text-center opacity-30">
           <svg className="w-16 h-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-          <p className="font-black uppercase text-xs tracking-widest">Configuration node offline</p>
+          <p className="font-black uppercase text-xs tracking-widest">Configuration offline</p>
        </div>
     </div>
   );
@@ -296,36 +306,35 @@ const SettingsSection: React.FC<{
   const handleToggle = async (key: keyof SettingsData, val: boolean) => {
     setActiveSaveKey(key);
     onUpdate({ ...data, [key]: val });
-    // Keep showing success for a second
     setTimeout(() => setActiveSaveKey(null), 1000);
   };
 
   const settingsList = [
     { 
       key: 'telegram_push', 
-      label: 'Telegram Alert Tunnel', 
-      desc: 'Instant push notifications to your verified Telegram ID.',
+      label: 'Telegram Alerts', 
+      desc: 'Get instant stock alerts on your Telegram account.',
       icon: 'M13 10V3L4 14h7v7l9-11h-7z',
       color: 'sky'
     },
     { 
       key: 'daily_email', 
-      label: 'Intelligence Digest', 
-      desc: 'Automated EOD report of all high-volatility news.',
+      label: 'Daily Email Report', 
+      desc: 'Receive a summary of market news every evening.',
       icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z',
       color: 'indigo'
     },
     { 
       key: 'ai_insight', 
-      label: 'Predictive Analysis', 
-      desc: 'AI-driven sentiment overlays on all live market feeds.',
+      label: 'AI News Analysis', 
+      desc: 'Enable AI-powered insights for every market alert.',
       icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
       color: 'emerald'
     },
     { 
       key: 'terminal_audio', 
-      label: 'Acoustic Signals', 
-      desc: 'Enable audio cues for high-confidence market events.',
+      label: 'Sound Notifications', 
+      desc: 'Play a sound alert when new high-priority news breaks.',
       icon: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z',
       color: 'rose'
     }
@@ -336,12 +345,12 @@ const SettingsSection: React.FC<{
       <div className="max-w-6xl mx-auto space-y-12">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-10">
           <div>
-            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Terminal Preferences</h2>
-            <p className="text-slate-500 text-sm mt-3 font-medium">Control your notification dispatch and AI processing parameters.</p>
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Terminal Settings</h2>
+            <p className="text-slate-500 text-sm mt-3 font-medium">Customize how you receive market intelligence and alerts.</p>
           </div>
           <div className="flex items-center space-x-3 bg-slate-900/50 px-4 py-2 rounded-xl border border-white/10">
              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Preferences Node Active</span>
+             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Settings Node Active</span>
           </div>
         </header>
         
@@ -375,11 +384,10 @@ const SettingsSection: React.FC<{
 
               {activeSaveKey === item.key && (
                 <div className="absolute inset-x-0 bottom-0 py-1 bg-emerald-500 text-center text-[8px] font-black text-slate-900 uppercase tracking-[0.3em] animate-in slide-in-from-bottom-full">
-                  Synchronizing Preferences...
+                  Applying Changes...
                 </div>
               )}
 
-              {/* Decorative Mesh */}
               <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-emerald-500/5 blur-[50px] rounded-full group-hover:bg-emerald-500/10 transition-all"></div>
             </div>
           ))}
@@ -390,12 +398,87 @@ const SettingsSection: React.FC<{
             <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-500">
                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
-            <p className="text-xs text-slate-500 font-medium">All preference updates are dispatched to the cloud node <span className="text-white font-bold">instantly</span>.</p>
+            <p className="text-xs text-slate-500 font-medium">Settings are automatically synchronized across all your devices.</p>
           </div>
           <div className="px-6 py-2 rounded-full border border-white/5 bg-slate-900/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
             Last Sync: Just Now
           </div>
         </footer>
+      </div>
+    </div>
+  );
+};
+
+const AlertHistorySection: React.FC<{ data: AlertData[]; loading: boolean }> = ({ data, loading }) => {
+  if (loading) {
+    return (
+      <div className="flex-grow flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-10 h-10 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+          <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Retrieving Dispatch Logs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="flex-grow flex flex-col items-center justify-center p-12 text-center opacity-30">
+        <div className="w-20 h-20 bg-sky-500/10 rounded-3xl flex items-center justify-center text-sky-500 mb-6 border border-sky-500/20">
+          <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+        </div>
+        <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">No Alerts Dispatched</h3>
+        <p className="text-slate-500 text-sm max-w-xs font-medium uppercase tracking-widest leading-loose">The secure dispatch tunnel is currently clear of notification history.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-grow p-4 md:p-10 lg:p-14 animate-in fade-in duration-700 w-full overflow-y-auto custom-scrollbar">
+      <div className="max-w-6xl mx-auto space-y-8">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-10">
+          <div>
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Alert Dispatch History</h2>
+            <p className="text-slate-500 text-sm mt-3 font-medium">Review your historical stock alert transmission telemetry.</p>
+          </div>
+          <div className="bg-sky-500/10 px-4 py-2 rounded-xl border border-sky-500/20 flex items-center space-x-3">
+             <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></div>
+             <span className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Tunnel Sync: Real-Time</span>
+          </div>
+        </header>
+
+        <div className="space-y-4">
+          {data.map((alert, idx) => (
+            <div key={idx} className="bg-[#111621] border border-white/5 rounded-3xl p-6 md:p-8 hover:bg-slate-900/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group">
+              <div className="flex items-start gap-6">
+                <div className="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 group-hover:scale-110 transition-transform flex-shrink-0">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.25.38-.51 1.05-.78 4.12-1.79 6.87-2.97 8.24-3.54 3.92-1.63 4.73-1.91 5.26-1.92.12 0 .38.03.55.17.14.12.18.28.2.44.02.16.02.32 0 .44z"/></svg>
+                </div>
+                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h4 className="text-white font-black uppercase tracking-tight text-base">{alert.title}</h4>
+                    <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[8px] font-black text-slate-500 uppercase tracking-widest">{alert.channel}</span>
+                  </div>
+                  <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-2xl">{alert.message}</p>
+                </div>
+              </div>
+
+              <div className="flex md:flex-col items-center md:items-end justify-between gap-2 shrink-0">
+                <div className={`px-3 py-1 rounded-lg border text-[9px] font-black uppercase tracking-widest ${
+                  alert.delivery_status.toLowerCase() === 'delivered' || alert.delivery_status.toLowerCase() === 'success'
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                    : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                }`}>
+                  {alert.delivery_status}
+                </div>
+                <div className="text-right">
+                  <p className="text-white font-mono text-[10px] font-bold">{new Date(alert.delivered_at || alert.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</p>
+                  <p className="text-slate-600 font-mono text-[9px]">{new Date(alert.delivered_at || alert.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -411,8 +494,10 @@ const Dashboard: React.FC = () => {
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [settingsData, setSettingsData] = useState<SettingsData | null>(null);
+  const [alertData, setAlertData] = useState<AlertData[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(false);
+  const [loadingAlerts, setLoadingAlerts] = useState(false);
 
   const handleLogout = () => {
     document.cookie = "sm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -425,78 +510,72 @@ const Dashboard: React.FC = () => {
     
     setLoading(true);
     setLoadingSettings(true);
+    setLoadingAlerts(true);
     try {
       const token = getAuthToken();
-      if (!token) {
-        navigate('/login');
-        return;
-      }
+      if (!token) return navigate('/login');
 
-      // 1. Fetch Subscription/Overview
-      const subResp = await fetch(`${API_BASE}/control-center`, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
-      });
+      const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+      // 1. Fetch Subscription
+      const subResp = await fetch(`${API_BASE}/control-center`, { method: 'GET', headers });
       const subJson = await subResp.json();
       if (subResp.status === 401 || subJson.error === 'unauthorized') return handleLogout();
       const subData = subJson.subscription || (subJson.data && subJson.data.subscription);
       if (subData) setSubscriptionData(subData);
 
       // 2. Fetch Profile
-      const profResp = await fetch(`${API_BASE}/profile`, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
-      });
+      const profResp = await fetch(`${API_BASE}/profile`, { method: 'GET', headers });
       const profJson = await profResp.json();
       if (profResp.status === 401 || profJson.error === 'unauthorized') return handleLogout();
       const finalProf = profJson.data || profJson.profile || profJson;
       if (finalProf && finalProf.name) setProfileData(finalProf);
 
-      // 3. Fetch Settings - Strict parsing of json.settings
-      const setResp = await fetch(`${API_BASE}/settings`, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
-      });
+      // 3. Fetch Settings
+      const setResp = await fetch(`${API_BASE}/settings`, { method: 'GET', headers });
       const setJson = await setResp.json();
       if (setResp.status === 401 || setJson.error === 'unauthorized') return handleLogout();
-      
-      const finalSettings = setJson.settings;
-      if (finalSettings) {
+      if (setJson.settings) {
         setSettingsData({
-          telegram_push: !!Number(finalSettings.telegram_push),
-          daily_email: !!Number(finalSettings.daily_email),
-          ai_insight: !!Number(finalSettings.ai_insight),
-          terminal_audio: !!Number(finalSettings.terminal_audio),
+          telegram_push: !!Number(setJson.settings.telegram_push),
+          daily_email: !!Number(setJson.settings.daily_email),
+          ai_insight: !!Number(setJson.settings.ai_insight),
+          terminal_audio: !!Number(setJson.settings.terminal_audio),
         });
       }
 
+      // 4. Fetch Alerts
+      const alertResp = await fetch(`${API_BASE}/alerts`, { method: 'GET', headers });
+      const alertJson = await alertResp.json();
+      if (alertResp.status === 401 || alertJson.error === 'unauthorized') return handleLogout();
+      const finalAlerts = alertJson.alerts || alertJson.data || alertJson;
+      if (Array.isArray(finalAlerts)) setAlertData(finalAlerts);
+
     } catch (e) {
-      console.error("Dashboard Data Sync Failure", e);
+      console.error("Data Sync Failure", e);
     } finally {
       setLoading(false);
       setLoadingSettings(false);
+      setLoadingAlerts(false);
     }
   };
 
   const handleUpdateSettings = async (updated: SettingsData) => {
+    const originalState = settingsData;
     setSettingsData(updated);
     try {
       const token = getAuthToken();
       if (!token) return;
-
       const body = new FormData();
       body.append('telegram_push', updated.telegram_push ? '1' : '0');
       body.append('daily_email', updated.daily_email ? '1' : '0');
       body.append('ai_insight', updated.ai_insight ? '1' : '0');
       body.append('terminal_audio', updated.terminal_audio ? '1' : '0');
-
-      await fetch(`${API_BASE}/settings`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: body
-      });
+      const response = await fetch(`${API_BASE}/settings`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body });
+      const result = await response.json();
+      if (!response.ok || result.status === 'error') throw new Error("Server Update Failed");
     } catch (e) {
-      console.error("Failed to persist settings node changes.", e);
+      setSettingsData(originalState);
     }
   };
 
@@ -578,7 +657,7 @@ const Dashboard: React.FC = () => {
             {activeSection === 'terminal' && <MarketTerminal onToggleFullScreen={setIsFullScreenMode} />}
             {activeSection === 'overview' && <OverviewSection data={subscriptionData} loading={loading} onNavigate={setActiveSection} />}
             {activeSection === 'account' && <ProfileSection data={profileData} loading={loading} />}
-            {activeSection === 'notifications' && <div className="p-10 flex flex-col items-center justify-center h-full text-center"><div className="w-20 h-20 bg-sky-500/10 rounded-3xl flex items-center justify-center text-sky-500 mb-6 border border-sky-500/20"><svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg></div><h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Alert History</h3><p className="text-slate-500 text-sm max-w-xs">Historical log of all real-time push notifications dispatched to your device.</p></div>}
+            {activeSection === 'notifications' && <AlertHistorySection data={alertData} loading={loadingAlerts} />}
             {activeSection === 'settings' && <SettingsSection data={settingsData} loading={loadingSettings} onUpdate={handleUpdateSettings} />}
             {activeSection === 'billing' && <div className="p-10 flex flex-col items-center justify-center h-full text-center"><div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center text-indigo-500 mb-6 border border-indigo-500/20"><svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></div><h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Billing Ledger</h3><p className="text-slate-500 text-sm max-w-xs">Subscription billing cycles and payment gateway configuration.</p></div>}
           </div>
