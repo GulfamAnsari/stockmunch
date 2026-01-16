@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MarketTerminal from '../components/MarketTerminal';
 import { User } from '../types';
@@ -27,7 +27,7 @@ interface ControlCenterData {
   plan_code: string;
   status: string;
   created_at: string;
-  auto_renew: string | boolean;
+  auto_renew: string | number | boolean;
 }
 
 const OverviewSection: React.FC<{ 
@@ -58,7 +58,7 @@ const OverviewSection: React.FC<{
     }
   };
 
-  const isAutoRenewOn = data?.auto_renew === '1' || data?.auto_renew === true || data?.auto_renew === 'true';
+  const isAutoRenewOn = data?.auto_renew === 1 || data?.auto_renew === '1' || data?.auto_renew === true || data?.auto_renew === 'true';
 
   return (
     <div className="flex-grow overflow-y-auto p-4 md:p-10 custom-scrollbar space-y-8 animate-in fade-in duration-700">
@@ -175,6 +175,7 @@ const OverviewSection: React.FC<{
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const hasFetched = useRef(false);
   const [activeSection, setActiveSection] = useState<'overview' | 'terminal' | 'account' | 'notifications' | 'settings' | 'billing'>('overview');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -199,6 +200,9 @@ const Dashboard: React.FC = () => {
   };
 
   const fetchControlCenter = async () => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+    
     setLoadingControlCenter(true);
     try {
       const token = getAuthToken();
@@ -223,8 +227,9 @@ const Dashboard: React.FC = () => {
         return;
       }
       
-      if (json.status === 'success' && json.data) {
-        setControlCenterData(json.data);
+      // Fixed mapping based on response: json.data.subscription
+      if (json.status === 'success' && json.data && json.data.subscription) {
+        setControlCenterData(json.data.subscription);
       }
     } catch (e) {
       console.error("Critical: Control Center Sync Failure", e);
@@ -235,16 +240,11 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     document.title = "Control Center | StockManch";
-    const token = getAuthToken();
-    if (!token) {
-       navigate('/login');
-       return;
-    }
     fetchControlCenter();
   }, []);
 
   const menuItems = [
-    { id: 'overview', label: 'Control Center', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+    { id: 'overview', label: 'Control Center', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
     { id: 'terminal', label: 'Market Terminal', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
     { id: 'notifications', label: 'Alert History', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
     { id: 'account', label: 'My Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
@@ -308,7 +308,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="h-screen bg-[#0b0f1a] flex flex-col text-slate-300 overflow-hidden relative">
-      {/* Mobile Sidebar Overlay - Relocated to root level for proper z-index context */}
+      {/* Mobile Sidebar Overlay - Relocated for correct stacking context */}
       {isMobileSidebarOpen && (
         <div className="fixed inset-0 z-[200] lg:hidden bg-black/80 backdrop-blur-md" onClick={() => setIsMobileSidebarOpen(false)}>
           <div className="w-72 h-full bg-[#0d121f] shadow-2xl animate-in slide-in-from-left duration-300" onClick={e => e.stopPropagation()}>

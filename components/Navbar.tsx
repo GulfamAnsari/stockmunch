@@ -84,8 +84,8 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onOpenLogin, onNavigateH
         </div>
       </div>
 
-      {/* Mobile Menu Content - Made more solid for better readability */}
-      <div className={`fixed inset-0 top-0 md:hidden bg-[#0b0f1a]/98 backdrop-blur-2xl transition-all duration-300 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'} z-[105]`}>
+      {/* Mobile Menu Content - Solid background for better readability */}
+      <div className={`fixed inset-0 top-0 md:hidden bg-[#0b0f1a] transition-all duration-300 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'} z-[105]`}>
         <div className="pt-24 p-6 space-y-2">
           <div className="flex flex-col space-y-1 text-sm font-bold text-slate-400 uppercase tracking-widest">
             <a href="#features" onClick={(e) => handleSectionClick(e, 'features')} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center group">
