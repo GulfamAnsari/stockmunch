@@ -41,7 +41,7 @@ const OverviewSection: React.FC<{
       <div className="flex-grow flex items-center justify-center bg-[#0b0f1a]">
         <div className="flex flex-col items-center space-y-4">
           <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Syncing Control Center...</p>
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Syncing Overview...</p>
         </div>
       </div>
     );
@@ -175,7 +175,7 @@ const OverviewSection: React.FC<{
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const hasFetched = useRef(false);
+  const fetchStarted = useRef(false);
   const [activeSection, setActiveSection] = useState<'overview' | 'terminal' | 'account' | 'notifications' | 'settings' | 'billing'>('overview');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -200,8 +200,8 @@ const Dashboard: React.FC = () => {
   };
 
   const fetchControlCenter = async () => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
+    if (fetchStarted.current) return;
+    fetchStarted.current = true;
     
     setLoadingControlCenter(true);
     try {
@@ -221,30 +221,33 @@ const Dashboard: React.FC = () => {
       
       const json = await resp.json();
 
+      // IF status 401 OR body specifically returns unauthorized error
       if (resp.status === 401 || json.error === 'unauthorized') {
         console.warn("Session expired or invalid token. Redirecting to login.");
         handleLogout();
         return;
       }
       
-      // Fixed mapping based on response: json.data.subscription
-      if (json.status === 'success' && json.data && json.data.subscription) {
-        setControlCenterData(json.data.subscription);
+      // Update parsing based on requested structure: json.subscription
+      // We check for both json.data.subscription (previous) and json.subscription (new) for robustness
+      const subData = json.subscription || (json.data && json.data.subscription);
+      if (subData) {
+        setControlCenterData(subData);
       }
     } catch (e) {
-      console.error("Critical: Control Center Sync Failure", e);
+      console.error("Critical: Overview Sync Failure", e);
     } finally {
       setLoadingControlCenter(false);
     }
   };
 
   useEffect(() => {
-    document.title = "Control Center | StockManch";
+    document.title = "Terminal Overview | StockManch";
     fetchControlCenter();
   }, []);
 
   const menuItems = [
-    { id: 'overview', label: 'Control Center', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+    { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
     { id: 'terminal', label: 'Market Terminal', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
     { id: 'notifications', label: 'Alert History', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
     { id: 'account', label: 'My Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
@@ -253,7 +256,7 @@ const Dashboard: React.FC = () => {
   ];
 
   const sectionTitles = {
-    overview: 'Control Center',
+    overview: 'Overview',
     terminal: 'Market Terminal',
     notifications: 'Recent Alerts',
     account: 'My Profile',
@@ -308,7 +311,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="h-screen bg-[#0b0f1a] flex flex-col text-slate-300 overflow-hidden relative">
-      {/* Mobile Sidebar Overlay - Relocated for correct stacking context */}
+      {/* Mobile Sidebar Overlay - Correct stacking context and high z-index */}
       {isMobileSidebarOpen && (
         <div className="fixed inset-0 z-[200] lg:hidden bg-black/80 backdrop-blur-md" onClick={() => setIsMobileSidebarOpen(false)}>
           <div className="w-72 h-full bg-[#0d121f] shadow-2xl animate-in slide-in-from-left duration-300" onClick={e => e.stopPropagation()}>
@@ -323,6 +326,7 @@ const Dashboard: React.FC = () => {
             <button 
               onClick={(e) => { e.stopPropagation(); setIsMobileSidebarOpen(true); }} 
               className="lg:hidden p-3 bg-white/5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-white/10"
+              aria-label="Toggle Menu"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
             </button>

@@ -42,7 +42,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onOpenLogin, onNavigateH
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
-      isScrolled || isMobileMenuOpen ? 'py-3 bg-[#0b0f1a]/95 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-black/40' : 'py-5 bg-transparent'
+      isScrolled || isMobileMenuOpen ? 'py-3 bg-[#0b0f1a] border-b border-white/5 shadow-2xl shadow-black/40' : 'py-5 bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
