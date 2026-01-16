@@ -502,12 +502,12 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
           </div>
           <div className="relative w-full sm:w-48 lg:w-72 shrink-0">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
-            <input type="text" placeholder="SEARCH SYMBOL..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); }} className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white focus:outline-none focus:border-emerald-500 transition-all font-mono placeholder:text-slate-500/70" />
+            <input type="text" placeholder="SEARCH SYMBOL..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); }} className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white focus:outline-none focus:border-emerald-500 transition-all font-mono placeholder:text-slate-400/50" />
           </div>
           {activeTab !== "WATCHLIST" && (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
               <div className="flex items-center space-x-2 bg-slate-900/50 p-1 rounded-lg border border-white/10">
-                <style dangerouslySetInnerHTML={{ __html: `input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.7); cursor: pointer; }` }} />
+                <style dangerouslySetInnerHTML={{ __html: `input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) brightness(100) contrast(100); cursor: pointer; }` }} />
                 <input type="date" value={fromDateInput} onChange={(e) => { setFromDateInput(e.target.value); }} className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-full sm:w-[110px] cursor-pointer" />
                 <span className="text-slate-400 text-[10px]">→</span>
                 <input type="date" value={toDateInput} onChange={(e) => { setToDateInput(e.target.value); }} className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-full sm:w-[110px] cursor-pointer" />

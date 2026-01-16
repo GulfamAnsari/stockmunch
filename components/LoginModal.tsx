@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../constants';
@@ -58,6 +57,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
       setError("Please enter a valid 10-digit mobile number.");
       return;
     }
+    if (method === 'PASSWORD' && formData.password.length <= 6) {
+      setError("Password must be more than 6 characters.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setNotRegistered(false);
@@ -75,6 +79,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
         if (data.status === 'otp_sent' || data.status === 'success') {
           setStep('VERIFY');
           setResendTimer(60);
+          setFormData({ ...formData, otp: '' });
         } else {
           if (data.error === 'not_registered') {
             setNotRegistered(true);
@@ -113,6 +118,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
         if (data.status === 'otp_sent' || data.status === 'success') {
           setStep('VERIFY');
           setResendTimer(60);
+          setFormData({ ...formData, otp: '' });
         } else {
           setError(data.message || data.error || "Reset failed.");
         }
@@ -126,6 +132,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.otp.length < 6) {
+      setError("Please enter the full 6-digit OTP.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -171,6 +182,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
   };
 
   const handleOtpChange = (index: number, val: string) => {
+    if (val && !/^\d+$/.test(val)) return;
     const newOtpArr = formData.otp.split('');
     newOtpArr[index] = val;
     const newOtpStr = newOtpArr.join('');
@@ -188,9 +200,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
         const newOtpArr = formData.otp.split('');
         newOtpArr[index - 1] = '';
         setFormData({ ...formData, otp: newOtpArr.join('') });
+      } else if (formData.otp[index]) {
+        const newOtpArr = formData.otp.split('');
+        newOtpArr[index] = '';
+        setFormData({ ...formData, otp: newOtpArr.join('') });
       }
     }
   };
+
+  const isInitialDisabled = formData.phone.length !== 10 || (method === 'PASSWORD' && formData.password.length <= 6);
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
@@ -206,7 +224,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex flex-col items-center animate-in fade-in">
+            <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex flex-col items-center animate-in slide-in-from-top-2">
               <span className="text-rose-500 text-xs font-bold text-center mb-3">{error}</span>
               {notRegistered && onSwitchToSignup && (
                 <button 
@@ -232,35 +250,52 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
                 <label className="text-[10px] font-black text-slate-600 uppercase px-1">Mobile Number</label>
                 <div className="relative">
                   <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black">+91</span>
-                  <input required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none focus:border-emerald-500 font-mono placeholder:text-slate-800/40" />
+                  <input 
+                    required 
+                    type="tel" 
+                    placeholder="98765 43210" 
+                    value={formData.phone} 
+                    onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} 
+                    className={`w-full bg-slate-950/50 border rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none transition-all font-mono placeholder:text-slate-800/40 ${error && formData.phone.length !== 10 ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} 
+                  />
                 </div>
               </div>
               {method === 'PASSWORD' && (
-                <div className="space-y-3">
+                <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
                   <div className="flex justify-between items-center px-1">
                     <label className="text-[10px] font-black text-slate-600 uppercase">Password</label>
                     <button type="button" onClick={() => { setMethod('RESET'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className="text-[9px] font-black text-emerald-500 uppercase">Forgot?</button>
                   </div>
-                  <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" />
+                  <input 
+                    required 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={formData.password} 
+                    onChange={(e) => setFormData({...formData, password: e.target.value})} 
+                    className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length <= 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} 
+                  />
                 </div>
               )}
-              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl transition-all hover:bg-emerald-400">
-                {loading ? 'Sending...' : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
+              <button 
+                type="submit" 
+                disabled={loading || isInitialDisabled} 
+                className={`w-full py-5 font-black uppercase rounded-2xl shadow-xl transition-all ${isInitialDisabled ? 'bg-slate-800 text-slate-600 opacity-50 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
+              >
+                {loading ? 'Processing...' : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
               </button>
             </form>
           ) : step === 'VERIFY' ? (
-            <form onSubmit={handleVerify} className="space-y-8">
+            <form onSubmit={handleVerify} className="space-y-8 animate-in fade-in slide-in-from-right-4">
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-slate-600 uppercase text-center block">Enter OTP</label>
                 <div className="flex justify-between gap-3">
                   {Array(6).fill(0).map((_, i) => (
                     <input 
                       key={i} 
-                      // @google/genai fix: Wrap assignment in curly braces to ensure the callback returns void.
                       ref={el => { otpRefs.current[i] = el; }}
                       maxLength={1} 
                       required 
-                      className="w-full h-14 bg-slate-950/50 border border-white/10 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" 
+                      className={`w-full h-14 bg-slate-950/50 border rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40 ${error ? 'border-rose-500/50 bg-rose-500/5' : 'border-white/10'}`} 
                       placeholder="•" 
                       value={formData.otp[i] || ''}
                       onChange={(e) => handleOtpChange(i, e.target.value)}
@@ -270,18 +305,31 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
                 </div>
               </div>
               {method === 'RESET' && (
-                <div className="space-y-3">
+                <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
                   <label className="text-[10px] font-black text-slate-600 uppercase px-1">Set New Password</label>
-                  <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" />
+                  <input 
+                    required 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={formData.password} 
+                    onChange={(e) => setFormData({...formData, password: e.target.value})} 
+                    className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length <= 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} 
+                  />
                 </div>
               )}
               <div className="space-y-4">
-                <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl">{loading ? 'Wait...' : "Verify OTP"}</button>
+                <button 
+                  type="submit" 
+                  disabled={loading || formData.otp.length < 6} 
+                  className={`w-full py-5 font-black uppercase rounded-2xl shadow-xl transition-all ${formData.otp.length < 6 ? 'bg-slate-800 text-slate-600 opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
+                >
+                  {loading ? 'Wait...' : "Verify OTP"}
+                </button>
                 <button type="button" onClick={() => { setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest transition-colors hover:text-white">Change Mobile Number</button>
               </div>
             </form>
           ) : (
-            <div className="text-center py-6">
+            <div className="text-center py-6 animate-in zoom-in">
               <h3 className="text-2xl font-black text-white uppercase mb-4 tracking-tighter">Updated</h3>
               <p className="text-slate-500 text-sm mb-10 leading-relaxed opacity-60">Password updated. Please sign in with your new credentials.</p>
               <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl">Sign In</button>

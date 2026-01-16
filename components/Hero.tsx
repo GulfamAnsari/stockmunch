@@ -141,7 +141,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
         <div className="mt-16 md:mt-24 flex flex-col sm:flex-row justify-center items-center space-y-8 sm:space-y-0 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-500">
           <div className="text-center px-6 md:px-12 sm:border-x border-white/5">
             <div className="text-3xl md:text-5xl font-black text-emerald-500 mb-1 md:mb-2 tracking-tighter uppercase">99.9%</div>
-            <div className="text-slate-400 text-[10px] font-black uppercase tracking-widest opacity-60">Accuracy</div>
+            <div className="text-slate-400 text-[10px] font-black uppercase tracking-widest opacity-60">Uptime</div>
           </div>
           <div className="text-center px-6 md:px-12 sm:border-r border-white/5">
             <div className="text-3xl md:text-5xl font-black text-emerald-500 mb-1 md:mb-2 tracking-tighter uppercase">30 Days</div>

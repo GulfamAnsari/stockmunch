@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Logo } from '../constants';
@@ -45,6 +44,11 @@ const Login: React.FC = () => {
       setError("Please enter a valid 10-digit mobile number.");
       return;
     }
+    if (method === 'PASSWORD' && formData.password.length <= 6) {
+      setError("Password must be more than 6 characters.");
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     setNotRegistered(false);
@@ -62,6 +66,7 @@ const Login: React.FC = () => {
         if (data.status === 'otp_sent' || data.status === 'success') {
           setStep('VERIFY');
           setResendTimer(60);
+          setFormData({ ...formData, otp: '' });
         } else {
           if (data.error === 'not_registered') {
             setNotRegistered(true);
@@ -99,6 +104,7 @@ const Login: React.FC = () => {
         if (data.status === 'otp_sent' || data.status === 'success') {
           setStep('VERIFY');
           setResendTimer(60);
+          setFormData({ ...formData, otp: '' });
         } else {
           setError(data.message || data.error || "Reset request failed.");
         }
@@ -112,6 +118,11 @@ const Login: React.FC = () => {
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.otp.length < 6) {
+      setError("Please enter the full 6-digit OTP.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -156,6 +167,7 @@ const Login: React.FC = () => {
   };
 
   const handleOtpChange = (index: number, val: string) => {
+    if (val && !/^\d+$/.test(val)) return;
     const newOtpArr = formData.otp.split('');
     newOtpArr[index] = val;
     const newOtpStr = newOtpArr.join('');
@@ -173,6 +185,10 @@ const Login: React.FC = () => {
         const newOtpArr = formData.otp.split('');
         newOtpArr[index - 1] = '';
         setFormData({ ...formData, otp: newOtpArr.join('') });
+      } else if (formData.otp[index]) {
+        const newOtpArr = formData.otp.split('');
+        newOtpArr[index] = '';
+        setFormData({ ...formData, otp: newOtpArr.join('') });
       }
     }
   };
@@ -184,10 +200,12 @@ const Login: React.FC = () => {
     }, 100);
   };
 
+  const isInitialDisabled = formData.phone.length !== 10 || (method === 'PASSWORD' && formData.password.length <= 6);
+
   return (
     <div className="min-h-screen bg-[#0b0f1a] flex flex-col items-center justify-center p-6">
       <Link to="/" className="mb-12"><Logo className="h-12 w-auto" /></Link>
-      <div className="w-full max-w-md bg-[#161b27] border border-white/5 p-10 rounded-[3rem] shadow-2xl">
+      <div className="w-full max-w-md bg-[#161b27] border border-white/5 p-10 rounded-[3rem] shadow-2xl relative overflow-hidden">
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
             {step === 'SUCCESS' ? 'Reset Done' : method === 'RESET' ? 'Reset Password' : 'Sign In'}
@@ -196,7 +214,7 @@ const Login: React.FC = () => {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex flex-col items-center animate-in fade-in">
+          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex flex-col items-center animate-in slide-in-from-top-2">
             <span className="text-rose-500 text-xs font-bold text-center mb-3">{error}</span>
             {notRegistered && (
               <button 
@@ -222,7 +240,14 @@ const Login: React.FC = () => {
               <label className="text-[10px] font-black text-slate-600 uppercase px-1">Mobile Number</label>
               <div className="relative">
                 <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black">+91</span>
-                <input required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none focus:border-emerald-500 font-mono placeholder:text-slate-800/40" />
+                <input 
+                  required 
+                  type="tel" 
+                  placeholder="98765 43210" 
+                  value={formData.phone} 
+                  onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} 
+                  className={`w-full bg-slate-950/50 border rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none transition-all font-mono placeholder:text-slate-800/40 ${error && formData.phone.length !== 10 ? 'border-rose-500 bg-rose-500/10' : 'border-white/5 focus:border-emerald-500'}`} 
+                />
               </div>
             </div>
             {method === 'PASSWORD' && (
@@ -231,11 +256,22 @@ const Login: React.FC = () => {
                   <label className="text-[10px] font-black text-slate-600 uppercase">Password</label>
                   <button type="button" onClick={() => { setMethod('RESET'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className="text-[9px] font-black text-emerald-500 uppercase">Forgot?</button>
                 </div>
-                <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" />
+                <input 
+                  required 
+                  type="password" 
+                  placeholder="••••••••" 
+                  value={formData.password} 
+                  onChange={(e) => setFormData({...formData, password: e.target.value})} 
+                  className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length <= 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/5 focus:border-emerald-500'}`} 
+                />
               </div>
             )}
-            <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl">
-              {loading ? 'Please wait...' : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
+            <button 
+              type="submit" 
+              disabled={loading || isInitialDisabled} 
+              className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl ${isInitialDisabled ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
+            >
+              {loading ? 'Processing...' : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
             </button>
           </form>
         ) : step === 'VERIFY' ? (
@@ -246,11 +282,10 @@ const Login: React.FC = () => {
                 {Array(6).fill(0).map((_, i) => (
                   <input 
                     key={i} 
-                    // @google/genai fix: Wrap assignment in curly braces to ensure the callback returns void.
                     ref={el => { otpRefs.current[i] = el; }}
                     maxLength={1} 
                     required 
-                    className="w-12 h-14 bg-slate-950/50 border border-white/5 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" 
+                    className={`w-12 h-14 bg-slate-950/50 border rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40 ${error ? 'border-rose-500/50 bg-rose-500/5' : 'border-white/5'}`} 
                     placeholder="•" 
                     value={formData.otp[i] || ''}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
@@ -262,11 +297,24 @@ const Login: React.FC = () => {
             {method === 'RESET' && (
               <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
                 <label className="text-[10px] font-black text-slate-600 uppercase px-1">Set New Password</label>
-                <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" />
+                <input 
+                  required 
+                  type="password" 
+                  placeholder="••••••••" 
+                  value={formData.password} 
+                  onChange={(e) => setFormData({...formData, password: e.target.value})} 
+                  className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length <= 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/5 focus:border-emerald-500'}`} 
+                />
               </div>
             )}
             <div className="space-y-4">
-              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl shadow-xl">{loading ? 'Verifying...' : "Verify OTP"}</button>
+              <button 
+                type="submit" 
+                disabled={loading || formData.otp.length < 6} 
+                className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.otp.length < 6 ? 'bg-slate-800 text-slate-600' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
+              >
+                {loading ? 'Verifying...' : "Verify OTP"}
+              </button>
               <button type="button" onClick={() => { setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Mobile Number</button>
             </div>
           </form>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../constants';
@@ -85,6 +84,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
       if (data.status === 'otp_sent' || data.status === 'success') {
         setStep('OTP');
         setResendTimer(60);
+        setFormData({ ...formData, otp: '' });
       } else {
         if (data.error === 'user_exists') {
           setUserExists(true);
@@ -102,6 +102,10 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.otp.length < 6) {
+      setError("Please enter the 6-digit verification code.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -128,6 +132,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
   };
 
   const handleOtpChange = (index: number, val: string) => {
+    if (val && !/^\d+$/.test(val)) return;
     const newOtpArr = formData.otp.split('');
     newOtpArr[index] = val;
     const newOtpStr = newOtpArr.join('');
@@ -145,12 +150,25 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
         const newOtpArr = formData.otp.split('');
         newOtpArr[index - 1] = '';
         setFormData({ ...formData, otp: newOtpArr.join('') });
+      } else if (formData.otp[index]) {
+        const newOtpArr = formData.otp.split('');
+        newOtpArr[index] = '';
+        setFormData({ ...formData, otp: newOtpArr.join('') });
       }
     }
   };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.password.length <= 6) {
+      setError("Password must be more than 6 characters.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -188,6 +206,8 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
     navigate('/dashboard');
   };
 
+  const isProfileDisabled = formData.password.length <= 6 || formData.name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
+
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-2xl">
       <div className="w-full max-w-lg bg-[#0b0f1a] border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in">
@@ -198,7 +218,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
           </div>
 
           {error && (
-            <div className="mb-6 p-5 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex flex-col items-center animate-in fade-in">
+            <div className="mb-6 p-5 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex flex-col items-center animate-in slide-in-from-top-2">
               <span className="text-rose-500 text-xs font-bold text-center mb-3">{error}</span>
               {userExists && onSwitchToLogin && (
                 <button 
@@ -220,10 +240,21 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                   <label className="block text-[10px] font-black text-slate-600 uppercase mb-3 px-1">Mobile Number</label>
                   <div className="relative">
                     <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black">+91</span>
-                    <input required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl pl-16 pr-6 py-5 text-xl text-white focus:outline-none focus:border-emerald-500 transition-all font-mono placeholder:text-slate-800/40" />
+                    <input 
+                      required 
+                      type="tel" 
+                      placeholder="98765 43210" 
+                      value={formData.phone} 
+                      onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} 
+                      className={`w-full bg-slate-900/50 border rounded-2xl pl-16 pr-6 py-5 text-xl text-white focus:outline-none transition-all font-mono placeholder:text-slate-800/40 ${error && formData.phone.length !== 10 ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} 
+                    />
                   </div>
                 </div>
-                <button type="submit" disabled={loading || formData.phone.length < 10} className="w-full py-5 bg-emerald-500 text-slate-950 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all hover:bg-emerald-400">
+                <button 
+                  type="submit" 
+                  disabled={loading || formData.phone.length !== 10} 
+                  className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.phone.length !== 10 ? 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'}`}
+                >
                   {loading ? 'Sending...' : "Send OTP"}
                 </button>
               </form>
@@ -239,10 +270,9 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                   {Array(6).fill(0).map((_, i) => (
                     <input 
                       key={i} 
-                      // @google/genai fix: Wrap assignment in curly braces to ensure the callback returns void.
                       ref={el => { otpRefs.current[i] = el; }}
                       maxLength={1} 
-                      className="w-full h-16 bg-slate-900/50 border border-white/10 rounded-xl text-center text-2xl font-black text-emerald-500 focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" 
+                      className={`w-full h-16 bg-slate-900/50 border rounded-xl text-center text-2xl font-black text-emerald-500 focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40 ${error ? 'border-rose-500/50 bg-rose-500/5' : 'border-white/10'}`} 
                       placeholder="•" 
                       value={formData.otp[i] || ''}
                       onChange={(e) => handleOtpChange(i, e.target.value)}
@@ -250,7 +280,11 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                     />
                   ))}
                 </div>
-                <button type="submit" disabled={loading || formData.otp.length < 6} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl shadow-xl">
+                <button 
+                  type="submit" 
+                  disabled={loading || formData.otp.length < 6} 
+                  className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.otp.length < 6 ? 'bg-slate-800 text-slate-600' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
+                >
                   {loading ? 'Verifying...' : "Verify OTP"}
                 </button>
                 <button type="button" onClick={() => { setStep('PHONE'); setError(null); setUserExists(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Number</button>
@@ -263,9 +297,15 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
               <h2 className="text-4xl font-black text-white uppercase mb-4 tracking-tighter">Setup <span className="text-emerald-500">Account</span></h2>
               <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Full Name</label><input required type="text" placeholder="Your Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" /></div>
-                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Email Address</label><input required type="email" placeholder="name@email.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" /></div>
-                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Set Password</label><input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" /></div>
-                <button type="submit" className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl shadow-xl mt-4">Complete Setup</button>
+                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Email Address</label><input required type="email" placeholder="name@email.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className={`w-full bg-slate-900/50 border rounded-2xl px-6 py-4 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} /></div>
+                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Set Password (Min 7 chars)</label><input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className={`w-full bg-slate-900/50 border rounded-2xl px-6 py-4 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length <= 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} /></div>
+                <button 
+                  type="submit" 
+                  disabled={loading || isProfileDisabled} 
+                  className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl mt-4 transition-all ${isProfileDisabled ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
+                >
+                  Complete Setup
+                </button>
               </form>
             </div>
           )}

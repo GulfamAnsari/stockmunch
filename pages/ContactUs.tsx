@@ -1,21 +1,67 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+
+const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api";
 
 const ContactUs: React.FC = () => {
   const [formState, setFormState] = useState({ name: '', email: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = "Contact Us | StockManch";
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    // Visual feedback only for demo purposes
-    setTimeout(() => setSubmitted(false), 3000);
+    setError(null);
+
+    // Validation
+    if (formState.name.length < 2) {
+      setError("Please enter a valid full name.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formState.email)) {
+      setError("Please provide a valid corporate or personal email.");
+      return;
+    }
+    if (formState.subject.length < 3) {
+      setError("Subject must be at least 3 characters long.");
+      return;
+    }
+    if (formState.message.length < 10) {
+      setError("Please provide more detail in your message (min 10 characters).");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const body = new FormData();
+      body.append('name', formState.name);
+      body.append('email', formState.email);
+      body.append('subject', formState.subject);
+      body.append('message', formState.message);
+
+      const response = await fetch(`${API_BASE}/send-inquery`, {
+        method: 'POST',
+        body: body
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.status === 'success') {
+        setSubmitted(true);
+      } else {
+        throw new Error(result.message || "Failed to dispatch inquiry.");
+      }
+    } catch (err: any) {
+      setError(err.message || "Network transmission failure. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,64 +113,86 @@ const ContactUs: React.FC = () => {
             </div>
 
             {/* Form Side */}
-            <div className="bg-[#161b27]/40 border border-white/5 p-10 md:p-14 rounded-[3rem] backdrop-blur-md shadow-2xl relative">
+            <div className="bg-[#161b27]/40 border border-white/5 p-10 md:p-14 rounded-[3rem] backdrop-blur-md shadow-2xl relative overflow-hidden">
               {submitted && (
-                <div className="absolute inset-0 z-10 bg-emerald-500/10 backdrop-blur-xl rounded-[3rem] flex items-center justify-center p-8 text-center animate-in fade-in duration-300">
+                <div className="absolute inset-0 z-20 bg-emerald-500/10 backdrop-blur-xl rounded-[3rem] flex items-center justify-center p-8 text-center animate-in fade-in zoom-in duration-500">
                   <div>
-                    <div className="w-16 h-16 bg-emerald-500 text-slate-900 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">✓</div>
-                    <h3 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight">Transmission Sent</h3>
-                    <p className="text-slate-400 font-medium">A support engineer will be in touch shortly.</p>
+                    <div className="w-20 h-20 bg-emerald-500 text-slate-900 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-black shadow-[0_0_40px_rgba(16,185,129,0.3)]">✓</div>
+                    <h3 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter">Transmission Successful</h3>
+                    <p className="text-slate-300 font-medium mb-8">A support engineer will review your node log and reach out shortly.</p>
+                    <button 
+                      onClick={() => { setSubmitted(false); setFormState({ name: '', email: '', subject: '', message: '' }); }}
+                      className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-black uppercase text-xs tracking-widest rounded-xl transition-all border border-white/10"
+                    >
+                      New Message
+                    </button>
                   </div>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-8">
+              <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+                {error && (
+                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center space-x-3 animate-in slide-in-from-top-2">
+                    <svg className="w-5 h-5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    <span className="text-rose-500 text-xs font-bold leading-tight">{error}</span>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Full Name</label>
+                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Full Name</label>
                     <input 
                       required
                       type="text" 
                       placeholder="Trader Name"
-                      className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-slate-800"
+                      value={formState.name}
+                      onChange={(e) => setFormState({...formState, name: e.target.value})}
+                      className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-4 text-sm text-white focus:outline-none transition-all placeholder:text-slate-800 ${error && formState.name.length < 2 ? 'border-rose-500 bg-rose-500/5' : 'border-white/10 focus:border-emerald-500/50'}`}
                     />
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Email Protocol</label>
+                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Email Protocol</label>
                     <input 
                       required
                       type="email" 
                       placeholder="name@terminal.com"
-                      className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-slate-800"
+                      value={formState.email}
+                      onChange={(e) => setFormState({...formState, email: e.target.value})}
+                      className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-4 text-sm text-white focus:outline-none transition-all placeholder:text-slate-800 ${error && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email) ? 'border-rose-500 bg-rose-500/5' : 'border-white/10 focus:border-emerald-500/50'}`}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Subject</label>
+                  <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Subject</label>
                   <input 
                     required
                     type="text" 
                     placeholder="Inquiry Topic"
-                    className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-slate-800"
+                    value={formState.subject}
+                    onChange={(e) => setFormState({...formState, subject: e.target.value})}
+                    className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-4 text-sm text-white focus:outline-none transition-all placeholder:text-slate-800 ${error && formState.subject.length < 3 ? 'border-rose-500 bg-rose-500/5' : 'border-white/10 focus:border-emerald-500/50'}`}
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Detailed Message</label>
+                  <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Detailed Message</label>
                   <textarea 
                     required
                     rows={4}
                     placeholder="How can our technical team assist your workflow?"
-                    className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-slate-800 resize-none"
+                    value={formState.message}
+                    onChange={(e) => setFormState({...formState, message: e.target.value})}
+                    className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-4 text-sm text-white focus:outline-none transition-all placeholder:text-slate-800 resize-none ${error && formState.message.length < 10 ? 'border-rose-500 bg-rose-500/5' : 'border-white/10 focus:border-emerald-500/50'}`}
                   />
                 </div>
 
                 <button 
                   type="submit"
-                  className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-emerald-500/20"
+                  disabled={loading}
+                  className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl ${loading ? 'bg-slate-800 text-slate-600' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900 shadow-emerald-500/20'}`}
                 >
-                  Dispatch Inquiry
+                  {loading ? 'Transmitting...' : 'Dispatch Inquiry'}
                 </button>
               </form>
             </div>
