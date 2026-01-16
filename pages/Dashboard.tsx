@@ -498,6 +498,7 @@ const Dashboard: React.FC = () => {
   const [loadingCore, setLoadingCore] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(false);
   const [loadingAlerts, setLoadingAlerts] = useState(false);
+  const [isOnline, setIsOnline] = useState(window.navigator.onLine);
 
   const handleLogout = () => {
     document.cookie = "sm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -582,6 +583,16 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     document.title = "Terminal Dashboard | StockManch";
     fetchCoreData();
+
+    // Connectivity management
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   // Handle Tab-based Lazy Loading
@@ -633,13 +644,22 @@ const Dashboard: React.FC = () => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden">
       <div className={`p-8 border-b border-white/5 bg-slate-950/20 ${isSidebarCollapsed ? 'items-center' : ''} flex flex-col`}>
-        <div className="flex items-center space-x-3 mb-2"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div></div>
-        {!isSidebarCollapsed && <div className="space-y-1"><h2 className="text-white font-black uppercase text-[10px] tracking-[0.2em]">Terminal Node</h2><p className="text-[8px] text-slate-600 font-mono uppercase">Online - Mumbai Secure</p></div>}
+        <div className="flex items-center space-x-3 mb-2">
+          <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-rose-500 shadow-[0_0_10px_#f43f5e]'} transition-all duration-300`}></div>
+        </div>
+        {!isSidebarCollapsed && (
+          <div className="space-y-1 animate-in fade-in slide-in-from-left-2 duration-300">
+            <h2 className="text-white font-black uppercase text-[10px] tracking-[0.2em]">Terminal Node</h2>
+            <p className={`text-[8px] font-mono uppercase ${isOnline ? 'text-slate-600' : 'text-rose-500 font-bold'}`}>
+              {isOnline ? 'Online' : 'Offline'}
+            </p>
+          </div>
+        )}
       </div>
       <nav className="flex-grow py-8 px-4 space-y-2">
         {menuItems.map((item) => (
           <button key={item.id} onClick={() => { setActiveSection(item.id as any); setIsMobileSidebarOpen(false); }} className={`w-full flex items-center space-x-4 p-4 rounded-2xl transition-all group ${activeSection === item.id ? 'bg-emerald-500 text-slate-900 shadow-xl shadow-emerald-500/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`} title={isSidebarCollapsed ? item.label : ''}>
-            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
             <span className={`${isSidebarCollapsed ? 'hidden' : 'block'} uppercase tracking-[0.15em] text-[10px] font-black truncate`}>{item.label}</span>
           </button>
         ))}
