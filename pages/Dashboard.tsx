@@ -31,6 +31,7 @@ interface SubscriptionData {
 }
 
 interface ProfileData {
+  id: string | number;
   name: string;
   phone: string;
   email: string;
@@ -217,7 +218,7 @@ const ProfileSection: React.FC<{ data: ProfileData | null; loading: boolean }> =
             <div className="flex-grow text-center md:text-left space-y-6">
               <div>
                 <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-2">{data.name}</h2>
-                <p className="text-slate-500 font-mono text-sm">TRD-UID: {data.phone.slice(-4)}-{data.joined_at.slice(0, 4)}</p>
+                <p className="text-slate-500 font-mono text-sm uppercase">User ID: {data.id}</p>
               </div>
 
               <div className="flex flex-wrap justify-center md:justify-start gap-3">
@@ -237,13 +238,6 @@ const ProfileSection: React.FC<{ data: ProfileData | null; loading: boolean }> =
                 <div className="space-y-1.5">
                   <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block">Commencement Date</span>
                   <p className="text-white font-bold tracking-tight text-lg">{new Date(data.joined_at).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
-                </div>
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block">Security Status</span>
-                  <div className="flex items-center space-x-2">
-                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                     <p className="text-emerald-500 font-black text-sm uppercase tracking-widest">Active Node</p>
-                  </div>
                 </div>
               </div>
             </div>
@@ -296,7 +290,10 @@ const Dashboard: React.FC = () => {
         handleLogout();
         return;
       }
-      if (subJson.subscription) setSubscriptionData(subJson.subscription);
+      
+      // Support nested data structure
+      const subData = subJson.subscription || (subJson.data && subJson.data.subscription);
+      if (subData) setSubscriptionData(subData);
 
       // 2. Fetch Profile
       const profResp = await fetch(`${API_BASE}/profile`, {
@@ -313,7 +310,6 @@ const Dashboard: React.FC = () => {
         return;
       }
       
-      // Assume standard response structure or handle nested data
       const finalProf = profJson.data || profJson.profile || profJson;
       if (finalProf && finalProf.name) setProfileData(finalProf);
 
