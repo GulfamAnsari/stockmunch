@@ -41,6 +41,27 @@ interface ProfileData {
   is_email_verified: boolean | number;
 }
 
+interface SettingsData {
+  telegram_push: boolean | number;
+  daily_email: boolean | number;
+  ai_insight: boolean | number;
+  terminal_audio: boolean | number;
+}
+
+const Toggle: React.FC<{ 
+  enabled: boolean; 
+  onChange: (val: boolean) => void; 
+  loading?: boolean;
+}> = ({ enabled, onChange, loading }) => (
+  <button 
+    onClick={() => !loading && onChange(!enabled)}
+    disabled={loading}
+    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${enabled ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-slate-800'} ${loading ? 'opacity-50 cursor-wait' : ''}`}
+  >
+    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+  </button>
+);
+
 const OverviewSection: React.FC<{ 
   data: SubscriptionData | null; 
   loading: boolean;
@@ -73,7 +94,6 @@ const OverviewSection: React.FC<{
   return (
     <div className="flex-grow overflow-y-auto p-4 md:p-10 custom-scrollbar space-y-8 animate-in fade-in duration-700">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Plan Card */}
         <div className="bg-[#111621] border border-white/5 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group hover:border-emerald-500/30 transition-all">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <svg className="w-16 h-16 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
@@ -92,7 +112,6 @@ const OverviewSection: React.FC<{
           </div>
         </div>
 
-        {/* Auto Renew Card */}
         <div className="bg-[#111621] border border-white/5 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group hover:border-sky-500/30 transition-all">
           <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Auto Renewal</p>
           <div className="flex items-center space-x-6">
@@ -106,7 +125,6 @@ const OverviewSection: React.FC<{
           </div>
         </div>
 
-        {/* Member Card */}
         <div className="bg-[#111621] border border-white/5 p-8 rounded-[2rem] shadow-2xl group hover:border-amber-500/30 transition-all">
           <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Account Verified</p>
           <h3 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">
@@ -248,6 +266,91 @@ const ProfileSection: React.FC<{ data: ProfileData | null; loading: boolean }> =
   );
 };
 
+const SettingsSection: React.FC<{ 
+  data: SettingsData | null; 
+  loading: boolean;
+  onUpdate: (updated: SettingsData) => void;
+}> = ({ data, loading, onUpdate }) => {
+  if (loading) {
+    return (
+      <div className="flex-grow flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!data) return <div className="p-10 text-center opacity-50 font-black uppercase text-xs tracking-widest">Settings node offline.</div>;
+
+  const handleToggle = (key: keyof SettingsData, val: boolean) => {
+    onUpdate({ ...data, [key]: val });
+  };
+
+  const settingsList = [
+    { 
+      key: 'telegram_push', 
+      label: 'Telegram Push Node', 
+      desc: 'Instant exchange dispatch via secure Telegram tunnel.',
+      icon: 'M13 10V3L4 14h7v7l9-11h-7z'
+    },
+    { 
+      key: 'daily_email', 
+      label: 'Daily Intelligence Report', 
+      desc: 'End-of-day market summary delivered to your hub.',
+      icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z'
+    },
+    { 
+      key: 'ai_insight', 
+      label: 'Gemini Deep Insights', 
+      desc: 'Enable real-time AI sentiment layer on all market feeds.',
+      icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
+    },
+    { 
+      key: 'terminal_audio', 
+      label: 'Terminal Audio Alerts', 
+      desc: 'Audible indicators for high-confidence volatility events.',
+      icon: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z'
+    }
+  ];
+
+  return (
+    <div className="flex-grow p-4 md:p-12 animate-in fade-in duration-700 max-w-4xl mx-auto w-full">
+      <div className="bg-[#111621] border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl">
+        <div className="p-8 md:p-12 border-b border-white/5 bg-slate-950/20">
+          <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Terminal Preferences</h2>
+          <p className="text-slate-500 text-sm mt-2">Manage your data dispatch and notification telemetry.</p>
+        </div>
+        
+        <div className="divide-y divide-white/5">
+          {settingsList.map((item) => (
+            <div key={item.key} className="p-8 md:p-10 flex items-center justify-between hover:bg-white/5 transition-all">
+              <div className="flex items-start space-x-6">
+                <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-center text-slate-400">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="text-white font-bold uppercase tracking-tight text-sm mb-1">{item.label}</h4>
+                  <p className="text-slate-500 text-xs font-medium max-w-sm">{item.desc}</p>
+                </div>
+              </div>
+              <Toggle 
+                enabled={!!data[item.key as keyof SettingsData]} 
+                onChange={(val) => handleToggle(item.key as keyof SettingsData, val)}
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="p-8 md:p-12 bg-slate-950/40 border-t border-white/5 flex items-center space-x-3">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Preferences Auto-Syncing Enabled</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const fetchStarted = useRef(false);
@@ -257,7 +360,9 @@ const Dashboard: React.FC = () => {
   const [isFullScreenMode, setIsFullScreenMode] = useState(false);
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [settingsData, setSettingsData] = useState<SettingsData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingSettings, setLoadingSettings] = useState(false);
 
   const handleLogout = () => {
     document.cookie = "sm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -269,6 +374,7 @@ const Dashboard: React.FC = () => {
     fetchStarted.current = true;
     
     setLoading(true);
+    setLoadingSettings(true);
     try {
       const token = getAuthToken();
       if (!token) {
@@ -279,44 +385,68 @@ const Dashboard: React.FC = () => {
       // 1. Fetch Subscription/Overview
       const subResp = await fetch(`${API_BASE}/control-center`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       const subJson = await subResp.json();
-      
-      if (subResp.status === 401 || subJson.error === 'unauthorized') {
-        handleLogout();
-        return;
-      }
-      
-      // Support nested data structure
+      if (subResp.status === 401 || subJson.error === 'unauthorized') return handleLogout();
       const subData = subJson.subscription || (subJson.data && subJson.data.subscription);
       if (subData) setSubscriptionData(subData);
 
       // 2. Fetch Profile
       const profResp = await fetch(`${API_BASE}/profile`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       const profJson = await profResp.json();
-      
-      if (profResp.status === 401 || profJson.error === 'unauthorized') {
-        handleLogout();
-        return;
-      }
-      
+      if (profResp.status === 401 || profJson.error === 'unauthorized') return handleLogout();
       const finalProf = profJson.data || profJson.profile || profJson;
       if (finalProf && finalProf.name) setProfileData(finalProf);
+
+      // 3. Fetch Settings
+      const setResp = await fetch(`${API_BASE}/settings`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      const setJson = await setResp.json();
+      if (setResp.status === 401 || setJson.error === 'unauthorized') return handleLogout();
+      const finalSettings = setJson.data || setJson.settings || setJson;
+      if (finalSettings) {
+        // Map common API bool forms (0/1 or string "0"/"1")
+        setSettingsData({
+          telegram_push: !!Number(finalSettings.telegram_push),
+          daily_email: !!Number(finalSettings.daily_email),
+          ai_insight: !!Number(finalSettings.ai_insight),
+          terminal_audio: !!Number(finalSettings.terminal_audio),
+        });
+      }
 
     } catch (e) {
       console.error("Dashboard Data Sync Failure", e);
     } finally {
       setLoading(false);
+      setLoadingSettings(false);
+    }
+  };
+
+  const handleUpdateSettings = async (updated: SettingsData) => {
+    setSettingsData(updated);
+    try {
+      const token = getAuthToken();
+      if (!token) return;
+
+      const body = new FormData();
+      body.append('telegram_push', updated.telegram_push ? '1' : '0');
+      body.append('daily_email', updated.daily_email ? '1' : '0');
+      body.append('ai_insight', updated.ai_insight ? '1' : '0');
+      body.append('terminal_audio', updated.terminal_audio ? '1' : '0');
+
+      await fetch(`${API_BASE}/settings`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: body
+      });
+    } catch (e) {
+      console.error("Failed to persist settings node changes.", e);
     }
   };
 
@@ -346,44 +476,19 @@ const Dashboard: React.FC = () => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden">
       <div className={`p-8 border-b border-white/5 bg-slate-950/20 ${isSidebarCollapsed ? 'items-center' : ''} flex flex-col`}>
-        <div className="flex items-center space-x-3 mb-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>
-        </div>
-        {!isSidebarCollapsed && (
-          <div className="space-y-1">
-            <h2 className="text-white font-black uppercase text-[10px] tracking-[0.2em]">Terminal Node</h2>
-            <p className="text-[8px] text-slate-600 font-mono uppercase">Online - Mumbai Secure</p>
-          </div>
-        )}
+        <div className="flex items-center space-x-3 mb-2"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div></div>
+        {!isSidebarCollapsed && <div className="space-y-1"><h2 className="text-white font-black uppercase text-[10px] tracking-[0.2em]">Terminal Node</h2><p className="text-[8px] text-slate-600 font-mono uppercase">Online - Mumbai Secure</p></div>}
       </div>
-
       <nav className="flex-grow py-8 px-4 space-y-2">
         {menuItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => { setActiveSection(item.id as any); setIsMobileSidebarOpen(false); }}
-            className={`w-full flex items-center space-x-4 p-4 rounded-2xl transition-all group ${activeSection === item.id ? 'bg-emerald-500 text-slate-900 shadow-xl shadow-emerald-500/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
-            title={isSidebarCollapsed ? item.label : ''}
-          >
-            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-            </svg>
-            <span className={`${isSidebarCollapsed ? 'hidden' : 'block'} uppercase tracking-[0.15em] text-[10px] font-black truncate`}>
-              {item.label}
-            </span>
+          <button key={item.id} onClick={() => { setActiveSection(item.id as any); setIsMobileSidebarOpen(false); }} className={`w-full flex items-center space-x-4 p-4 rounded-2xl transition-all group ${activeSection === item.id ? 'bg-emerald-500 text-slate-900 shadow-xl shadow-emerald-500/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`} title={isSidebarCollapsed ? item.label : ''}>
+            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
+            <span className={`${isSidebarCollapsed ? 'hidden' : 'block'} uppercase tracking-[0.15em] text-[10px] font-black truncate`}>{item.label}</span>
           </button>
         ))}
       </nav>
-      
       <div className="p-8 border-t border-white/5 bg-slate-950/20">
-        <button
-          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          className="flex w-full items-center justify-center p-2 rounded-xl text-slate-700 hover:text-white transition-all bg-white/5 border border-white/5"
-        >
-          <svg className={`w-5 h-5 transition-transform duration-500 ${isSidebarCollapsed ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-          </svg>
-        </button>
+        <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="flex w-full items-center justify-center p-2 rounded-xl text-slate-700 hover:text-white transition-all bg-white/5 border border-white/5"><svg className={`w-5 h-5 transition-transform duration-500 ${isSidebarCollapsed ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg></button>
       </div>
     </div>
   );
@@ -392,67 +497,39 @@ const Dashboard: React.FC = () => {
     <div className="h-screen bg-[#0b0f1a] flex flex-col text-slate-300 overflow-hidden relative">
       {isMobileSidebarOpen && (
         <div className="fixed inset-0 z-[200] lg:hidden bg-black/80 backdrop-blur-md" onClick={() => setIsMobileSidebarOpen(false)}>
-          <div className="w-72 h-full bg-[#0d121f] shadow-2xl animate-in slide-in-from-left duration-300" onClick={e => e.stopPropagation()}>
-            <SidebarContent />
-          </div>
+          <div className="w-72 h-full bg-[#0d121f] shadow-2xl animate-in slide-in-from-left duration-300" onClick={e => e.stopPropagation()}><SidebarContent /></div>
         </div>
       )}
 
       {!isFullScreenMode && (
         <header className="w-full bg-[#111621] px-6 md:px-10 py-5 flex items-center justify-between shrink-0 border-b border-white/10 z-[50]">
           <div className="flex items-center space-x-3 md:space-x-8">
-            <button 
-              onClick={(e) => { e.stopPropagation(); setIsMobileSidebarOpen(true); }} 
-              className="lg:hidden p-3 bg-white/5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-white/10"
-              aria-label="Toggle Menu"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-            </button>
+            <button onClick={(e) => { e.stopPropagation(); setIsMobileSidebarOpen(true); }} className="lg:hidden p-3 bg-white/5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all border border-white/10" aria-label="Toggle Menu"><svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg></button>
             <div className="flex items-center space-x-6">
               <Logo className="h-7 w-auto hidden sm:block" />
               <div className="h-6 w-px bg-white/10 hidden md:block"></div>
-              <h2 className="text-white font-black uppercase tracking-[0.2em] text-xs hidden md:block">
-                {sectionTitles[activeSection]}
-              </h2>
+              <h2 className="text-white font-black uppercase tracking-[0.2em] text-xs hidden md:block">{sectionTitles[activeSection]}</h2>
             </div>
           </div>
           <div className="flex items-center space-x-4 md:space-x-6">
             <div className="flex flex-col items-end">
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                {subscriptionData?.plan_code || '---'}
-              </span>
-              <span className="text-[10px] text-emerald-500 font-black uppercase tracking-tight">
-                {profileData?.name || 'SYNCING...'}
-              </span>
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{subscriptionData?.plan_code || '---'}</span>
+              <span className="text-[10px] text-emerald-500 font-black uppercase tracking-tight">{profileData?.name || 'SYNCING...'}</span>
             </div>
-            <button onClick={handleLogout} className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-xl">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
+            <button onClick={handleLogout} className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-xl"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
           </div>
         </header>
       )}
 
       <div className="flex-grow flex overflow-hidden relative">
-        {!isFullScreenMode && (
-          <aside className={`hidden lg:flex ${isSidebarCollapsed ? 'w-24' : 'w-72'} bg-[#0d121f] border-r border-white/5 flex-col shrink-0 z-10 transition-all duration-500`}>
-            <SidebarContent />
-          </aside>
-        )}
+        {!isFullScreenMode && <aside className={`hidden lg:flex ${isSidebarCollapsed ? 'w-24' : 'w-72'} bg-[#0d121f] border-r border-white/5 flex-col shrink-0 z-10 transition-all duration-500`}><SidebarContent /></aside>}
         <main className="flex-grow flex flex-col min-w-0 bg-[#0b0f1a] relative overflow-hidden">
           <div className="flex-grow flex flex-col overflow-hidden">
             {activeSection === 'terminal' && <MarketTerminal onToggleFullScreen={setIsFullScreenMode} />}
-            {activeSection === 'overview' && (
-              <OverviewSection 
-                data={subscriptionData} 
-                loading={loading} 
-                onNavigate={setActiveSection} 
-              />
-            )}
+            {activeSection === 'overview' && <OverviewSection data={subscriptionData} loading={loading} onNavigate={setActiveSection} />}
             {activeSection === 'account' && <ProfileSection data={profileData} loading={loading} />}
             {activeSection === 'notifications' && <div className="p-10 flex flex-col items-center justify-center h-full text-center"><div className="w-20 h-20 bg-sky-500/10 rounded-3xl flex items-center justify-center text-sky-500 mb-6 border border-sky-500/20"><svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg></div><h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Alert History</h3><p className="text-slate-500 text-sm max-w-xs">Historical log of all real-time push notifications dispatched to your device.</p></div>}
-            {activeSection === 'settings' && <div className="p-10 flex flex-col items-center justify-center h-full text-center"><div className="w-20 h-20 bg-amber-500/10 rounded-3xl flex items-center justify-center text-amber-500 mb-6 border border-amber-500/20"><svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div><h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Terminal Settings</h3><p className="text-slate-500 text-sm max-w-xs">Global application preferences and UI configuration parameters.</p></div>}
+            {activeSection === 'settings' && <SettingsSection data={settingsData} loading={loadingSettings} onUpdate={handleUpdateSettings} />}
             {activeSection === 'billing' && <div className="p-10 flex flex-col items-center justify-center h-full text-center"><div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center text-indigo-500 mb-6 border border-indigo-500/20"><svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></div><h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Billing Ledger</h3><p className="text-slate-500 text-sm max-w-xs">Subscription billing cycles and payment gateway configuration.</p></div>}
           </div>
         </main>
