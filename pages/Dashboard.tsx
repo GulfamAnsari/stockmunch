@@ -56,9 +56,9 @@ const Toggle: React.FC<{
   <button 
     onClick={() => !loading && onChange(!enabled)}
     disabled={loading}
-    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${enabled ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-slate-800'} ${loading ? 'opacity-50 cursor-wait' : ''}`}
+    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-300 ease-in-out focus:outline-none ${enabled ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-800'} ${loading ? 'opacity-40 cursor-wait' : ''}`}
   >
-    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-300 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
   </button>
 );
 
@@ -271,81 +271,131 @@ const SettingsSection: React.FC<{
   loading: boolean;
   onUpdate: (updated: SettingsData) => void;
 }> = ({ data, loading, onUpdate }) => {
+  const [activeSaveKey, setActiveSaveKey] = useState<string | null>(null);
+
   if (loading) {
     return (
       <div className="flex-grow flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-10 h-10 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+          <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Accessing Config...</p>
+        </div>
       </div>
     );
   }
 
-  if (!data) return <div className="p-10 text-center opacity-50 font-black uppercase text-xs tracking-widest">Settings node offline.</div>;
+  if (!data) return (
+    <div className="flex-grow flex items-center justify-center">
+       <div className="text-center opacity-30">
+          <svg className="w-16 h-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          <p className="font-black uppercase text-xs tracking-widest">Configuration node offline</p>
+       </div>
+    </div>
+  );
 
-  const handleToggle = (key: keyof SettingsData, val: boolean) => {
+  const handleToggle = async (key: keyof SettingsData, val: boolean) => {
+    setActiveSaveKey(key);
     onUpdate({ ...data, [key]: val });
+    // Keep showing success for a second
+    setTimeout(() => setActiveSaveKey(null), 1000);
   };
 
   const settingsList = [
     { 
       key: 'telegram_push', 
-      label: 'Telegram Push Node', 
-      desc: 'Instant exchange dispatch via secure Telegram tunnel.',
-      icon: 'M13 10V3L4 14h7v7l9-11h-7z'
+      label: 'Telegram Alert Tunnel', 
+      desc: 'Instant push notifications to your verified Telegram ID.',
+      icon: 'M13 10V3L4 14h7v7l9-11h-7z',
+      color: 'sky'
     },
     { 
       key: 'daily_email', 
-      label: 'Daily Intelligence Report', 
-      desc: 'End-of-day market summary delivered to your hub.',
-      icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z'
+      label: 'Intelligence Digest', 
+      desc: 'Automated EOD report of all high-volatility news.',
+      icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z',
+      color: 'indigo'
     },
     { 
       key: 'ai_insight', 
-      label: 'Gemini Deep Insights', 
-      desc: 'Enable real-time AI sentiment layer on all market feeds.',
-      icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
+      label: 'Predictive Analysis', 
+      desc: 'AI-driven sentiment overlays on all live market feeds.',
+      icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+      color: 'emerald'
     },
     { 
       key: 'terminal_audio', 
-      label: 'Terminal Audio Alerts', 
-      desc: 'Audible indicators for high-confidence volatility events.',
-      icon: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z'
+      label: 'Acoustic Signals', 
+      desc: 'Enable audio cues for high-confidence market events.',
+      icon: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z',
+      color: 'rose'
     }
   ];
 
   return (
-    <div className="flex-grow p-4 md:p-12 animate-in fade-in duration-700 max-w-4xl mx-auto w-full">
-      <div className="bg-[#111621] border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl">
-        <div className="p-8 md:p-12 border-b border-white/5 bg-slate-950/20">
-          <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Terminal Preferences</h2>
-          <p className="text-slate-500 text-sm mt-2">Manage your data dispatch and notification telemetry.</p>
-        </div>
+    <div className="flex-grow p-4 md:p-10 lg:p-14 animate-in fade-in duration-700 w-full overflow-y-auto custom-scrollbar">
+      <div className="max-w-6xl mx-auto space-y-12">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-10">
+          <div>
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Terminal Preferences</h2>
+            <p className="text-slate-500 text-sm mt-3 font-medium">Control your notification dispatch and AI processing parameters.</p>
+          </div>
+          <div className="flex items-center space-x-3 bg-slate-900/50 px-4 py-2 rounded-xl border border-white/10">
+             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Preferences Node Active</span>
+          </div>
+        </header>
         
-        <div className="divide-y divide-white/5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
           {settingsList.map((item) => (
-            <div key={item.key} className="p-8 md:p-10 flex items-center justify-between hover:bg-white/5 transition-all">
-              <div className="flex items-start space-x-6">
-                <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-center text-slate-400">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                  </svg>
+            <div 
+              key={item.key} 
+              className={`bg-[#111621] border transition-all duration-300 rounded-[2.5rem] p-8 md:p-10 group relative overflow-hidden flex flex-col justify-between h-full ${
+                activeSaveKey === item.key ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)] scale-[1.01]' : 'border-white/5 hover:border-white/10 hover:bg-slate-900/30'
+              }`}
+            >
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-8">
+                  <div className={`w-14 h-14 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-center text-${item.color}-400 group-hover:scale-110 transition-transform`}>
+                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
+                    </svg>
+                  </div>
+                  <Toggle 
+                    enabled={!!data[item.key as keyof SettingsData]} 
+                    onChange={(val) => handleToggle(item.key as keyof SettingsData, val)}
+                    loading={activeSaveKey === item.key}
+                  />
                 </div>
+                
                 <div>
-                  <h4 className="text-white font-bold uppercase tracking-tight text-sm mb-1">{item.label}</h4>
-                  <p className="text-slate-500 text-xs font-medium max-w-sm">{item.desc}</p>
+                  <h4 className="text-white font-black uppercase tracking-tight text-lg mb-2">{item.label}</h4>
+                  <p className="text-slate-500 text-[13px] font-medium leading-relaxed max-w-[240px]">{item.desc}</p>
                 </div>
               </div>
-              <Toggle 
-                enabled={!!data[item.key as keyof SettingsData]} 
-                onChange={(val) => handleToggle(item.key as keyof SettingsData, val)}
-              />
+
+              {activeSaveKey === item.key && (
+                <div className="absolute inset-x-0 bottom-0 py-1 bg-emerald-500 text-center text-[8px] font-black text-slate-900 uppercase tracking-[0.3em] animate-in slide-in-from-bottom-full">
+                  Synchronizing Preferences...
+                </div>
+              )}
+
+              {/* Decorative Mesh */}
+              <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-emerald-500/5 blur-[50px] rounded-full group-hover:bg-emerald-500/10 transition-all"></div>
             </div>
           ))}
         </div>
 
-        <div className="p-8 md:p-12 bg-slate-950/40 border-t border-white/5 flex items-center space-x-3">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Preferences Auto-Syncing Enabled</span>
-        </div>
+        <footer className="p-8 bg-slate-950/40 border border-white/5 rounded-[2rem] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-500">
+               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <p className="text-xs text-slate-500 font-medium">All preference updates are dispatched to the cloud node <span className="text-white font-bold">instantly</span>.</p>
+          </div>
+          <div className="px-6 py-2 rounded-full border border-white/5 bg-slate-900/50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            Last Sync: Just Now
+          </div>
+        </footer>
       </div>
     </div>
   );
@@ -402,16 +452,16 @@ const Dashboard: React.FC = () => {
       const finalProf = profJson.data || profJson.profile || profJson;
       if (finalProf && finalProf.name) setProfileData(finalProf);
 
-      // 3. Fetch Settings
+      // 3. Fetch Settings - Strict parsing of json.settings
       const setResp = await fetch(`${API_BASE}/settings`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       const setJson = await setResp.json();
       if (setResp.status === 401 || setJson.error === 'unauthorized') return handleLogout();
-      const finalSettings = setJson.data || setJson.settings || setJson;
+      
+      const finalSettings = setJson.settings;
       if (finalSettings) {
-        // Map common API bool forms (0/1 or string "0"/"1")
         setSettingsData({
           telegram_push: !!Number(finalSettings.telegram_push),
           daily_email: !!Number(finalSettings.daily_email),
