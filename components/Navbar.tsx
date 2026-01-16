@@ -42,7 +42,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onOpenLogin, onNavigateH
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
-      isScrolled || isMobileMenuOpen ? 'py-3 glass border-b shadow-2xl shadow-black/20' : 'py-5 bg-transparent'
+      isScrolled || isMobileMenuOpen ? 'py-3 bg-[#0b0f1a]/95 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-black/40' : 'py-5 bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
@@ -84,29 +84,29 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onOpenLogin, onNavigateH
         </div>
       </div>
 
-      {/* Mobile Menu Content */}
-      <div className={`fixed inset-0 top-0 md:hidden bg-[#0b0f1a] transition-all duration-300 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'} z-[105]`}>
+      {/* Mobile Menu Content - Made more solid for better readability */}
+      <div className={`fixed inset-0 top-0 md:hidden bg-[#0b0f1a]/98 backdrop-blur-2xl transition-all duration-300 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'} z-[105]`}>
         <div className="pt-24 p-6 space-y-2">
           <div className="flex flex-col space-y-1 text-sm font-bold text-slate-400 uppercase tracking-widest">
-            <a href="#features" onClick={(e) => handleSectionClick(e, 'features')} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center">
-              Features
+            <a href="#features" onClick={(e) => handleSectionClick(e, 'features')} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center group">
+              <span className="group-hover:translate-x-2 transition-transform">Features</span>
               <svg className="w-4 h-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </a>
-            <a href="#pricing" onClick={(e) => handleSectionClick(e, 'pricing')} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center">
-              Pricing
+            <a href="#pricing" onClick={(e) => handleSectionClick(e, 'pricing')} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center group">
+              <span className="group-hover:translate-x-2 transition-transform">Pricing</span>
               <svg className="w-4 h-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </a>
-            <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center">
-              Our Mission
+            <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center group">
+              <span className="group-hover:translate-x-2 transition-transform">Our Mission</span>
               <svg className="w-4 h-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </Link>
-            <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center">
-              Contact
+            <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center group">
+              <span className="group-hover:translate-x-2 transition-transform">Contact</span>
               <svg className="w-4 h-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </Link>
             <button 
               onClick={() => { setIsMobileMenuOpen(false); onOpenLogin(); }}
-              className="w-full py-5 bg-emerald-500 text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl mt-8"
+              className="w-full py-5 bg-emerald-500 text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl mt-8 hover:bg-emerald-400 transition-all"
             >
               Sign In to Terminal
             </button>

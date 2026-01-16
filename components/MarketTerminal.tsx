@@ -369,6 +369,15 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         }
       });
       const json = await response.json();
+      
+      // Handle unauthorized explicitly
+      if (response.status === 401 || json.error === 'unauthorized') {
+        console.warn("Terminal session expired. Evicting to login.");
+        document.cookie = "sm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = '#/login';
+        return;
+      }
+      
       if (json.status === "success" && json.data) {
         const allItems: StockNews[] = [];
         Object.keys(json.data).forEach((dateKey) => {
