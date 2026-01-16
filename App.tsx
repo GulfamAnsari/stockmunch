@@ -12,6 +12,7 @@ const App: React.FC = () => {
   const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string>('');
+  const [selectedPlanId, setSelectedPlanId] = useState<string | undefined>();
   const [hoveredPlanId, setHoveredPlanId] = useState<string | null>(null);
   const [journeyStep, setJourneyStep] = useState<Record<string, boolean>>({});
   
@@ -21,6 +22,7 @@ const App: React.FC = () => {
   const handleStartJourney = (id: string) => {
     const plan = PRICING_PLANS.find(p => p.id === id);
     setSelectedPlan(plan?.name || 'Pro');
+    setSelectedPlanId(id);
     setIsTrialModalOpen(true);
     setJourneyStep(prev => ({ ...prev, [id]: true }));
     setTimeout(() => {
@@ -176,12 +178,20 @@ const App: React.FC = () => {
         isOpen={isTrialModalOpen} 
         onClose={() => setIsTrialModalOpen(false)} 
         planName={selectedPlan} 
+        planId={selectedPlanId}
         onSwitchToLogin={() => {
           setIsTrialModalOpen(false);
           setIsLoginModalOpen(true);
         }}
       />
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      <LoginModal 
+        isOpen={isLoginModalOpen} 
+        onClose={() => setIsLoginModalOpen(false)} 
+        onSwitchToSignup={() => {
+          setIsLoginModalOpen(false);
+          scrollToSection('pricing');
+        }}
+      />
     </div>
   );
 };

@@ -17,6 +17,7 @@ const Login: React.FC = () => {
   const [step, setStep] = useState<'INPUT' | 'VERIFY' | 'SUCCESS'>('INPUT');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notRegistered, setNotRegistered] = useState(false);
   const [formData, setFormData] = useState({ phone: '', otp: '', password: '' });
   const [resendTimer, setResendTimer] = useState(0);
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setNotRegistered(false);
     try {
       if (method === 'OTP') {
         const resp = await fetch(`${API_BASE}/send-otp-login`, {
@@ -55,7 +57,12 @@ const Login: React.FC = () => {
           setStep('VERIFY');
           setResendTimer(60);
         } else {
-          setError(data.message || "Failed to send OTP.");
+          if (data.error === 'not_registered') {
+            setNotRegistered(true);
+            setError("This mobile number is not registered with StockManch.");
+          } else {
+            setError(data.message || data.error || "Failed to send OTP.");
+          }
         }
       } else if (method === 'PASSWORD') {
         const resp = await fetch(`${API_BASE}/login`, {
@@ -71,7 +78,7 @@ const Login: React.FC = () => {
           setAuthCookie(data.token);
           navigate('/dashboard');
         } else {
-          setError(data.message || "Incorrect details.");
+          setError(data.message || data.error || "Incorrect login details.");
         }
       } else if (method === 'RESET') {
         const resp = await fetch(`${API_BASE}/send-otp-reset`, {
@@ -87,7 +94,7 @@ const Login: React.FC = () => {
           setStep('VERIFY');
           setResendTimer(60);
         } else {
-          setError(data.message || "Reset request failed.");
+          setError(data.message || data.error || "Reset request failed.");
         }
       }
     } catch (err) {
@@ -116,7 +123,7 @@ const Login: React.FC = () => {
           if (data.token) setAuthCookie(data.token);
           setStep('SUCCESS');
         } else {
-          setError(data.message || "Reset failed.");
+          setError(data.message || data.error || "Failed to update password.");
         }
       } else {
         const resp = await fetch(`${API_BASE}/verify-otp`, {
@@ -132,14 +139,21 @@ const Login: React.FC = () => {
           if (data.token) setAuthCookie(data.token);
           navigate('/dashboard');
         } else {
-          setError(data.message || "Incorrect OTP.");
+          setError(data.message || "Incorrect OTP entered.");
         }
       }
     } catch (err) {
-      setError("Login failed.");
+      setError("Verification failed.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const goToSignup = () => {
+    navigate('/');
+    setTimeout(() => {
+      document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
   return (
@@ -153,12 +167,24 @@ const Login: React.FC = () => {
           <p className="text-slate-500 text-sm opacity-60">{step === 'SUCCESS' ? 'Use your new password to sign in.' : 'Access your StockManch terminal.'}</p>
         </div>
 
-        {error && <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-xs font-bold text-center animate-in fade-in">{error}</div>}
+        {error && (
+          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex flex-col items-center animate-in fade-in">
+            <span className="text-rose-500 text-xs font-bold text-center mb-3">{error}</span>
+            {notRegistered && (
+              <button 
+                onClick={goToSignup}
+                className="px-6 py-2 bg-emerald-500 text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-all shadow-lg"
+              >
+                Sign Up
+              </button>
+            )}
+          </div>
+        )}
 
         {method !== 'RESET' && step !== 'SUCCESS' && (
           <div className="flex bg-slate-950/50 rounded-2xl p-1 mb-10 border border-white/5">
-            <button onClick={() => { setMethod('OTP'); setStep('INPUT'); setError(null); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'OTP' ? 'bg-emerald-500 text-slate-900' : 'text-slate-500'}`}>OTP Login</button>
-            <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'PASSWORD' ? 'bg-emerald-500 text-slate-900' : 'text-slate-500'}`}>Password</button>
+            <button onClick={() => { setMethod('OTP'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'OTP' ? 'bg-emerald-500 text-slate-900' : 'text-slate-500'}`}>OTP Login</button>
+            <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'PASSWORD' ? 'bg-emerald-500 text-slate-900' : 'text-slate-500'}`}>Password</button>
           </div>
         )}
 
@@ -175,12 +201,12 @@ const Login: React.FC = () => {
               <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
                 <div className="flex justify-between items-center px-1">
                   <label className="text-[10px] font-black text-slate-600 uppercase">Password</label>
-                  <button type="button" onClick={() => { setMethod('RESET'); setStep('INPUT'); setError(null); }} className="text-[9px] font-black text-emerald-500 uppercase">Forgot?</button>
+                  <button type="button" onClick={() => { setMethod('RESET'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className="text-[9px] font-black text-emerald-500 uppercase">Forgot?</button>
                 </div>
                 <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" />
               </div>
             )}
-            <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl">{loading ? 'Please wait...' : (method === 'OTP' ? 'Send OTP' : 'Sign In')}</button>
+            <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl">{loading ? 'Please wait...' : "Send OTP"}</button>
           </form>
         ) : step === 'VERIFY' ? (
           <form onSubmit={handleVerify} className="space-y-8 animate-in fade-in slide-in-from-right-4">
@@ -197,21 +223,21 @@ const Login: React.FC = () => {
             </div>
             {method === 'RESET' && (
               <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                <label className="text-[10px] font-black text-slate-600 uppercase px-1">New Password</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase px-1">Set New Password</label>
                 <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" />
               </div>
             )}
             <div className="space-y-4">
-              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl shadow-xl">{loading ? 'Verifying...' : 'Verify OTP'}</button>
-              <button type="button" onClick={() => { setStep('INPUT'); setError(null); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Mobile Number</button>
+              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl shadow-xl">{loading ? 'Verifying...' : "Verify OTP"}</button>
+              <button type="button" onClick={() => { setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Mobile Number</button>
             </div>
           </form>
         ) : (
           <div className="text-center animate-in zoom-in py-6">
             <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-8 text-emerald-500"><svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg></div>
             <h3 className="text-2xl font-black text-white uppercase mb-4 tracking-tighter">Updated</h3>
-            <p className="text-slate-500 text-sm mb-10 leading-relaxed">Password changed successfully. Please sign in again.</p>
-            <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); }} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl">Sign In</button>
+            <p className="text-slate-500 text-sm mb-10 leading-relaxed opacity-60">Password updated. Please sign in with your new credentials.</p>
+            <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl">Sign In</button>
           </div>
         )}
       </div>

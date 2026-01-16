@@ -112,7 +112,12 @@ const NewsCard: React.FC<{
         onPriceUpdate(news.id, percentageMap.get(querySymbol));
       } else {
         const resp = await fetch(
-          `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`
+          `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`,
+          {
+            headers: {
+              'Authorization': `Bearer ${getAuthToken()}`
+            }
+          }
         );
         const data = await resp.json();
         if (data && data.chart && data.chart.result && data.chart.result[0]) {
@@ -358,7 +363,11 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
       };
       const url = `https://droidtechknow.com/admin/api/stocks/news/save.php?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}&source=g`;
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`
+        }
+      });
       const json = await response.json();
       if (json.status === "success" && json.data) {
         const allItems: StockNews[] = [];

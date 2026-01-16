@@ -6,6 +6,7 @@ interface TrialFlowModalProps {
   isOpen: boolean;
   onClose: () => void;
   planName: string;
+  planId?: string;
   onSwitchToLogin?: () => void;
 }
 
@@ -21,7 +22,16 @@ const getAuthToken = () => {
   return document.cookie.split('; ').find(row => row.startsWith('sm_token='))?.split('=')[1] || null;
 };
 
-const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planName, onSwitchToLogin }) => {
+const getSubscriptionDetails = (pid?: string) => {
+  switch (pid) {
+    case 'alerts-only': return { alerts: true, dashboard: false };
+    case 'dashboard-only': return { alerts: false, dashboard: true };
+    case 'alerts-dashboard': return { alerts: true, dashboard: true };
+    default: return { alerts: true, dashboard: false }; // Default
+  }
+};
+
+const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planName, planId, onSwitchToLogin }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>('PHONE');
   const [formData, setFormData] = useState({ phone: '', otp: '', password: '', name: '', email: '' });
@@ -70,12 +80,11 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
         setStep('OTP');
         setResendTimer(60);
       } else {
-        const msg = data.message || "Failed to send OTP.";
-        if (msg.toLowerCase().includes('exist')) {
+        if (data.error === 'user_exists') {
           setUserExists(true);
-          setError("Account already exists with this mobile number.");
+          setError("This mobile number is already registered.");
         } else {
-          setError(msg);
+          setError(data.message || data.error || "Failed to send OTP.");
         }
       }
     } catch (err) {
@@ -103,7 +112,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
         if (data.token) setAuthCookie(data.token);
         setStep('PROFILE');
       } else {
-        setError(data.message || "Incorrect OTP.");
+        setError(data.message || "Incorrect OTP entered.");
       }
     } catch (err) {
       setError("Error verifying OTP.");
@@ -117,13 +126,20 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
     setLoading(true);
     setError(null);
     try {
+      const subDetails = getSubscriptionDetails(planId);
       const resp = await fetch(`${API_BASE}/set-password`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAuthToken()}`
         },
-        body: JSON.stringify({ phone: formData.phone, password: formData.password, name: formData.name, email: formData.email })
+        body: JSON.stringify({ 
+          phone: formData.phone, 
+          password: formData.password, 
+          name: formData.name, 
+          email: formData.email,
+          subscription: subDetails
+        })
       });
       const data = await resp.json();
       if (data.status === 'password_set' || data.status === 'success') {
@@ -170,7 +186,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
           {step === 'PHONE' && (
             <div className="animate-in slide-in-from-right">
               <h2 className="text-4xl font-black text-white uppercase mb-4 tracking-tighter">Start <span className="text-emerald-500">Trial</span></h2>
-              <p className="text-slate-400 text-sm mb-10 leading-relaxed opacity-70">Enter your mobile number to get a 30-day trial for <span className="text-white font-bold">{planName}</span>.</p>
+              <p className="text-slate-400 text-sm mb-10 leading-relaxed opacity-60">Get a 30-day trial for <span className="text-white font-bold">{planName}</span>.</p>
               <form onSubmit={handlePhoneSubmit} className="space-y-6">
                 <div>
                   <label className="block text-[10px] font-black text-slate-600 uppercase mb-3 px-1">Mobile Number</label>
@@ -189,7 +205,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
           {step === 'OTP' && (
             <div className="animate-in slide-in-from-right">
               <h2 className="text-4xl font-black text-white uppercase mb-4 tracking-tighter">Verify <span className="text-emerald-500">Device</span></h2>
-              <p className="text-slate-400 text-sm mb-10">We've sent an OTP to <span className="text-emerald-400 font-mono">+91 {formData.phone}</span>.</p>
+              <p className="text-slate-400 text-sm mb-10">Code sent to <span className="text-emerald-400 font-mono">+91 {formData.phone}</span>.</p>
               <form onSubmit={handleOtpSubmit} className="space-y-8">
                 <div className="flex justify-between gap-3">
                   {Array(6).fill(0).map((_, i) => (
@@ -202,6 +218,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                 <button type="submit" disabled={loading || formData.otp.length < 6} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl shadow-xl">
                   {loading ? 'Verifying...' : "Verify OTP"}
                 </button>
+                <button type="button" onClick={() => { setStep('PHONE'); setError(null); setUserExists(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Number</button>
               </form>
             </div>
           )}
@@ -212,7 +229,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
               <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Full Name</label><input required type="text" placeholder="Your Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" /></div>
                 <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Email Address</label><input required type="email" placeholder="name@email.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" /></div>
-                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Password</label><input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" /></div>
+                <div><label className="block text-[10px] font-black text-slate-600 uppercase mb-2 px-1">Set Password</label><input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" /></div>
                 <button type="submit" className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl shadow-xl mt-4">Complete Setup</button>
               </form>
             </div>
