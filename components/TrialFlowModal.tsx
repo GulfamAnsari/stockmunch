@@ -160,6 +160,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Min 6 chars validation for signup
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
@@ -227,7 +228,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
               <p className="text-slate-400 text-sm mb-10 leading-relaxed opacity-70">Register with mobile for <span className="text-white font-bold">{planName}</span>.</p>
               <form onSubmit={handlePhoneSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Mobile Number</label>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Mobile Number*</label>
                   <div className="relative">
                     <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black">+91</span>
                     <input 
@@ -243,7 +244,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                 <button 
                   type="submit" 
                   disabled={loading || formData.phone.length !== 10} 
-                  className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.phone.length !== 10 ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'}`}
+                  className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.phone.length !== 10 ? 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'}`}
                 >
                   {loading ? 'Sending...' : "Send OTP"}
                 </button>

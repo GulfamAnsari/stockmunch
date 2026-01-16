@@ -118,6 +118,7 @@ const Login: React.FC = () => {
       setError("Please enter the full 6-digit OTP.");
       return;
     }
+    // Validation ONLY for RESET/SIGNUP (as per instructions: min character to 6)
     if (method === 'RESET' && formData.password.length < 6) {
       setError("New password must be at least 6 characters.");
       return;
@@ -193,6 +194,7 @@ const Login: React.FC = () => {
     }
   };
 
+  // Button is disabled until 10 digits are entered. Sign-in password does not need min-6 check here.
   const isInitialDisabled = formData.phone.length !== 10 || (method === 'PASSWORD' && formData.password.length === 0);
 
   return (
@@ -203,14 +205,14 @@ const Login: React.FC = () => {
           <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
             {step === 'SUCCESS' ? 'Reset Done' : method === 'RESET' ? 'Reset Password' : 'Sign In'}
           </h1>
-          <p className="text-slate-500 text-sm opacity-60">{step === 'SUCCESS' ? 'Password updated.' : 'Access your StockManch terminal.'}</p>
+          <p className="text-slate-500 text-sm opacity-60">{step === 'SUCCESS' ? 'Credentials synced.' : 'Access your StockManch terminal.'}</p>
         </div>
 
         {error && (
           <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex flex-col items-center animate-shake">
             <span className="text-rose-500 text-[10px] font-black uppercase tracking-widest text-center">{error}</span>
             {notRegistered && (
-              <button onClick={() => navigate('/#pricing')} className="mt-3 px-6 py-2 bg-emerald-500 text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-all shadow-lg">Sign Up</button>
+              <button onClick={() => navigate('/')} className="mt-3 px-6 py-2 bg-emerald-500 text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-all shadow-lg">Sign Up</button>
             )}
           </div>
         )}
@@ -225,7 +227,7 @@ const Login: React.FC = () => {
         {step === 'INPUT' ? (
           <form onSubmit={handleInitialSubmit} className="space-y-8">
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Mobile Number</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Mobile Number*</label>
               <div className="relative">
                 <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black">+91</span>
                 <input 
@@ -241,7 +243,7 @@ const Login: React.FC = () => {
             {method === 'PASSWORD' && (
               <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
                 <div className="flex justify-between items-center px-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Password</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Password*</label>
                   <button type="button" onClick={() => { setMethod('RESET'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className="text-[9px] font-black text-emerald-500 uppercase">Forgot?</button>
                 </div>
                 <input 
@@ -257,7 +259,7 @@ const Login: React.FC = () => {
             <button 
               type="submit" 
               disabled={loading || isInitialDisabled} 
-              className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl ${isInitialDisabled ? 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
+              className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl ${isInitialDisabled ? 'bg-slate-800 text-slate-600 opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
             >
               {loading ? 'Processing...' : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
             </button>
@@ -284,7 +286,7 @@ const Login: React.FC = () => {
             </div>
             {method === 'RESET' && (
               <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Set New Password (min 6 chars)</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Set New Password* (min 6 chars)</label>
                 <input 
                   required 
                   type="password" 
@@ -299,7 +301,7 @@ const Login: React.FC = () => {
               <button 
                 type="submit" 
                 disabled={loading || formData.otp.length < 6} 
-                className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.otp.length < 6 ? 'bg-slate-800 text-slate-600' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
+                className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.otp.length < 6 ? 'bg-slate-800 text-slate-600 opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
               >
                 {loading ? 'Verifying...' : "Verify OTP"}
               </button>
