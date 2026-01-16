@@ -22,12 +22,12 @@ const getAuthToken = () => {
   return document.cookie.split('; ').find(row => row.startsWith('sm_token='))?.split('=')[1] || null;
 };
 
-const getSubscriptionDetails = (pid?: string) => {
+const getMappedPlanId = (pid?: string) => {
   switch (pid) {
-    case 'alerts-only': return { alerts: true, dashboard: false };
-    case 'dashboard-only': return { alerts: false, dashboard: true };
-    case 'alerts-dashboard': return { alerts: true, dashboard: true };
-    default: return { alerts: true, dashboard: false }; // Default
+    case 'alerts-only': return 'ALERT';
+    case 'dashboard-only': return 'DASHBOARD';
+    case 'alerts-dashboard': return 'ALERT_DASH';
+    default: return 'ALERT';
   }
 };
 
@@ -126,7 +126,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
     setLoading(true);
     setError(null);
     try {
-      const subDetails = getSubscriptionDetails(planId);
+      const mappedPlanId = getMappedPlanId(planId);
       const resp = await fetch(`${API_BASE}/set-password`, {
         method: 'POST',
         headers: { 
@@ -138,7 +138,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
           password: formData.password, 
           name: formData.name, 
           email: formData.email,
-          subscription: subDetails
+          plan_id: mappedPlanId
         })
       });
       const data = await resp.json();
@@ -186,7 +186,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
           {step === 'PHONE' && (
             <div className="animate-in slide-in-from-right">
               <h2 className="text-4xl font-black text-white uppercase mb-4 tracking-tighter">Start <span className="text-emerald-500">Trial</span></h2>
-              <p className="text-slate-400 text-sm mb-10 leading-relaxed opacity-60">Get a 30-day trial for <span className="text-white font-bold">{planName}</span>.</p>
+              <p className="text-slate-400 text-sm mb-10 leading-relaxed opacity-70">Get a 30-day trial for <span className="text-white font-bold">{planName}</span>.</p>
               <form onSubmit={handlePhoneSubmit} className="space-y-6">
                 <div>
                   <label className="block text-[10px] font-black text-slate-600 uppercase mb-3 px-1">Mobile Number</label>
