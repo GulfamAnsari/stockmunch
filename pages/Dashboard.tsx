@@ -484,6 +484,62 @@ const AlertHistorySection: React.FC<{ data: AlertData[]; loading: boolean }> = (
   );
 };
 
+const BillingSection: React.FC<{ data: SubscriptionData | null }> = ({ data }) => {
+  return (
+    <div className="flex-grow p-4 md:p-10 lg:p-14 animate-in fade-in duration-700 w-full overflow-y-auto custom-scrollbar">
+      <div className="max-w-5xl mx-auto space-y-12">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-10">
+          <div>
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Billing Ledger</h2>
+            <p className="text-slate-500 text-sm mt-3 font-medium">Manage your subscription protocol and financial telemetry.</p>
+          </div>
+          <div className="bg-indigo-500/10 px-4 py-2 rounded-xl border border-indigo-500/20 flex items-center space-x-3">
+             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Financial Node Secure</span>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           <div className="bg-[#111621] border border-white/5 rounded-[2.5rem] p-10 flex flex-col shadow-2xl relative overflow-hidden group">
+             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                <svg className="w-24 h-24 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+             </div>
+             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-4">Current Subscription</span>
+             <h3 className="text-4xl font-black text-white uppercase tracking-tighter mb-4">{data?.plan_code || 'TRIAL_PRO'}</h3>
+             <div className="flex items-center space-x-4 mb-10">
+                <div className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg text-[9px] font-black uppercase tracking-widest">Active</div>
+                <div className="text-[10px] text-slate-500 font-mono">Renews: {data?.end_date ? new Date(data.end_date).toLocaleDateString() : '30 Days Remaining'}</div>
+             </div>
+             <button className="mt-auto py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:bg-emerald-500 hover:text-slate-900 transition-all">Upgrade Protocol</button>
+           </div>
+
+           <div className="bg-[#111621] border border-white/5 rounded-[2.5rem] p-10 flex flex-col shadow-2xl">
+             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-6">Dispatch History</span>
+             <div className="space-y-4">
+                {[
+                  { date: 'Jan 10, 2026', amount: '₹0.00', status: 'COMPLETED', id: '#SM-9401' },
+                  { date: 'Dec 11, 2025', amount: '₹0.00', status: 'COMPLETED', id: '#SM-8212' },
+                ].map((inv, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 bg-slate-900/50 border border-white/5 rounded-2xl group hover:border-emerald-500/30 transition-all">
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-bold text-slate-200">{inv.date}</span>
+                      <span className="text-[8px] font-mono text-slate-600">{inv.id}</span>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-[11px] font-black text-white">{inv.amount}</span>
+                      <svg className="w-4 h-4 text-slate-700 hover:text-emerald-500 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    </div>
+                  </div>
+                ))}
+             </div>
+             <p className="mt-8 text-center text-[9px] font-medium text-slate-600 uppercase tracking-widest">Encrypted Billing by StockManch Ledger</p>
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const coreSyncStarted = useRef(false);
@@ -515,14 +571,12 @@ const Dashboard: React.FC = () => {
       if (!token) return navigate('/login');
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      // 1. Fetch Subscription
       const subResp = await fetch(`${API_BASE}/control-center`, { method: 'GET', headers });
       const subJson = await subResp.json();
       if (subResp.status === 401 || subJson.error === 'unauthorized') return handleLogout();
       const subData = subJson.subscription || (subJson.data && subJson.data.subscription);
       if (subData) setSubscriptionData(subData);
 
-      // 2. Fetch Profile
       const profResp = await fetch(`${API_BASE}/profile`, { method: 'GET', headers });
       const profJson = await profResp.json();
       if (profResp.status === 401 || profJson.error === 'unauthorized') return handleLogout();
@@ -579,12 +633,10 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Initial mount: Sync Core Data
   useEffect(() => {
     document.title = "Terminal Dashboard | StockManch";
     fetchCoreData();
 
-    // Connectivity management
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
     window.addEventListener('online', handleOnline);
@@ -595,7 +647,6 @@ const Dashboard: React.FC = () => {
     };
   }, []);
 
-  // Handle Tab-based Lazy Loading
   useEffect(() => {
     if (activeSection === 'settings') {
       fetchSettingsData();
@@ -664,8 +715,14 @@ const Dashboard: React.FC = () => {
           </button>
         ))}
       </nav>
-      <div className="p-8 border-t border-white/5 bg-slate-950/20">
-        <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="flex w-full items-center justify-center p-2 rounded-xl text-slate-700 hover:text-white transition-all bg-white/5 border border-white/5"><svg className={`w-5 h-5 transition-transform duration-500 ${isSidebarCollapsed ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg></button>
+      <div className="p-8 space-y-4 border-t border-white/5 bg-slate-950/20">
+        <button onClick={handleLogout} className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center' : 'space-x-4'} p-3 rounded-xl text-rose-500 hover:bg-rose-500 hover:text-white transition-all border border-rose-500/20 shadow-lg`} title="Logout Protocol">
+          <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          {!isSidebarCollapsed && <span className="uppercase tracking-[0.15em] text-[10px] font-black">Terminate Session</span>}
+        </button>
+        <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="flex w-full items-center justify-center p-2 rounded-xl text-slate-700 hover:text-white transition-all bg-white/5 border border-white/5">
+          <svg className={`w-5 h-5 transition-transform duration-500 ${isSidebarCollapsed ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+        </button>
       </div>
     </div>
   );
@@ -693,7 +750,16 @@ const Dashboard: React.FC = () => {
               <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{subscriptionData?.plan_code || '---'}</span>
               <span className="text-[10px] text-emerald-500 font-black uppercase tracking-tight">{profileData?.name || 'SYNCING...'}</span>
             </div>
-            <button onClick={handleLogout} className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-xl"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
+            <div 
+              onClick={() => setActiveSection('account')}
+              className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center text-emerald-500 hover:border-emerald-500 transition-all cursor-pointer shadow-xl overflow-hidden"
+            >
+              {profileData?.logo ? (
+                <img src={profileData.logo} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-sm font-black uppercase">{profileData?.name?.substring(0, 1) || 'S'}</span>
+              )}
+            </div>
           </div>
         </header>
       )}
@@ -707,7 +773,7 @@ const Dashboard: React.FC = () => {
             {activeSection === 'account' && <ProfileSection data={profileData} loading={loadingCore} />}
             {activeSection === 'notifications' && <AlertHistorySection data={alertData} loading={loadingAlerts} />}
             {activeSection === 'settings' && <SettingsSection data={settingsData} loading={loadingSettings} onUpdate={handleUpdateSettings} />}
-            {activeSection === 'billing' && <div className="p-10 flex flex-col items-center justify-center h-full text-center"><div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center text-indigo-500 mb-6 border border-indigo-500/20"><svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></div><h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Billing Ledger</h3><p className="text-slate-500 text-sm max-w-xs">Subscription billing cycles and payment gateway configuration.</p></div>}
+            {activeSection === 'billing' && <BillingSection data={subscriptionData} />}
           </div>
         </main>
       </div>

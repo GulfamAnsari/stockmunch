@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Logo } from '../constants';
 
@@ -21,6 +22,7 @@ const Login: React.FC = () => {
   const [formData, setFormData] = useState({ phone: '', otp: '', password: '' });
   const [resendTimer, setResendTimer] = useState(0);
   const navigate = useNavigate();
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -39,6 +41,10 @@ const Login: React.FC = () => {
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.phone.length !== 10) {
+      setError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setNotRegistered(false);
@@ -149,6 +155,28 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleOtpChange = (index: number, val: string) => {
+    const newOtpArr = formData.otp.split('');
+    newOtpArr[index] = val;
+    const newOtpStr = newOtpArr.join('');
+    setFormData({ ...formData, otp: newOtpStr });
+
+    if (val && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      if (!formData.otp[index] && index > 0) {
+        otpRefs.current[index - 1]?.focus();
+        const newOtpArr = formData.otp.split('');
+        newOtpArr[index - 1] = '';
+        setFormData({ ...formData, otp: newOtpArr.join('') });
+      }
+    }
+  };
+
   const goToSignup = () => {
     navigate('/');
     setTimeout(() => {
@@ -206,7 +234,9 @@ const Login: React.FC = () => {
                 <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" />
               </div>
             )}
-            <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl">{loading ? 'Please wait...' : "Send OTP"}</button>
+            <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl">
+              {loading ? 'Please wait...' : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
+            </button>
           </form>
         ) : step === 'VERIFY' ? (
           <form onSubmit={handleVerify} className="space-y-8 animate-in fade-in slide-in-from-right-4">
@@ -214,10 +244,18 @@ const Login: React.FC = () => {
               <label className="text-[10px] font-black text-slate-600 uppercase text-center block">Enter OTP</label>
               <div className="flex justify-between gap-2">
                 {Array(6).fill(0).map((_, i) => (
-                  <input key={i} maxLength={1} required className="w-12 h-14 bg-slate-950/50 border border-white/5 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" placeholder="•" onChange={(e) => {
-                    const val = e.target.value; if (val && i < 5) (e.currentTarget.nextElementSibling as HTMLInputElement)?.focus();
-                    const newOtp = formData.otp.split(''); newOtp[i] = val; setFormData({...formData, otp: newOtp.join('')});
-                  }} />
+                  <input 
+                    key={i} 
+                    // @google/genai fix: Wrap assignment in curly braces to ensure the callback returns void.
+                    ref={el => { otpRefs.current[i] = el; }}
+                    maxLength={1} 
+                    required 
+                    className="w-12 h-14 bg-slate-950/50 border border-white/5 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" 
+                    placeholder="•" 
+                    value={formData.otp[i] || ''}
+                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                  />
                 ))}
               </div>
             </div>

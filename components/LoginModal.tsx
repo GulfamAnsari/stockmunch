@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../constants';
 
@@ -27,6 +28,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
   const [formData, setFormData] = useState({ phone: '', otp: '', password: '' });
   const [resendTimer, setResendTimer] = useState(0);
   const navigate = useNavigate();
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -52,6 +54,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.phone.length !== 10) {
+      setError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setNotRegistered(false);
@@ -164,6 +170,28 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
     }
   };
 
+  const handleOtpChange = (index: number, val: string) => {
+    const newOtpArr = formData.otp.split('');
+    newOtpArr[index] = val;
+    const newOtpStr = newOtpArr.join('');
+    setFormData({ ...formData, otp: newOtpStr });
+
+    if (val && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      if (!formData.otp[index] && index > 0) {
+        otpRefs.current[index - 1]?.focus();
+        const newOtpArr = formData.otp.split('');
+        newOtpArr[index - 1] = '';
+        setFormData({ ...formData, otp: newOtpArr.join('') });
+      }
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
       <div className="w-full max-w-md bg-[#0b0f1a] border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl animate-in zoom-in">
@@ -213,46 +241,4 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
                     <label className="text-[10px] font-black text-slate-600 uppercase">Password</label>
                     <button type="button" onClick={() => { setMethod('RESET'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className="text-[9px] font-black text-emerald-500 uppercase">Forgot?</button>
                   </div>
-                  <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" />
-                </div>
-              )}
-              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl transition-all hover:bg-emerald-400">{loading ? 'Sending...' : "Send OTP"}</button>
-            </form>
-          ) : step === 'VERIFY' ? (
-            <form onSubmit={handleVerify} className="space-y-8">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-600 uppercase text-center block">Enter OTP</label>
-                <div className="flex justify-between gap-3">
-                  {Array(6).fill(0).map((_, i) => (
-                    <input key={i} maxLength={1} required className="w-full h-14 bg-slate-950/50 border border-white/10 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" placeholder="•" onChange={(e) => {
-                      const val = e.target.value; if (val && i < 5) (e.currentTarget.nextElementSibling as HTMLInputElement)?.focus();
-                      const newOtp = formData.otp.split(''); newOtp[i] = val; setFormData({...formData, otp: newOtp.join('')});
-                    }} />
-                  ))}
-                </div>
-              </div>
-              {method === 'RESET' && (
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-600 uppercase px-1">Set New Password</label>
-                  <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" />
-                </div>
-              )}
-              <div className="space-y-4">
-                <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl">{loading ? 'Wait...' : "Verify OTP"}</button>
-                <button type="button" onClick={() => { setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest transition-colors hover:text-white">Change Mobile Number</button>
-              </div>
-            </form>
-          ) : (
-            <div className="text-center py-6">
-              <h3 className="text-2xl font-black text-white uppercase mb-4 tracking-tighter">Updated</h3>
-              <p className="text-slate-500 text-sm mb-10 leading-relaxed opacity-60">Password updated. Please sign in with your new credentials.</p>
-              <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl">Sign In</button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default LoginModal;
+                  <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-
