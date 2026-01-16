@@ -486,7 +486,7 @@ const AlertHistorySection: React.FC<{ data: AlertData[]; loading: boolean }> = (
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const fetchStarted = useRef(false);
+  const coreSyncStarted = useRef(false);
   const [activeSection, setActiveSection] = useState<'overview' | 'terminal' | 'account' | 'notifications' | 'settings' | 'billing'>('overview');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -495,7 +495,7 @@ const Dashboard: React.FC = () => {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [settingsData, setSettingsData] = useState<SettingsData | null>(null);
   const [alertData, setAlertData] = useState<AlertData[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingCore, setLoadingCore] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(false);
   const [loadingAlerts, setLoadingAlerts] = useState(false);
 
@@ -504,17 +504,14 @@ const Dashboard: React.FC = () => {
     navigate('/login');
   };
 
-  const fetchDashboardData = async () => {
-    if (fetchStarted.current) return;
-    fetchStarted.current = true;
+  const fetchCoreData = async () => {
+    if (coreSyncStarted.current) return;
+    coreSyncStarted.current = true;
     
-    setLoading(true);
-    setLoadingSettings(true);
-    setLoadingAlerts(true);
+    setLoadingCore(true);
     try {
       const token = getAuthToken();
       if (!token) return navigate('/login');
-
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
       // 1. Fetch Subscription
@@ -530,8 +527,20 @@ const Dashboard: React.FC = () => {
       if (profResp.status === 401 || profJson.error === 'unauthorized') return handleLogout();
       const finalProf = profJson.data || profJson.profile || profJson;
       if (finalProf && finalProf.name) setProfileData(finalProf);
+    } catch (e) {
+      console.error("Core Data Sync Failure", e);
+    } finally {
+      setLoadingCore(false);
+    }
+  };
 
-      // 3. Fetch Settings
+  const fetchSettingsData = async () => {
+    setLoadingSettings(true);
+    try {
+      const token = getAuthToken();
+      if (!token) return;
+      const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
       const setResp = await fetch(`${API_BASE}/settings`, { method: 'GET', headers });
       const setJson = await setResp.json();
       if (setResp.status === 401 || setJson.error === 'unauthorized') return handleLogout();
@@ -543,22 +552,46 @@ const Dashboard: React.FC = () => {
           terminal_audio: !!Number(setJson.settings.terminal_audio),
         });
       }
+    } catch (e) {
+      console.error("Settings Sync Failure", e);
+    } finally {
+      setLoadingSettings(false);
+    }
+  };
 
-      // 4. Fetch Alerts
+  const fetchAlertsData = async () => {
+    setLoadingAlerts(true);
+    try {
+      const token = getAuthToken();
+      if (!token) return;
+      const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
       const alertResp = await fetch(`${API_BASE}/alerts`, { method: 'GET', headers });
       const alertJson = await alertResp.json();
       if (alertResp.status === 401 || alertJson.error === 'unauthorized') return handleLogout();
       const finalAlerts = alertJson.alerts || alertJson.data || alertJson;
       if (Array.isArray(finalAlerts)) setAlertData(finalAlerts);
-
     } catch (e) {
-      console.error("Data Sync Failure", e);
+      console.error("Alerts Sync Failure", e);
     } finally {
-      setLoading(false);
-      setLoadingSettings(false);
       setLoadingAlerts(false);
     }
   };
+
+  // Initial mount: Sync Core Data
+  useEffect(() => {
+    document.title = "Terminal Dashboard | StockManch";
+    fetchCoreData();
+  }, []);
+
+  // Handle Tab-based Lazy Loading
+  useEffect(() => {
+    if (activeSection === 'settings') {
+      fetchSettingsData();
+    } else if (activeSection === 'notifications') {
+      fetchAlertsData();
+    }
+  }, [activeSection]);
 
   const handleUpdateSettings = async (updated: SettingsData) => {
     const originalState = settingsData;
@@ -578,11 +611,6 @@ const Dashboard: React.FC = () => {
       setSettingsData(originalState);
     }
   };
-
-  useEffect(() => {
-    document.title = "Terminal Dashboard | StockManch";
-    fetchDashboardData();
-  }, []);
 
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
@@ -611,7 +639,7 @@ const Dashboard: React.FC = () => {
       <nav className="flex-grow py-8 px-4 space-y-2">
         {menuItems.map((item) => (
           <button key={item.id} onClick={() => { setActiveSection(item.id as any); setIsMobileSidebarOpen(false); }} className={`w-full flex items-center space-x-4 p-4 rounded-2xl transition-all group ${activeSection === item.id ? 'bg-emerald-500 text-slate-900 shadow-xl shadow-emerald-500/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`} title={isSidebarCollapsed ? item.label : ''}>
-            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
+            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
             <span className={`${isSidebarCollapsed ? 'hidden' : 'block'} uppercase tracking-[0.15em] text-[10px] font-black truncate`}>{item.label}</span>
           </button>
         ))}
@@ -655,8 +683,8 @@ const Dashboard: React.FC = () => {
         <main className="flex-grow flex flex-col min-w-0 bg-[#0b0f1a] relative overflow-hidden">
           <div className="flex-grow flex flex-col overflow-hidden">
             {activeSection === 'terminal' && <MarketTerminal onToggleFullScreen={setIsFullScreenMode} />}
-            {activeSection === 'overview' && <OverviewSection data={subscriptionData} loading={loading} onNavigate={setActiveSection} />}
-            {activeSection === 'account' && <ProfileSection data={profileData} loading={loading} />}
+            {activeSection === 'overview' && <OverviewSection data={subscriptionData} loading={loadingCore} onNavigate={setActiveSection} />}
+            {activeSection === 'account' && <ProfileSection data={profileData} loading={loadingCore} />}
             {activeSection === 'notifications' && <AlertHistorySection data={alertData} loading={loadingAlerts} />}
             {activeSection === 'settings' && <SettingsSection data={settingsData} loading={loadingSettings} onUpdate={handleUpdateSettings} />}
             {activeSection === 'billing' && <div className="p-10 flex flex-col items-center justify-center h-full text-center"><div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center text-indigo-500 mb-6 border border-indigo-500/20"><svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></div><h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Billing Ledger</h3><p className="text-slate-500 text-sm max-w-xs">Subscription billing cycles and payment gateway configuration.</p></div>}
