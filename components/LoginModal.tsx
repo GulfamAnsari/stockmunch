@@ -57,7 +57,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           setStep('VERIFY');
           setResendTimer(60);
         } else {
-          setError(data.message || "Code send failed.");
+          setError(data.message || "Failed to send OTP.");
         }
       } else if (method === 'PASSWORD') {
         const resp = await fetch(`${API_BASE}/login`, {
@@ -72,7 +72,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         if (data.token) {
           setAuthCookie(data.token);
           onClose();
-          // Landing on dashboard defaults to Control Center (overview)
           navigate('/dashboard');
         } else {
           setError(data.message || "Incorrect details.");
@@ -135,21 +134,20 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         if (data.verified) {
           if (data.token) setAuthCookie(data.token);
           onClose();
-          // Landing on dashboard defaults to Control Center (overview)
           navigate('/dashboard');
         } else {
-          setError(data.message || "Incorrect code.");
+          setError(data.message || "Incorrect OTP.");
         }
       }
     } catch (err) {
-      setError("Error verifying code.");
+      setError("Error verifying OTP.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
       <div className="w-full max-w-md bg-[#0b0f1a] border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl animate-in zoom-in">
         <div className="p-10">
           <div className="flex justify-between items-start mb-10">
@@ -157,13 +155,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             <button onClick={onClose} className="p-2 text-slate-500 hover:text-white transition-colors"><svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
           </div>
           <div className="mb-10 text-center">
-            <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">{method === 'RESET' ? 'Reset Password' : 'Sign In'}</h2>
-            <p className="text-slate-500 text-sm">Enter details to sign in to StockManch.</p>
+            <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-2 opacity-90">{method === 'RESET' ? 'Reset Password' : 'Sign In'}</h2>
+            <p className="text-slate-500 text-sm opacity-60">Enter details to sign in to StockManch.</p>
           </div>
-          {error && <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-xs font-bold text-center">{error}</div>}
+          {error && <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-xs font-bold text-center animate-in fade-in">{error}</div>}
           {method !== 'RESET' && step !== 'SUCCESS' && (
             <div className="flex bg-slate-950/50 rounded-2xl p-1 mb-10 border border-white/5">
-              <button onClick={() => { setMethod('OTP'); setStep('INPUT'); setError(null); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'OTP' ? 'bg-emerald-500 text-slate-900 shadow-lg' : 'text-slate-500'}`}>Login Code</button>
+              <button onClick={() => { setMethod('OTP'); setStep('INPUT'); setError(null); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'OTP' ? 'bg-emerald-500 text-slate-900 shadow-lg' : 'text-slate-500'}`}>OTP Login</button>
               <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'PASSWORD' ? 'bg-emerald-500 text-slate-900 shadow-lg' : 'text-slate-500'}`}>Password</button>
             </div>
           )}
@@ -173,7 +171,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 <label className="text-[10px] font-black text-slate-600 uppercase px-1">Mobile Number</label>
                 <div className="relative">
                   <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black">+91</span>
-                  <input required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none focus:border-emerald-500 font-mono placeholder:text-slate-700/30" />
+                  <input required type="tel" placeholder="98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none focus:border-emerald-500 font-mono placeholder:text-slate-800/40" />
                 </div>
               </div>
               {method === 'PASSWORD' && (
@@ -182,26 +180,32 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                     <label className="text-[10px] font-black text-slate-600 uppercase">Password</label>
                     <button type="button" onClick={() => { setMethod('RESET'); setStep('INPUT'); setError(null); }} className="text-[9px] font-black text-emerald-500 uppercase">Forgot?</button>
                   </div>
-                  <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/30" />
+                  <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" />
                 </div>
               )}
-              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl transition-all hover:bg-emerald-400">{loading ? 'Sending...' : (method === 'OTP' ? 'Send Code' : 'Sign In')}</button>
+              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl transition-all hover:bg-emerald-400">{loading ? 'Sending...' : (method === 'OTP' ? 'Send OTP' : 'Sign In')}</button>
             </form>
           ) : step === 'VERIFY' ? (
             <form onSubmit={handleVerify} className="space-y-8">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-600 uppercase text-center block">Enter Code</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase text-center block">Enter OTP</label>
                 <div className="flex justify-between gap-3">
                   {Array(6).fill(0).map((_, i) => (
-                    <input key={i} maxLength={1} required className="w-full h-14 bg-slate-950/50 border border-white/10 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-700/30" placeholder="•" onChange={(e) => {
+                    <input key={i} maxLength={1} required className="w-full h-14 bg-slate-950/50 border border-white/10 rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" placeholder="•" onChange={(e) => {
                       const val = e.target.value; if (val && i < 5) (e.currentTarget.nextElementSibling as HTMLInputElement)?.focus();
                       const newOtp = formData.otp.split(''); newOtp[i] = val; setFormData({...formData, otp: newOtp.join('')});
                     }} />
                   ))}
                 </div>
               </div>
-              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl">{loading ? 'Wait...' : 'Sign In'}</button>
-              <button type="button" onClick={() => setStep('INPUT')} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest transition-colors hover:text-white">Change Phone</button>
+              {method === 'RESET' && (
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-600 uppercase px-1">New Password</label>
+                  <input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" />
+                </div>
+              )}
+              <button type="submit" disabled={loading} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase rounded-2xl shadow-xl">{loading ? 'Wait...' : 'Verify OTP'}</button>
+              <button type="button" onClick={() => { setStep('INPUT'); setError(null); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest transition-colors hover:text-white">Change Mobile Number</button>
             </form>
           ) : (
             <div className="text-center py-6">

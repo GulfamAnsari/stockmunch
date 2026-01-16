@@ -41,7 +41,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onOpenLogin, onNavigateH
   if (isDashboard) return null;
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${
+    <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
       isScrolled || isMobileMenuOpen ? 'py-3 glass border-b shadow-2xl shadow-black/20' : 'py-5 bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
@@ -72,36 +72,47 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onOpenLogin, onNavigateH
           {/* Mobile Menu Toggle */}
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-slate-400 hover:text-white relative z-[70]"
+            className="md:hidden p-2 text-slate-400 hover:text-white relative z-[110]"
             aria-label="Toggle Menu"
           >
             {isMobileMenuOpen ? (
-              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             ) : (
-              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
             )}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu Content */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 top-[60px] md:hidden bg-[#0d121f] border-t border-white/5 p-6 space-y-4 animate-in slide-in-from-top duration-300 z-[65] overflow-y-auto">
-          <div className="flex flex-col space-y-4 text-sm font-bold text-slate-400 uppercase tracking-widest">
-            <a href="#features" onClick={(e) => handleSectionClick(e, 'features')} className="py-4 hover:text-emerald-500 transition-colors border-b border-white/5">Features</a>
-            <a href="#pricing" onClick={(e) => handleSectionClick(e, 'pricing')} className="py-4 hover:text-emerald-500 transition-colors border-b border-white/5">Pricing</a>
-            <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="py-4 hover:text-emerald-500 transition-colors border-b border-white/5">Our Mission</Link>
-            <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="py-4 hover:text-emerald-500 transition-colors border-b border-white/5">Contact</Link>
-            <a href="#faq" onClick={(e) => handleSectionClick(e, 'faq')} className="py-4 hover:text-emerald-500 transition-colors border-b border-white/5">FAQ</a>
+      <div className={`fixed inset-0 top-0 md:hidden bg-[#0b0f1a] transition-all duration-300 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'} z-[105]`}>
+        <div className="pt-24 p-6 space-y-2">
+          <div className="flex flex-col space-y-1 text-sm font-bold text-slate-400 uppercase tracking-widest">
+            <a href="#features" onClick={(e) => handleSectionClick(e, 'features')} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center">
+              Features
+              <svg className="w-4 h-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </a>
+            <a href="#pricing" onClick={(e) => handleSectionClick(e, 'pricing')} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center">
+              Pricing
+              <svg className="w-4 h-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </a>
+            <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center">
+              Our Mission
+              <svg className="w-4 h-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </Link>
+            <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="py-5 hover:text-emerald-500 transition-colors border-b border-white/5 flex justify-between items-center">
+              Contact
+              <svg className="w-4 h-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </Link>
             <button 
               onClick={() => { setIsMobileMenuOpen(false); onOpenLogin(); }}
-              className="w-full py-5 bg-emerald-500 text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg mt-6"
+              className="w-full py-5 bg-emerald-500 text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl mt-8"
             >
               Sign In to Terminal
             </button>
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };
