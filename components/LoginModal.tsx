@@ -12,7 +12,7 @@ interface LoginModalProps {
 const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
 
 const setAuthCookie = (token: string) => {
-  document.cookie = `sm_token=${token}; max-age=300; path=/; SameSite=Lax`;
+  document.cookie = `sm_token=${token}; max-age=2592000; path=/; SameSite=Lax`;
 };
 
 const getAuthToken = () => {
