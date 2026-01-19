@@ -7,12 +7,13 @@ import React, {
   useLayoutEffect
 } from "react";
 import { StockNews } from "../types";
+import BseCards from "./BseCards";
 
 const getAuthToken = () => {
   return document.cookie.split('; ').find(row => row.startsWith('sm_token='))?.split('=')[1] || null;
 };
 
-const AnimatedTooltip: React.FC<{
+export const AnimatedTooltip: React.FC<{
   text: string;
   children: React.ReactNode;
   label?: string;
@@ -81,12 +82,12 @@ const AnimatedTooltip: React.FC<{
 
 const percentageMap = new Map();
 
-const NewsCard: React.FC<{
+export const NewsCard: React.FC<{
   news: StockNews;
   isWatchlist?: boolean;
-  onWatchlistAdd: (item: any) => void;
-  onPriceUpdate: (id: string, pct: number) => void;
-  autoRefresh: boolean;
+  onWatchlistAdd?: (item: any) => void;
+  onPriceUpdate?: (id: string, pct: number) => void;
+  autoRefresh?: boolean;
 }> = ({ news, isWatchlist, onWatchlistAdd, onPriceUpdate }) => {
   const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
   const [isRead, setIsRead] = useState(false);
@@ -109,7 +110,7 @@ const NewsCard: React.FC<{
 
     try {
       if (percentageMap.has(querySymbol) && !manualUpdate) {
-        onPriceUpdate(news.id, percentageMap.get(querySymbol));
+        onPriceUpdate?.(news.id, percentageMap.get(querySymbol));
       } else {
         const resp = await fetch(
           `https://lavender-goldfish-594505.hostingersite.com/api/chart?symbol=${querySymbol}&interval=1d&range=1d`,
@@ -124,7 +125,7 @@ const NewsCard: React.FC<{
           const { chartPreviousClose, regularMarketPrice } = data.chart.result[0].meta;
           if (chartPreviousClose && regularMarketPrice) {
             const pct = ((regularMarketPrice - chartPreviousClose) / chartPreviousClose) * 100;
-            onPriceUpdate(news.id, pct);
+            onPriceUpdate?.(news.id, pct);
             percentageMap.set(querySymbol, pct);
           }
         }
@@ -192,12 +193,12 @@ const NewsCard: React.FC<{
               {news.logoUrl ? (
                 <img src={news.logoUrl} alt={news.symbol} className="w-full h-full object-contain p-1 bg-white/[0.03]" />
               ) : (
-                news.symbol.substring(0, 2)
+                news.symbol?.substring(0, 2) || "SM"
               )}
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-x-2">
-                <h3 className="text-[12px] text-blue-400/100 tracking-tight uppercase leading-none truncate max-w-[120px]">
+                <h3 className="text-[11px] font-black text-blue-500/90 tracking-tight uppercase leading-none truncate max-w-[120px]">
                   {news.companyName}
                 </h3>
                 <span className={`text-[9px] font-bold flex items-center ${
@@ -223,14 +224,14 @@ const NewsCard: React.FC<{
         </div>
 
         <AnimatedTooltip text={news.title}>
-          <h4 className="text-[13px] text-slate-300 leading-snug mb-3 line-clamp-2 transition-colors">
+          <h4 className="text-[13px] font-bold text-slate-200 leading-snug mb-3 line-clamp-2 group-hover:text-emerald-500/90 transition-colors">
             {news.title}
           </h4>
         </AnimatedTooltip>
 
         <div className="flex-grow">
           <AnimatedTooltip text={news.content}>
-            <p className="text-[11px] text-slate-500 line-clamp-4 leading-relaxed mb-4 font-medium italic border-l-2 border-emerald-600/30 pl-3 transition-colors">
+            <p className="text-[11px] text-slate-400 line-clamp-4 leading-relaxed mb-4 font-medium italic border-l-2 border-emerald-600/30 pl-3 transition-colors group-hover:text-slate-200">
               {news.content}
             </p>
           </AnimatedTooltip>
@@ -268,13 +269,13 @@ const NewsCard: React.FC<{
             {showWatchlistOpts && (
               <div className="absolute bottom-full left-0 mb-2 w-32 bg-[#1c2230] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2">
                 <button
-                  onClick={(e) => { e.stopPropagation(); onWatchlistAdd({ ...news, userSentiment: "BULLISH" }); setShowWatchlistOpts(false); }}
+                  onClick={(e) => { e.stopPropagation(); onWatchlistAdd?.({ ...news, userSentiment: "BULLISH" }); setShowWatchlistOpts(false); }}
                   className="w-full text-left px-4 py-2.5 text-[9.5px] font-black text-emerald-500 hover:bg-emerald-600/10 uppercase tracking-widest border-b border-white/[0.05]"
                 >
                   BULLISH
                 </button>
                 <button
-                  onClick={(e) => { e.stopPropagation(); onWatchlistAdd({ ...news, userSentiment: "BEARISH" }); setShowWatchlistOpts(false); }}
+                  onClick={(e) => { e.stopPropagation(); onWatchlistAdd?.({ ...news, userSentiment: "BEARISH" }); setShowWatchlistOpts(false); }}
                   className="w-full text-left px-4 py-2.5 text-[9.5px] font-black text-rose-500 hover:bg-rose-600/10 uppercase tracking-widest"
                 >
                   BEARISH
@@ -357,7 +358,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
   }, []);
 
   const fetchNews = useCallback(async () => {
-    if (activeTab === "WATCHLIST") return;
+    if (activeTab === "WATCHLIST" || activeTab === "BSE FEEDS") return;
     setLoading(true);
     try {
       const toApiDate = (d: string) => {
@@ -422,7 +423,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
 
   useEffect(() => {
     let interval: number | undefined;
-    if (autoRefresh && !loading && activeTab !== "WATCHLIST") interval = window.setInterval(fetchNews, 15000);
+    if (autoRefresh && !loading && activeTab !== "WATCHLIST" && activeTab !== "BSE FEEDS") interval = window.setInterval(fetchNews, 15000);
     return () => clearInterval(interval);
   }, [autoRefresh, loading, fetchNews, activeTab]);
 
@@ -497,7 +498,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
       <div className={`${isControlsVisible ? 'flex' : 'hidden lg:flex'} px-4 md:px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/[0.05] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-y-4 gap-x-6`}>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-wrap">
           <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/[0.05] shadow-inner shrink-0 self-start sm:self-auto">
-            {["ALL FEEDS", "WATCHLIST"].map((tab) => (
+            {["ALL FEEDS", "BSE FEEDS", "WATCHLIST"].map((tab) => (
               <button key={tab} onClick={() => { setActiveTab(tab); setIsFilterPanelOpen(false); }} className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${ activeTab === tab ? "bg-emerald-700 text-slate-100 shadow-lg" : "text-slate-500 hover:text-slate-300" }`}>{tab}</button>
             ))}
           </div>
@@ -505,7 +506,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
             <input type="text" placeholder="SEARCH SYMBOL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-950/40 border border-white/[0.05] rounded-lg pl-10 pr-3 py-2 text-[10px] text-slate-300 focus:outline-none focus:border-emerald-600/50 transition-all font-mono placeholder:text-slate-700" />
           </div>
-          {activeTab !== "WATCHLIST" && (
+          {activeTab === "ALL FEEDS" && (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
               <div className="flex items-center space-x-2 bg-slate-900/50 p-1 rounded-lg border border-white/[0.05]">
                 <input type="date" value={fromDateInput} onChange={(e) => setFromDateInput(e.target.value)} className="bg-slate-900 border border-white/10 rounded-md px-2 py-1 text-[9px] text-slate-400 font-mono focus:border-emerald-600/50 focus:outline-none w-full sm:w-[110px] cursor-pointer" />
@@ -562,7 +563,9 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
       </div>
 
       <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-grow overflow-y-auto px-4 md:px-8 py-8 custom-scrollbar bg-black/[0.02] overflow-x-hidden">
-        {loading && news.length === 0 ? (
+        {activeTab === "BSE FEEDS" ? (
+          <BseCards onWatchlistAdd={handleWatchlistAdd} />
+        ) : loading && news.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center space-y-6"><div className="w-16 h-16 border-4 border-emerald-600/30 border-t-emerald-600 rounded-full animate-spin"></div><p className="text-[12px] font-black uppercase tracking-[0.4em] opacity-20 text-center">Connecting Stream...</p></div>
         ) : processedNews.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-20"><p className="text-lg sm:text-xl font-black uppercase tracking-[0.3em] px-4">No Match in Tunnel</p></div>
@@ -582,7 +585,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
       </div>
 
       <footer className="shrink-0 bg-[#111621] border-t border-white/[0.05] px-4 md:px-8 py-3 flex flex-col sm:flex-row items-center justify-between text-[9px] font-black font-mono text-slate-700 tracking-[0.2em] uppercase gap-2">
-        <div className="flex items-center space-x-6 md:space-x-10"><div className="flex items-center space-x-2"><span className="text-emerald-600/80 font-black">SYSTEM:</span><span>READY</span></div><div className="flex items-center space-x-2"><span className="text-emerald-600/80 font-black">STREAM:</span><span>{processedNews.length} SYNCED</span></div></div>
+        <div className="flex items-center space-x-6 md:space-x-10"><div className="flex items-center space-x-2"><span className="text-emerald-600/80 font-black">SYSTEM:</span><span>READY</span></div><div className="flex items-center space-x-2"><span className="text-emerald-600/80 font-black">STREAM:</span><span>{activeTab === "BSE FEEDS" ? "BSE SYNCED" : `${processedNews.length} SYNCED`}</span></div></div>
         <div className="flex items-center space-x-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-600 opacity-30"></div><span className="opacity-40 italic tracking-tight uppercase text-center">StockManch</span></div>
       </footer>
     </div>
