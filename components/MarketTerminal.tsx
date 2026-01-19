@@ -16,7 +16,7 @@ const AnimatedTooltip: React.FC<{
   text: string;
   children: React.ReactNode;
   label?: string;
-}> = ({ text, children, label = "Dispatch" }) => {
+}> = ({ text, children }) => {
   const [position, setPosition] = useState<"left" | "right" | "top" | "bottom">("right");
   const triggerRef = useRef<HTMLDivElement>(null);
 
@@ -87,7 +87,7 @@ const NewsCard: React.FC<{
   onWatchlistAdd: (item: any) => void;
   onPriceUpdate: (id: string, pct: number) => void;
   autoRefresh: boolean;
-}> = ({ news, isWatchlist, onWatchlistAdd, onPriceUpdate, autoRefresh }) => {
+}> = ({ news, isWatchlist, onWatchlistAdd, onPriceUpdate }) => {
   const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
   const [isRead, setIsRead] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -136,7 +136,7 @@ const NewsCard: React.FC<{
 
   useEffect(() => {
     fetchLocalPercent();
-  }, []);
+  }, [fetchLocalPercent]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -155,6 +155,8 @@ const NewsCard: React.FC<{
       default: return "bg-amber-500/10 text-amber-400 border-amber-500/20";
     }
   };
+
+  const hasPriceData = typeof news.priceChange === 'number';
 
   return (
     <div
@@ -199,10 +201,10 @@ const NewsCard: React.FC<{
                   {news.companyName}
                 </h3>
                 <span className={`text-[9px] font-bold flex items-center ${
-                    news.priceChange !== 0 ? news.priceChange >= 0 ? "text-emerald-400" : "text-rose-400" : "text-slate-500"
+                    hasPriceData && news.priceChange !== 0 ? news.priceChange >= 0 ? "text-emerald-400" : "text-rose-400" : "text-slate-500"
                   }`}>
-                  {news.priceChange !== 0 ? (news.priceChange >= 0 ? "↑" : "↓") : "•"}{" "}
-                  {news.priceChange || news.priceChange == 0 ? Math.abs(news.priceChange).toFixed(2) : ""}%
+                  {hasPriceData && news.priceChange !== 0 ? (news.priceChange >= 0 ? "↑" : "↓") : "•"}{" "}
+                  {hasPriceData ? Math.abs(news.priceChange).toFixed(2) : "0.00"}%
                 </span>
               </div>
               <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider truncate max-w-[140px] mt-1">
@@ -220,14 +222,14 @@ const NewsCard: React.FC<{
           </div>
         </div>
 
-        <AnimatedTooltip text={news.title} label="Title">
+        <AnimatedTooltip text={news.title}>
           <h4 className="text-[13px] font-bold text-white leading-snug mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors">
             {news.title}
           </h4>
         </AnimatedTooltip>
 
         <div className="flex-grow">
-          <AnimatedTooltip text={news.content} label="Description">
+          <AnimatedTooltip text={news.content}>
             <p className="text-[11px] text-slate-300 line-clamp-4 leading-relaxed mb-4 font-medium italic border-l-2 border-emerald-500/50 pl-3 transition-colors group-hover:text-white">
               {news.content}
             </p>
@@ -238,7 +240,7 @@ const NewsCard: React.FC<{
           {news.aiAnalysis && (
             <div className="mb-3 p-3 bg-white/5 rounded-lg border border-white/10">
               <span className="text-[8.5px] font-black text-emerald-500 uppercase tracking-widest block mb-1">AI Deep Analysis</span>
-              <AnimatedTooltip text={news.aiAnalysis} label="AI Analysis">
+              <AnimatedTooltip text={news.aiAnalysis}>
                 <p className="text-[9.5px] text-slate-200 leading-tight line-clamp-2 font-medium">{news.aiAnalysis}</p>
               </AnimatedTooltip>
             </div>
@@ -302,7 +304,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
   const [isControlsVisible, setIsControlsVisible] = useState(true);
   const [sortOrder, setSortOrder] = useState<"TIME" | "SENTIMENT" | "CHANGE">("TIME");
   const [sentimentFilters, setSentimentFilters] = useState<string[]>(["ALL"]);
-  const [timeRange, setTimeRange] = useState({ from: 0, to: 24 });
+  const [timeRange] = useState({ from: 0, to: 24 });
   const [watchlist, setWatchlist] = useState<any[]>([]);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [filterDropdownSide, setFilterDropdownSide] = useState<"left" | "right">("right");
@@ -313,7 +315,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
   const [fromDateInput, setFromDateInput] = useState(new Date().toISOString().split("T")[0]);
   const [toDateInput, setToDateInput] = useState(new Date().toISOString().split("T")[0]);
 
-  const isFiltered = useMemo(() => sentimentFilters.some((f) => f !== "ALL") || timeRange.from !== 0 || timeRange.to !== 24, [sentimentFilters, timeRange]);
+  const isFiltered = useMemo(() => sentimentFilters.some((f) => f !== "ALL"), [sentimentFilters]);
 
   useEffect(() => {
     const saved = localStorage.getItem("stockmanch_watchlist");
@@ -371,9 +373,8 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
       const json = await response.json();
       
       if (response.status === 401 || json.error === 'unauthorized') {
-        console.warn("Terminal session expired. Evicting to login.");
         document.cookie = "sm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        window.location.href = '#/login';
+        window.location.hash = '/login';
         return;
       }
       
@@ -421,7 +422,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
 
   useEffect(() => {
     let interval: number | undefined;
-    if (autoRefresh && !loading && activeTab !== "WATCHLIST") interval = window.setInterval(fetchNews, 10000);
+    if (autoRefresh && !loading && activeTab !== "WATCHLIST") interval = window.setInterval(fetchNews, 15000);
     return () => clearInterval(interval);
   }, [autoRefresh, loading, fetchNews, activeTab]);
 
@@ -502,15 +503,14 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
           </div>
           <div className="relative w-full sm:w-48 lg:w-72 shrink-0">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
-            <input type="text" placeholder="SEARCH SYMBOL..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); }} className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white focus:outline-none focus:border-emerald-500 transition-all font-mono placeholder:text-slate-400/50" />
+            <input type="text" placeholder="SEARCH SYMBOL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-900 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-[10px] text-white focus:outline-none focus:border-emerald-500 transition-all font-mono placeholder:text-slate-400/50" />
           </div>
           {activeTab !== "WATCHLIST" && (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
               <div className="flex items-center space-x-2 bg-slate-900/50 p-1 rounded-lg border border-white/10">
-                <style dangerouslySetInnerHTML={{ __html: `input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) brightness(100) contrast(100); cursor: pointer; }` }} />
-                <input type="date" value={fromDateInput} onChange={(e) => { setFromDateInput(e.target.value); }} className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-full sm:w-[110px] cursor-pointer" />
+                <input type="date" value={fromDateInput} onChange={(e) => setFromDateInput(e.target.value)} className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-full sm:w-[110px] cursor-pointer" />
                 <span className="text-slate-400 text-[10px]">→</span>
-                <input type="date" value={toDateInput} onChange={(e) => { setToDateInput(e.target.value); }} className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-full sm:w-[110px] cursor-pointer" />
+                <input type="date" value={toDateInput} onChange={(e) => setToDateInput(e.target.value)} className="bg-slate-900 border border-white/20 rounded-md px-2 py-1 text-[9px] text-white font-mono focus:border-emerald-500 focus:outline-none w-full sm:w-[110px] cursor-pointer" />
                 <button onClick={fetchNews} disabled={loading} className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-md border border-emerald-500/30 hover:bg-emerald-500/30 transition-all flex items-center justify-center min-w-[32px]" title="Sync Feed">
                   {loading ? (<div className="w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>) : (<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>)}
                 </button>
@@ -553,7 +553,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
                 <div className="h-px bg-white/5"></div>
                 <div className="space-y-3">
                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Sort Method</span>
-                  <select value={sortOrder} onChange={(e) => { setSortOrder(e.target.value as any); }} className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-white font-mono uppercase focus:outline-none"><option value="TIME">Newest First</option><option value="SENTIMENT">AI Confidence</option><option value="CHANGE">Volatility</option></select>
+                  <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-white font-mono uppercase focus:outline-none"><option value="TIME">Newest First</option><option value="SENTIMENT">AI Confidence</option><option value="CHANGE">Volatility</option></select>
                 </div>
               </div>
             </div>
@@ -567,12 +567,15 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         ) : processedNews.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-30"><p className="text-lg sm:text-xl font-black uppercase tracking-[0.3em] px-4">No Match in Tunnel</p></div>
         ) : (
-          <><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 pt-4">{pagedNews.map((newsItem) => (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 pt-4">
+              {pagedNews.map((newsItem) => (
                 <div key={newsItem.id} className="relative">
                   <NewsCard news={newsItem} isWatchlist={activeTab === "WATCHLIST"} onWatchlistAdd={handleWatchlistAdd} onPriceUpdate={updatePriceChange} autoRefresh={autoRefresh} />
                   {activeTab === "WATCHLIST" && (<button onClick={() => removeFromWatchlist(newsItem.id)} className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-lg hover:scale-110 transition-all z-40 border border-white/20">✕</button>)}
                 </div>
-              ))}</div>
+              ))}
+            </div>
             {displayLimit < processedNews.length && (<div className="py-10 flex justify-center"><div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div></div>)}
           </>
         )}

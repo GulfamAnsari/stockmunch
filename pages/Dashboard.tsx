@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MarketTerminal from '../components/MarketTerminal';
@@ -128,7 +129,8 @@ const OverviewSection: React.FC<{
 
   const isAutoRenewOn = data?.auto_renew === 1 || data?.auto_renew === '1' || data?.auto_renew === true || data?.auto_renew === 'true';
   const activeInvite = invites.length > 0 ? invites[0] : null;
-  const isActuallyUsed = activeInvite?.used || inviteUsedLocal;
+  // @google/genai fix: Use double negation to ensure boolean type for isActuallyUsed
+  const isActuallyUsed = !!(activeInvite?.used || inviteUsedLocal);
 
   return (
     <div className="flex-grow overflow-y-auto p-4 md:p-10 custom-scrollbar space-y-8 animate-in fade-in duration-700">

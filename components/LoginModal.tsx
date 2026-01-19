@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../constants';
@@ -18,6 +17,13 @@ const setAuthCookie = (token: string) => {
 const getAuthToken = () => {
   return document.cookie.split('; ').find(row => row.startsWith('sm_token='))?.split('=')[1] || null;
 };
+
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center space-x-2">
+    <div className="w-4 h-4 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin"></div>
+    <span>Processing...</span>
+  </div>
+);
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSignup }) => {
   const [method, setMethod] = useState<'OTP' | 'PASSWORD' | 'RESET'>('OTP');
@@ -133,7 +139,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
       setError("Enter the 6-digit OTP.");
       return;
     }
-    // Min 6 chars for password reset
     if (method === 'RESET' && formData.password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
@@ -226,7 +231,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
           </div>
           <div className="mb-10 text-center">
             <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-2 opacity-90">{method === 'RESET' ? 'Reset Password' : 'Sign In'}</h2>
-            <p className="text-slate-500 text-sm opacity-60">Access your StockMunch terminal.</p>
+            <p className="text-slate-500 text-sm opacity-60">Access your StockManch terminal.</p>
           </div>
 
           {error && (
@@ -282,7 +287,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
                 disabled={loading || isInitialDisabled} 
                 className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl ${isInitialDisabled ? 'bg-slate-800 text-slate-600 opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
               >
-                {loading ? 'Processing...' : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
+                {loading ? <LoadingSpinner /> : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
               </button>
             </form>
           ) : step === 'VERIFY' ? (
@@ -324,7 +329,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
                   disabled={loading || formData.otp.length < 6} 
                   className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.otp.length < 6 ? 'bg-slate-800 text-slate-600 opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
                 >
-                  {loading ? 'Verifying...' : "Verify OTP"}
+                  {loading ? <LoadingSpinner /> : "Verify OTP"}
                 </button>
                 <button type="button" onClick={() => { setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Number</button>
               </div>

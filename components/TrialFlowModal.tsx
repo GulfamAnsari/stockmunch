@@ -31,6 +31,13 @@ const getMappedPlanId = (pid?: string) => {
   }
 };
 
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center space-x-2">
+    <div className="w-4 h-4 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin"></div>
+    <span>Processing...</span>
+  </div>
+);
+
 const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planName, planId, onSwitchToLogin }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>('PHONE');
@@ -160,7 +167,6 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Min 6 chars validation for signup
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
@@ -246,7 +252,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                   disabled={loading || formData.phone.length !== 10} 
                   className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.phone.length !== 10 ? 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'}`}
                 >
-                  {loading ? 'Sending...' : "Send OTP"}
+                  {loading ? <LoadingSpinner /> : "Send OTP"}
                 </button>
               </form>
             </div>
@@ -279,7 +285,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                   disabled={loading || formData.otp.length < 6} 
                   className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.otp.length < 6 ? 'bg-slate-800 text-slate-600' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
                 >
-                  {loading ? 'Verifying...' : "Verify OTP"}
+                  {loading ? <LoadingSpinner /> : "Verify OTP"}
                 </button>
                 <button type="button" onClick={() => { setStep('PHONE'); setError(null); setUserExists(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Number</button>
               </form>
@@ -298,7 +304,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
                   disabled={loading || isProfileDisabled} 
                   className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl mt-4 transition-all ${isProfileDisabled ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
                 >
-                  Complete Setup
+                  {loading ? <LoadingSpinner /> : "Complete Setup"}
                 </button>
               </form>
             </div>

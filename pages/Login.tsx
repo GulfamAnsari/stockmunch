@@ -12,6 +12,13 @@ const getAuthToken = () => {
   return document.cookie.split('; ').find(row => row.startsWith('sm_token='))?.split('=')[1] || null;
 };
 
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center space-x-2">
+    <div className="w-4 h-4 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin"></div>
+    <span>Processing...</span>
+  </div>
+);
+
 const Login: React.FC = () => {
   const [method, setMethod] = useState<'OTP' | 'PASSWORD' | 'RESET'>('OTP');
   const [step, setStep] = useState<'INPUT' | 'VERIFY' | 'SUCCESS'>('INPUT');
@@ -25,7 +32,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Login | StockMunch";
+    document.title = "Login | StockManch";
   }, []);
 
   useEffect(() => {
@@ -118,7 +125,6 @@ const Login: React.FC = () => {
       setError("Please enter the full 6-digit OTP.");
       return;
     }
-    // Validation ONLY for RESET/SIGNUP (as per instructions: min character to 6)
     if (method === 'RESET' && formData.password.length < 6) {
       setError("New password must be at least 6 characters.");
       return;
@@ -194,7 +200,6 @@ const Login: React.FC = () => {
     }
   };
 
-  // Button is disabled until 10 digits are entered. Sign-in password does not need min-6 check here.
   const isInitialDisabled = formData.phone.length !== 10 || (method === 'PASSWORD' && formData.password.length === 0);
 
   return (
@@ -205,7 +210,7 @@ const Login: React.FC = () => {
           <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
             {step === 'SUCCESS' ? 'Reset Done' : method === 'RESET' ? 'Reset Password' : 'Sign In'}
           </h1>
-          <p className="text-slate-500 text-sm opacity-60">{step === 'SUCCESS' ? 'Credentials synced.' : 'Access your StockMunch terminal.'}</p>
+          <p className="text-slate-500 text-sm opacity-60">{step === 'SUCCESS' ? 'Credentials synced.' : 'Access your StockManch terminal.'}</p>
         </div>
 
         {error && (
@@ -261,7 +266,7 @@ const Login: React.FC = () => {
               disabled={loading || isInitialDisabled} 
               className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl ${isInitialDisabled ? 'bg-slate-800 text-slate-600 opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
             >
-              {loading ? 'Processing...' : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
+              {loading ? <LoadingSpinner /> : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
             </button>
           </form>
         ) : step === 'VERIFY' ? (
@@ -306,7 +311,7 @@ const Login: React.FC = () => {
                 disabled={loading || formData.otp.length < 6} 
                 className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.otp.length < 6 ? 'bg-slate-800 text-slate-600 opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
               >
-                {loading ? 'Verifying...' : "Verify OTP"}
+                {loading ? <LoadingSpinner /> : "Verify OTP"}
               </button>
               <button type="button" onClick={() => { setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Number</button>
             </div>
