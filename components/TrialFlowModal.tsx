@@ -255,7 +255,10 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
           {step === 'OTP' && (
             <div className="animate-in slide-in-from-right">
               <h2 className="text-4xl font-black text-white uppercase mb-4 tracking-tighter">Verify <span className="text-emerald-500">Device</span></h2>
-              <p className="text-slate-400 text-sm mb-10">Code sent to <span className="text-emerald-400 font-mono">+91 {formData.phone}</span>.</p>
+              <p className="text-slate-400 text-sm mb-6">Code sent to <span className="text-emerald-400 font-mono">+91 {formData.phone}</span>.</p>
+              <p className="text-[10px] font-medium text-amber-500/90 text-center mb-6 uppercase tracking-tight leading-relaxed px-4">
+                We will call you to provide the OTP. <br />Please pick up the call for OTP.
+              </p>
               <form onSubmit={handleOtpSubmit} className="space-y-8">
                 <div className="flex justify-between gap-3">
                   {Array(6).fill(0).map((_, i) => (

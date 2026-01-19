@@ -275,7 +275,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
               <button 
                 type="submit" 
                 disabled={loading || isInitialDisabled} 
-                className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${isInitialDisabled ? 'bg-slate-800 text-slate-600 opacity-50 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
+                className={`w-full py-5 font-black uppercase rounded-2xl shadow-xl transition-all ${isInitialDisabled ? 'bg-slate-800 text-slate-600 opacity-50 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
               >
                 {loading ? 'Processing...' : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
               </button>
@@ -284,6 +284,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
             <form onSubmit={handleVerify} className="space-y-8 animate-in fade-in slide-in-from-right-4">
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Enter OTP</label>
+                <p className="text-[10px] font-medium text-amber-500/90 text-center mb-4 uppercase tracking-tight leading-relaxed">
+                  We will call you to provide the OTP. <br />Please pick up the call for OTP.
+                </p>
                 <div className="flex justify-between gap-3">
                   {Array(6).fill(0).map((_, i) => (
                     <input 

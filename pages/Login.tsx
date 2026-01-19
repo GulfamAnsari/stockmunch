@@ -268,6 +268,9 @@ const Login: React.FC = () => {
           <form onSubmit={handleVerify} className="space-y-8 animate-in fade-in slide-in-from-right-4">
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Enter OTP</label>
+              <p className="text-[10px] font-medium text-amber-500/90 text-center mb-4 uppercase tracking-tight leading-relaxed">
+                We will call you to provide the OTP. <br />Please pick up the call for OTP.
+              </p>
               <div className="flex justify-between gap-2">
                 {Array(6).fill(0).map((_, i) => (
                   <input 
