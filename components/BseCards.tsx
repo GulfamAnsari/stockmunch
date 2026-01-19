@@ -19,7 +19,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("https://aquamarine-wallaby-801291.hostingersite.com/apis/bse.php", {
+      const response = await fetch("/api/bsefeed", {
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`
         }
