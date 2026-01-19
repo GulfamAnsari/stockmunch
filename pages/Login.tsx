@@ -5,7 +5,8 @@ import { Logo } from '../constants';
 const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
 
 const setAuthCookie = (token: string) => {
-  document.cookie = `sm_token=${token}; max-age=300; path=/; SameSite=Lax`;
+  // Fixed: Increased max-age from 300 to 2592000 (30 days)
+  document.cookie = `sm_token=${token}; max-age=2592000; path=/; SameSite=Lax`;
 };
 
 const getAuthToken = () => {

@@ -15,7 +15,8 @@ type Step = 'PHONE' | 'OTP' | 'PROFILE' | 'SUCCESS';
 const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
 
 const setAuthCookie = (token: string) => {
-  document.cookie = `sm_token=${token}; max-age=300; path=/; SameSite=Lax`;
+  // Fixed: Increased max-age from 300 to 2592000 (30 days)
+  document.cookie = `sm_token=${token}; max-age=2592000; path=/; SameSite=Lax`;
 };
 
 const getAuthToken = () => {
@@ -298,7 +299,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
               <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <div><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Full Name*</label><input required type="text" placeholder="Your Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40" /></div>
                 <div><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Email Address*</label><input required type="email" placeholder="name@email.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className={`w-full bg-slate-900/50 border rounded-2xl px-6 py-4 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} /></div>
-                <div><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Set Password* (min 6 chars)</label><input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className={`w-full bg-slate-900/50 border rounded-2xl px-6 py-4 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length < 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} /></div>
+                <div><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Set Password* (min 6 chars)</label><input required type="password" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-4 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length < 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} /></div>
                 <button 
                   type="submit" 
                   disabled={loading || isProfileDisabled} 
