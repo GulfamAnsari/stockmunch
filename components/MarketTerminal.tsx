@@ -197,7 +197,7 @@ const NewsCard: React.FC<{
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-x-2">
-                <h3 className="text-[11px] font-black text-blue-500/90 tracking-tight uppercase leading-none truncate max-w-[120px]">
+                <h3 className="text-[12px] text-blue-400/100 tracking-tight uppercase leading-none truncate max-w-[120px]">
                   {news.companyName}
                 </h3>
                 <span className={`text-[9px] font-bold flex items-center ${
@@ -223,14 +223,14 @@ const NewsCard: React.FC<{
         </div>
 
         <AnimatedTooltip text={news.title}>
-          <h4 className="text-[13px] font-bold text-slate-200 leading-snug mb-3 line-clamp-2 group-hover:text-emerald-500/90 transition-colors">
+          <h4 className="text-[13px] text-slate-300 leading-snug mb-3 line-clamp-2 transition-colors">
             {news.title}
           </h4>
         </AnimatedTooltip>
 
         <div className="flex-grow">
           <AnimatedTooltip text={news.content}>
-            <p className="text-[11px] text-slate-400 line-clamp-4 leading-relaxed mb-4 font-medium italic border-l-2 border-emerald-600/30 pl-3 transition-colors group-hover:text-slate-200">
+            <p className="text-[11px] text-slate-500 line-clamp-4 leading-relaxed mb-4 font-medium italic border-l-2 border-emerald-600/30 pl-3 transition-colors">
               {news.content}
             </p>
           </AnimatedTooltip>
