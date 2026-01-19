@@ -137,7 +137,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
     setError(null);
     try {
       // Updated to requested API URL
-      const response = await fetch("https://aquamarine-wallaby-801291.hostingersite.com/apis/bse.php", {
+      const response = await fetch("https://lavender-goldfish-594505.hostingersite.com/apis/bse.php", {
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`
         }
