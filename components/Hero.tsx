@@ -51,12 +51,11 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
         <div className="absolute top-[15%] right-[10%] hidden xl:block animate-[float-icon_6s_ease-in-out_infinite]">
           <div className="relative group">
             <div className="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full scale-150 group-hover:bg-emerald-500/30 transition-all duration-700"></div>
-            <svg className="w-32 h-32 text-emerald-500/40 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-32 h-32 text-emerald-600/40 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
           </div>
         </div>
-
         {/* Floating Candlestick UI Elements */}
         <div className="absolute bottom-[25%] left-[10%] hidden xl:flex space-x-8 items-end animate-[float-icon_8s_ease-in-out_infinite_reverse]">
           <div className="flex flex-col items-center opacity-40">
@@ -100,9 +99,9 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
           India's definitive real-time stock alert engine
         </div>
         
-        <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white mb-6 md:mb-8 tracking-tighter leading-[0.95] md:leading-[0.9] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 uppercase">
-          Never Miss a <span className="text-emerald-500 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]">Market</span> <br className="hidden sm:block" />
-          <span className="text-emerald-500 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]">Move</span> Again
+        <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-slate-200 mb-6 md:mb-8 tracking-tighter leading-[0.95] md:leading-[0.9] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 uppercase">
+          Never Miss a <span className="text-emerald-600 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.2)]">Market</span> <br className="hidden sm:block" />
+          <span className="text-emerald-600 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.2)]">Move</span> Again
         </h1>
         
         <p className="text-sm sm:text-base md:text-xl text-slate-400 mb-8 md:mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 font-medium">
@@ -112,7 +111,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
           <button 
             onClick={onOpenPricing}
-            className="w-full md:w-auto px-8 md:px-10 py-4 md:py-5 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black uppercase tracking-widest rounded-xl transition-all shadow-2xl shadow-emerald-500/25 flex flex-col items-center justify-center group shrink-0"
+            className="w-full md:w-auto px-8 md:px-10 py-4 md:py-5 bg-emerald-700 hover:bg-emerald-600 text-slate-100 font-black uppercase tracking-widest rounded-xl transition-all shadow-2xl shadow-emerald-900/20 flex flex-col items-center justify-center group shrink-0"
           >
             <span className="flex items-center">
               30-Day Free Trial
@@ -125,27 +124,39 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
           
           <button 
             onClick={() => onScrollToSection('alerts')}
-            className="w-full md:w-auto px-8 py-4 md:py-5 bg-transparent hover:bg-emerald-500/5 text-emerald-500 font-bold rounded-xl border border-emerald-500/50 transition-all flex items-center justify-center"
+            className="w-full md:w-auto px-8 py-4 md:py-5 bg-transparent hover:bg-emerald-600/5 text-emerald-600 font-bold rounded-xl border border-emerald-600/30 transition-all flex items-center justify-center"
           >
             Explore Alerts
           </button>
 
           <button 
             onClick={() => onScrollToSection('dashboard')}
-            className="w-full md:w-auto px-8 py-4 md:py-5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center"
+            className="w-full md:w-auto px-8 py-4 md:py-5 bg-white/[0.02] hover:bg-white/[0.05] text-slate-300 font-bold rounded-xl border border-white/[0.05] transition-all flex items-center justify-center"
           >
             Live Terminal
           </button>
         </div>
 
-        <div className="mt-16 md:mt-24 flex flex-col sm:flex-row justify-center items-center space-y-8 sm:space-y-0 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-500">
-          <div className="text-center px-6 md:px-12 sm:border-x border-white/5">
-            <div className="text-3xl md:text-5xl font-black text-emerald-500 mb-1 md:mb-2 tracking-tighter uppercase">99.9%</div>
-            <div className="text-slate-400 text-[10px] font-black uppercase tracking-widest opacity-60">Uptime</div>
+        {/* Roadmap Roadmap/Coming Soon Badges */}
+        <div className="mt-8 flex flex-wrap justify-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
+          <div className="flex items-center space-x-2 px-3 py-1.5 bg-white/[0.02] rounded-full border border-white/[0.05]">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+            <span className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-500">WhatsApp Alerts Coming Soon</span>
           </div>
-          <div className="text-center px-6 md:px-12 sm:border-r border-white/5">
-            <div className="text-3xl md:text-5xl font-black text-emerald-500 mb-1 md:mb-2 tracking-tighter uppercase">30 Days</div>
-            <div className="text-slate-400 text-[10px] font-black uppercase tracking-widest opacity-60">Trial Period</div>
+          <div className="flex items-center space-x-2 px-3 py-1.5 bg-white/[0.02] rounded-full border border-white/[0.05]">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-600 animate-pulse"></span>
+            <span className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-500">Android & iOS Apps Coming Soon</span>
+          </div>
+        </div>
+
+        <div className="mt-16 md:mt-24 flex flex-col sm:flex-row justify-center items-center space-y-8 sm:space-y-0 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-500">
+          <div className="text-center px-6 md:px-12 sm:border-x border-white/[0.05]">
+            <div className="text-3xl md:text-5xl font-black text-emerald-600/80 mb-1 md:mb-2 tracking-tighter uppercase">99.9%</div>
+            <div className="text-slate-600 text-[10px] font-black uppercase tracking-widest opacity-60">Uptime</div>
+          </div>
+          <div className="text-center px-6 md:px-12 sm:border-r border-white/[0.05]">
+            <div className="text-3xl md:text-5xl font-black text-emerald-600/80 mb-1 md:mb-2 tracking-tighter uppercase">30 Days</div>
+            <div className="text-slate-600 text-[10px] font-black uppercase tracking-widest opacity-60">Trial Period</div>
           </div>
         </div>
       </div>
