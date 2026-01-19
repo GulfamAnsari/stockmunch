@@ -112,7 +112,7 @@ const NewsCard: React.FC<{
         onPriceUpdate(news.id, percentageMap.get(querySymbol));
       } else {
         const resp = await fetch(
-          `https://droidtechknow.com/admin/api/stocks/chart.php?symbol=${querySymbol}&interval=1d&range=1d`,
+          `https://lavender-goldfish-594505.hostingersite.com/api/chart?symbol=${querySymbol}&interval=1d&range=1d`,
           {
             headers: {
               'Authorization': `Bearer ${getAuthToken()}`
