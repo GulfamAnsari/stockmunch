@@ -56,7 +56,6 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
       className={`bg-[#111621] border border-white/[0.05] rounded-xl flex flex-col h-full hover:border-blue-500/20 transition-all group shadow-2xl relative cursor-pointer ${isRead ? 'opacity-80' : ''}`}
     >
       <div className="p-5 flex flex-col h-full">
-        {/* Header - Simple Header for BSE */}
         <div className="flex items-start justify-between mb-4">
           <div className="min-w-0">
             <h3 className="text-[11px] font-black text-blue-500 tracking-tight uppercase leading-none truncate max-w-[180px] mb-1">
@@ -76,14 +75,12 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
           </div>
         </div>
 
-        {/* Title */}
         <BseTooltip text={news.title}>
           <h4 className="text-[14px] font-bold text-slate-200 leading-snug mb-3 line-clamp-2 group-hover:text-blue-400 transition-colors">
             {news.title}
           </h4>
         </BseTooltip>
 
-        {/* Content */}
         <div className="flex-grow">
           <BseTooltip text={news.content}>
             <p className="text-[11px] text-slate-400 line-clamp-5 leading-relaxed mb-4 font-medium border-l-2 border-blue-600/30 pl-3">
@@ -92,7 +89,6 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
           </BseTooltip>
         </div>
 
-        {/* Footer - Only Watchlist and PDF */}
         <div className="pt-4 mt-auto flex items-center justify-between border-t border-white/[0.05]">
           <button
             onClick={(e) => { e.stopPropagation(); onWatchlistAdd({ ...news, source: 'BSE' }); }}
@@ -130,14 +126,16 @@ interface BseCardsProps {
 const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
   const [bseNews, setBseNews] = useState<BseNewsItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [displayLimit, setDisplayLimit] = useState(10);
+  const loaderRef = useRef<HTMLDivElement>(null);
 
-  const fetchBseFeeds = useCallback(async () => {
-    setLoading(true);
+  const fetchBseFeeds = useCallback(async (isInitial = false) => {
+    if (isInitial) setLoading(true);
     setError(null);
     try {
-      // Updated to requested API URL
-      const response = await fetch("https://lavender-goldfish-594505.hostingersite.com/apis/bse.php", {
+      const response = await fetch("https://lavender-goldfish-594505.hostingersite.com/api/bsefeed", {
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`
         }
@@ -146,7 +144,6 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
 
       if (json.status === "success" && json.data) {
         const allItems: BseNewsItem[] = [];
-        // Support both array and object-indexed response structures
         if (Array.isArray(json.data)) {
           json.data.forEach((item: any) => {
             allItems.push({
@@ -160,7 +157,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
                 day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
               }),
               rawPublishedAt: item.publishedAt,
-              pdfUrl: item.media?.pdf || item.data?.media?.pdf, // Supporting PDF in media key
+              pdfUrl: item.media?.pdf || item.data?.media?.pdf,
               source: "BSE"
             });
           });
@@ -178,12 +175,14 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
                 day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
               }),
               rawPublishedAt: item.publishedAt,
-              pdfUrl: item.media?.pdf || item.data?.media?.pdf, // Supporting PDF in media key
+              pdfUrl: item.media?.pdf || item.data?.media?.pdf,
               source: "BSE"
             }));
             allItems.push(...mappedItems);
           });
         }
+        // Sort by time descending
+        allItems.sort((a, b) => new Date(b.rawPublishedAt).getTime() - new Date(a.rawPublishedAt).getTime());
         setBseNews(allItems);
       } else {
         setError("BSE data stream temporarily unavailable.");
@@ -192,13 +191,42 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
       console.error("BSE Fetch Error:", err);
       setError("Unable to connect to BSE data tunnel.");
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchBseFeeds();
+    fetchBseFeeds(true);
   }, [fetchBseFeeds]);
+
+  // Polling every 10 seconds if autoRefresh is enabled
+  useEffect(() => {
+    let interval: number | undefined;
+    if (autoRefresh) {
+      interval = window.setInterval(() => {
+        fetchBseFeeds(false);
+      }, 10000);
+    }
+    return () => clearInterval(interval);
+  }, [autoRefresh, fetchBseFeeds]);
+
+  // Intersection Observer for Infinite Scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && bseNews.length > displayLimit) {
+          setDisplayLimit((prev) => prev + 10);
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [bseNews.length, displayLimit]);
 
   if (loading) {
     return (
@@ -214,28 +242,59 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
       <div className="h-full min-h-[400px] flex flex-col items-center justify-center p-8 text-center opacity-40">
         <p className="text-xl font-black uppercase tracking-[0.2em] mb-4 text-rose-500">Pipeline Offline</p>
         <p className="text-slate-400 text-xs font-medium max-w-xs">{error}</p>
-        <button onClick={fetchBseFeeds} className="mt-8 px-6 py-2 bg-slate-900 border border-white/5 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-300 hover:bg-slate-800 transition-all">Retry Link</button>
+        <button onClick={() => fetchBseFeeds(true)} className="mt-8 px-6 py-2 bg-slate-900 border border-white/5 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-300 hover:bg-slate-800 transition-all">Retry Link</button>
       </div>
     );
   }
 
-  if (bseNews.length === 0) {
-    return (
-      <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center opacity-20">
-        <p className="text-lg sm:text-xl font-black uppercase tracking-[0.3em] px-4">BSE Tunnel Clear</p>
-      </div>
-    );
-  }
+  const pagedNews = bseNews.slice(0, displayLimit);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 pt-4 animate-in fade-in duration-500">
-      {bseNews.map((newsItem) => (
-        <BseNewsCard 
-          key={newsItem.id} 
-          news={newsItem} 
-          onWatchlistAdd={onWatchlistAdd} 
-        />
-      ))}
+    <div className="flex flex-col space-y-6">
+      {/* Component Specific Control Bar */}
+      <div className="flex items-center justify-between pb-2">
+        <div className="flex items-center space-x-2">
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">BSE Pipeline Status</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+        </div>
+        <button 
+          onClick={() => setAutoRefresh(!autoRefresh)} 
+          className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 ${ 
+            autoRefresh ? "bg-blue-600/10 border-blue-600/50 text-blue-500" : "bg-slate-950/40 border-white/[0.05] text-slate-500 hover:text-slate-300" 
+          }`}
+        >
+          <div className={`w-2 h-2 rounded-full ${ autoRefresh ? "bg-blue-600 animate-pulse shadow-[0_0_8px_rgba(37,99,235,0.3)]" : "bg-slate-700" }`}></div>
+          <span>BSE Live Monitoring</span>
+        </button>
+      </div>
+
+      {bseNews.length === 0 ? (
+        <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center opacity-20">
+          <p className="text-lg sm:text-xl font-black uppercase tracking-[0.3em] px-4">BSE Tunnel Clear</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 pt-4 animate-in fade-in duration-500">
+            {pagedNews.map((newsItem) => (
+              <BseNewsCard 
+                key={newsItem.id} 
+                news={newsItem} 
+                onWatchlistAdd={onWatchlistAdd} 
+              />
+            ))}
+          </div>
+          
+          {/* Infinite Scroll Trigger */}
+          <div ref={loaderRef} className="py-10 flex justify-center">
+            {displayLimit < bseNews.length && (
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-8 h-8 border-2 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+                <p className="text-[8px] font-black text-slate-700 uppercase tracking-widest">Fetching more dispatches...</p>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };
