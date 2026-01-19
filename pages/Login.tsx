@@ -25,7 +25,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Login | StockManch";
+    document.title = "Login | StockMunch";
   }, []);
 
   useEffect(() => {
@@ -205,7 +205,7 @@ const Login: React.FC = () => {
           <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
             {step === 'SUCCESS' ? 'Reset Done' : method === 'RESET' ? 'Reset Password' : 'Sign In'}
           </h1>
-          <p className="text-slate-500 text-sm opacity-60">{step === 'SUCCESS' ? 'Credentials synced.' : 'Access your StockManch terminal.'}</p>
+          <p className="text-slate-500 text-sm opacity-60">{step === 'SUCCESS' ? 'Credentials synced.' : 'Access your StockMunch terminal.'}</p>
         </div>
 
         {error && (

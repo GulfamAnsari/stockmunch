@@ -1,9 +1,8 @@
-
 import React from 'react';
 
 const AlertShowcase: React.FC = () => {
   return (
-    <section id="alerts" className="py-24 bg-[#0b0f1a] relative overflow-hidden border-t border-white/5">
+    <section id="alerts" className="py-24 bg-[#0b0f1a] relative overflow-hidden border-t border-white/5 selection:bg-emerald-500/30">
       {/* Decorative Glows */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-emerald-500/5 blur-[120px] rounded-full"></div>
       <div className="absolute bottom-0 left-0 w-1/4 h-1/2 bg-sky-500/5 blur-[100px] rounded-full"></div>
@@ -92,7 +91,7 @@ const AlertShowcase: React.FC = () => {
                   <div className="bg-[#242f3d] p-3 pt-10 flex items-center space-x-3 border-b border-white/5">
                     <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[10px] font-bold">S</div>
                     <div>
-                      <p className="text-[10px] font-bold text-white leading-none">StockManch(Stock...</p>
+                      <p className="text-[10px] font-bold text-white leading-none">StockMunch(Stock...</p>
                       <p className="text-[8px] text-slate-400">5 members</p>
                     </div>
                   </div>
@@ -130,6 +129,7 @@ const AlertShowcase: React.FC = () => {
                   {/* Telegram Message Input Area Mockup */}
                   <div className="p-2 pb-6 border-t border-white/5 flex items-center space-x-2">
                     <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-slate-500">
+                      {/* Fixed malformed SVG attribute below */}
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                       </svg>

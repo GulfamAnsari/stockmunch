@@ -1,11 +1,10 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const RegulatoryPolicy: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Regulatory Policy | StockManch";
+    document.title = "Regulatory Policy | StockMunch";
   }, []);
 
   return (
@@ -19,12 +18,12 @@ const RegulatoryPolicy: React.FC = () => {
           <div className="space-y-12 text-lg leading-relaxed font-medium">
             <section>
               <h2 className="text-xl font-bold text-white uppercase tracking-widest mb-4 border-l-4 border-emerald-500 pl-4">Compliance Framework</h2>
-              <p>Compliance is our priority. StockManch operates within the regulatory framework governing information technology and financial data dissemination in India.</p>
+              <p>Compliance is our priority. StockMunch operates within the regulatory framework governing information technology and financial data dissemination in India.</p>
             </section>
 
             <section>
               <h2 className="text-xl font-bold text-white uppercase tracking-widest mb-4 border-l-4 border-emerald-500 pl-4">SEBI Guidelines</h2>
-              <p>StockManch operates strictly as a news aggregation and analysis tool. We adhere to SEBI (Investment Advisers) Regulations by ensuring we only provide factual data and AI-driven sentiment analysis without specific buy/sell recommendations.</p>
+              <p>StockMunch operates strictly as a news aggregation and analysis tool. We adhere to SEBI (Investment Advisers) Regulations by ensuring we only provide factual data and AI-driven sentiment analysis without specific buy/sell recommendations.</p>
             </section>
 
             <section>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PRICING_PLANS } from '../constants';
 import { PricingPlan } from '../types';
@@ -19,7 +18,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onSelectPl
           <div className="flex justify-between items-center mb-10">
             <div>
               <h2 className="text-3xl font-bold text-white mb-2">Choose Your Plan</h2>
-              <p className="text-slate-400">Join StockManch and never miss a market move again.</p>
+              <p className="text-slate-400">Join StockMunch and never miss a market move again.</p>
             </div>
             <button 
               onClick={onClose}

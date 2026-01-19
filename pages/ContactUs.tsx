@@ -11,7 +11,7 @@ const ContactUs: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Contact Us | StockManch";
+    document.title = "Contact Us | StockMunch";
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,7 +94,7 @@ const ContactUs: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-white font-bold uppercase text-xs tracking-widest mb-1">Email Dispatch</h3>
-                    <p className="text-slate-400 font-mono text-sm">support@stockmanch.com</p>
+                    <p className="text-slate-400 font-mono text-sm">support@stockmunch.com</p>
                   </div>
                 </div>
 
@@ -106,7 +106,7 @@ const ContactUs: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-white font-bold uppercase text-xs tracking-widest mb-1">Telegram Community</h3>
-                    <p className="text-slate-400 font-mono text-sm">@stockmanch_support</p>
+                    <p className="text-slate-400 font-mono text-sm">@stockmunch_support</p>
                   </div>
                 </div>
               </div>

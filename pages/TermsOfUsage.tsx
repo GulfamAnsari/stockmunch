@@ -1,11 +1,10 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const TermsOfUsage: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Terms of Usage | StockManch";
+    document.title = "Terms of Usage | StockMunch";
   }, []);
 
   return (
@@ -19,12 +18,12 @@ const TermsOfUsage: React.FC = () => {
           <div className="space-y-12 text-lg leading-relaxed font-medium">
             <section>
               <h2 className="text-xl font-bold text-white uppercase tracking-widest mb-4 border-l-4 border-emerald-500 pl-4">Agreement to Terms</h2>
-              <p>By accessing StockManch.com and using our alert services, you agree to be bound by these terms. If you do not agree, please discontinue use of the platform immediately.</p>
+              <p>By accessing StockMunch.com and using our alert services, you agree to be bound by these terms. If you do not agree, please discontinue use of the platform immediately.</p>
             </section>
 
             <section>
               <h2 className="text-xl font-bold text-white uppercase tracking-widest mb-4 border-l-4 border-emerald-500 pl-4">Nature of Service</h2>
-              <p>StockManch provides information and alerts based on public filings and exchange data. We are a technology-driven information aggregator. We are not a registered investment advisor (RIA) or a broker-dealer.</p>
+              <p>StockMunch provides information and alerts based on public filings and exchange data. We are a technology-driven information aggregator. We are not a registered investment advisor (RIA) or a broker-dealer.</p>
             </section>
 
             <section>
@@ -34,7 +33,7 @@ const TermsOfUsage: React.FC = () => {
 
             <section>
               <h2 className="text-xl font-bold text-white uppercase tracking-widest mb-4 border-l-4 border-emerald-500 pl-4">Accuracy and Latency</h2>
-              <p>While we strive for millisecond precision and institutional-grade accuracy, technical latencies, exchange errors, or upstream data provider failures are beyond our control. StockManch is not liable for losses resulting from data delays.</p>
+              <p>While we strive for millisecond precision and institutional-grade accuracy, technical latencies, exchange errors, or upstream data provider failures are beyond our control. StockMunch is not liable for losses resulting from data delays.</p>
             </section>
 
             <section>

@@ -146,7 +146,7 @@ const App: React.FC = () => {
                     <svg className="w-4 h-4 mr-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z" />
                     </svg>
-                    support@stockmanch.com
+                    support@stockmunch.com
                   </li>
                   <li><button onClick={() => scrollToSection('faq')} className="hover:text-emerald-500 transition-colors text-left w-full">Help Center / FAQ</button></li>
                 </ul>
@@ -155,10 +155,10 @@ const App: React.FC = () => {
             
             <div className="pt-16 border-t border-white/5 text-center flex flex-col items-center max-w-4xl mx-auto">
               <div className="mb-6 text-[11px] text-slate-600 font-mono tracking-[0.2em] uppercase">
-                © 2026 StockManch | Terminal Build v4.2.1-stable | Secure Node #042
+                © 2026 StockMunch | Terminal Build v4.2.1-stable | Secure Node #042
               </div>
               <p className="text-[10px] text-slate-500 leading-relaxed font-medium opacity-60 mb-8 max-w-3xl">
-                DISCLAIMER: Investment in securities market are subject to market risks. Read all the related documents carefully before investing. StockManch provides technology-driven information aggregation and AI sentiment analysis for educational and informational purposes only. We are not a SEBI registered investment advisor.
+                DISCLAIMER: Investment in securities market are subject to market risks. Read all the related documents carefully before investing. StockMunch provides technology-driven information aggregation and AI sentiment analysis for educational and informational purposes only. We are not a SEBI registered investment advisor.
               </p>
               <div className="flex items-center justify-center space-x-6">
                 <div className="flex items-center text-[10px] text-emerald-500/50 uppercase font-black tracking-widest">

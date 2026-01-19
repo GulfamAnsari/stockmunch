@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MOCK_NEWS } from '../constants';
 import { StockNews } from '../types';
@@ -140,7 +139,7 @@ const Dashboard: React.FC = () => {
               <svg className="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2-2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span>stockmanch.com/terminal/v2</span>
+              <span>stockmunch.com/terminal/v2</span>
             </div>
           </div>
           <div className="flex items-center space-x-6">
@@ -238,7 +237,7 @@ const Dashboard: React.FC = () => {
            </div>
            <div className="flex items-center space-x-2">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/40"></div>
-              <span className="uppercase opacity-60">StockManch Terminal v4.2.1-STABLE</span>
+              <span className="uppercase opacity-60">StockMunch Terminal v4.2.1-STABLE</span>
            </div>
         </footer>
       </section>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { StockNews, PricingPlan } from './types';
 
@@ -218,18 +217,18 @@ export const FAQ_DATA = [
   },
   {
     question: "Is there a free trial available?",
-    answer: "Absolutely! We offer a 30-day full access trial for all new users so you can experience the speed and power of StockManch risk-free."
+    answer: "Absolutely! We offer a 30-day full access trial for all new users so you can experience the speed and power of StockMunch risk-free."
   },
   {
     question: "Can I cancel my subscription anytime?",
     answer: "Yes. You can cancel your subscription from your account settings at any time. If you are in the trial period, you won't be charged."
   },
   {
-    question: "Is StockManch a SEBI registered investment advisor?",
-    answer: "StockManch is a technology-driven information aggregator and AI analysis platform. We do not provide personalized investment advice or buy/sell recommendations. We are not a SEBI registered advisor."
+    question: "Is StockMunch a SEBI registered investment advisor?",
+    answer: "StockMunch is a technology-driven information aggregator and AI analysis platform. We do not provide personalized investment advice or buy/sell recommendations. We are not a SEBI registered advisor."
   },
   {
-    question: "What data sources does StockManch use?",
+    question: "What data sources does StockMunch use?",
     answer: "We fetch news and market updates directly from leading financial news media houses and verified journalistic sources to ensure you get comprehensive coverage of the market landscape."
   },
   {

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../constants';
@@ -132,7 +133,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
       setError("Enter the 6-digit OTP.");
       return;
     }
-    // Min 6 char check only for RESET/SIGNUP as per instructions
+    // Min 6 chars for password reset
     if (method === 'RESET' && formData.password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
@@ -217,11 +218,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
         <div className="p-10">
           <div className="flex justify-between items-start mb-10">
             <Logo className="h-10 w-auto" />
-            <button onClick={onClose} className="p-2 text-slate-500 hover:text-white transition-colors"><svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <button onClick={onClose} className="p-2 text-slate-500 hover:text-white transition-colors">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
           <div className="mb-10 text-center">
             <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-2 opacity-90">{method === 'RESET' ? 'Reset Password' : 'Sign In'}</h2>
-            <p className="text-slate-500 text-sm opacity-60">Access your StockManch terminal.</p>
+            <p className="text-slate-500 text-sm opacity-60">Access your StockMunch terminal.</p>
           </div>
 
           {error && (
@@ -235,11 +240,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
 
           {method !== 'RESET' && step !== 'SUCCESS' && (
             <div className="flex bg-slate-950/50 rounded-2xl p-1 mb-10 border border-white/5">
-              <button onClick={() => { setMethod('OTP'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'OTP' ? 'bg-emerald-500 text-slate-900 shadow-lg' : 'text-slate-500'}`}>OTP Login</button>
-              <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'PASSWORD' ? 'bg-emerald-500 text-slate-900 shadow-lg' : 'text-slate-500'}`}>Password</button>
+              <button onClick={() => { setMethod('OTP'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'OTP' ? 'bg-emerald-500 text-slate-900' : 'text-slate-500'}`}>OTP Login</button>
+              <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${method === 'PASSWORD' ? 'bg-emerald-500 text-slate-900' : 'text-slate-500'}`}>Password</button>
             </div>
           )}
-          
+
           {step === 'INPUT' ? (
             <form onSubmit={handleInitialSubmit} className="space-y-8">
               <div className="space-y-3">
@@ -252,7 +257,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
                     placeholder="98765 43210" 
                     value={formData.phone} 
                     onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})} 
-                    className={`w-full bg-slate-950/50 border rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none transition-all font-mono placeholder:text-slate-800/40 ${error && formData.phone.length !== 10 ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} 
+                    className={`w-full bg-slate-950/50 border rounded-2xl pl-16 pr-6 py-5 text-white focus:outline-none transition-all font-mono placeholder:text-slate-800/40 ${error && formData.phone.length !== 10 ? 'border-rose-500 bg-rose-500/10' : 'border-white/5 focus:border-emerald-500'}`} 
                   />
                 </div>
               </div>
@@ -268,14 +273,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
                     placeholder="••••••••" 
                     value={formData.password} 
                     onChange={(e) => setFormData({...formData, password: e.target.value})} 
-                    className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} 
+                    className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error ? 'border-rose-500 bg-rose-500/10' : 'border-white/5 focus:border-emerald-500'}`} 
                   />
                 </div>
               )}
               <button 
                 type="submit" 
                 disabled={loading || isInitialDisabled} 
-                className={`w-full py-5 font-black uppercase rounded-2xl shadow-xl transition-all ${isInitialDisabled ? 'bg-slate-800 text-slate-600 opacity-50 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
+                className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl ${isInitialDisabled ? 'bg-slate-800 text-slate-600 opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
               >
                 {loading ? 'Processing...' : (method === 'PASSWORD' ? 'Sign In' : "Send OTP")}
               </button>
@@ -284,21 +289,18 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
             <form onSubmit={handleVerify} className="space-y-8 animate-in fade-in slide-in-from-right-4">
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Enter OTP</label>
-                <p className="text-[10px] font-medium text-amber-500/90 text-center mb-4 uppercase tracking-tight leading-relaxed">
-                  We will call you to provide the OTP. <br />Please pick up the call for OTP.
-                </p>
-                <div className="flex justify-between gap-3">
+                <div className="flex justify-between gap-2">
                   {Array(6).fill(0).map((_, i) => (
                     <input 
                       key={i} 
-                      ref={el => { otpRefs.current[i] = el; }}
+                      ref={el => { otpRefs.current[i] = el; }} 
                       maxLength={1} 
                       required 
-                      className={`w-full h-14 bg-slate-950/50 border rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40 ${error ? 'border-rose-500/50 bg-rose-500/5' : 'border-white/10'}`} 
+                      className={`w-full h-14 bg-slate-950/50 border rounded-xl text-center text-xl text-emerald-500 font-black focus:outline-none focus:border-emerald-500 placeholder:text-slate-800/40 ${error ? 'border-rose-500/50 bg-rose-500/5' : 'border-white/5'}`} 
                       placeholder="•" 
-                      value={formData.otp[i] || ''}
-                      onChange={(e) => handleOtpChange(i, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                      value={formData.otp[i] || ''} 
+                      onChange={(e) => handleOtpChange(i, e.target.value)} 
+                      onKeyDown={(e) => handleOtpKeyDown(i, e)} 
                     />
                   ))}
                 </div>
@@ -312,7 +314,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
                     placeholder="••••••••" 
                     value={formData.password} 
                     onChange={(e) => setFormData({...formData, password: e.target.value})} 
-                    className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length < 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} 
+                    className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length < 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/5 focus:border-emerald-500'}`} 
                   />
                 </div>
               )}
@@ -322,13 +324,18 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
                   disabled={loading || formData.otp.length < 6} 
                   className={`w-full py-5 font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all ${formData.otp.length < 6 ? 'bg-slate-800 text-slate-600 opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900'}`}
                 >
-                  {loading ? 'Wait...' : "Verify OTP"}
+                  {loading ? 'Verifying...' : "Verify OTP"}
                 </button>
-                <button type="button" onClick={() => { setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest transition-colors hover:text-white">Change Number</button>
+                <button type="button" onClick={() => { setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-white transition-colors">Change Number</button>
               </div>
             </form>
           ) : (
-            <div className="text-center py-6 animate-in zoom-in">
+            <div className="text-center animate-in zoom-in py-6">
+              <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-8 text-emerald-500">
+                <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
               <h3 className="text-2xl font-black text-white uppercase mb-4 tracking-tighter">Updated</h3>
               <p className="text-slate-500 text-sm mb-10 leading-relaxed opacity-60">Credentials synced. Please sign in now.</p>
               <button onClick={() => { setMethod('PASSWORD'); setStep('INPUT'); setError(null); setNotRegistered(false); }} className="w-full py-5 bg-emerald-500 text-slate-900 font-black uppercase tracking-widest rounded-2xl">Sign In</button>

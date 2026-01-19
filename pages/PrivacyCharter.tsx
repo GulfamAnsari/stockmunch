@@ -1,11 +1,10 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const PrivacyCharter: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Privacy Charter | StockManch";
+    document.title = "Privacy Charter | StockMunch";
   }, []);
 
   return (
@@ -19,7 +18,7 @@ const PrivacyCharter: React.FC = () => {
           <div className="space-y-12 text-lg leading-relaxed font-medium">
             <section>
               <h2 className="text-xl font-bold text-white uppercase tracking-widest mb-4 border-l-4 border-emerald-500 pl-4">Introduction</h2>
-              <p>At StockManch, we recognize that privacy is a fundamental right. This Charter outlines our commitment to protecting your personal data and maintaining the trust you place in us as your stock market alert partner.</p>
+              <p>At StockMunch, we recognize that privacy is a fundamental right. This Charter outlines our commitment to protecting your personal data and maintaining the trust you place in us as your stock market alert partner.</p>
             </section>
 
             <section>

@@ -216,7 +216,7 @@ const OverviewSection: React.FC<{
             <div className="flex-grow text-center md:text-left">
                <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
                   <h3 className="text-sm font-black text-white uppercase tracking-[0.2em]">Telegram Alert Node</h3>
-                  <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${isActuallyUsed ? 'bg-slate-800 text-slate-500 border border-white/5' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 animate-pulse'}`}>
+                  <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${isActuallyUsed ? 'bg-slate-800 text-slate-500 border border-white/5' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse'}`}>
                     {isActuallyUsed ? 'DEACTIVATED' : 'READY'}
                   </div>
                </div>
@@ -261,7 +261,7 @@ const OverviewSection: React.FC<{
                   <span className="text-[8px] text-slate-600 uppercase font-mono mt-1">{act.time}</span>
                 </div>
                 <span className={`text-[8px] font-black px-2 py-1 rounded border ${
-                  act.status === 'SUCCESS' ? 'border-emerald-500/20 text-emerald-500 bg-emerald-500/5' :
+                  act.status === 'SUCCESS' ? 'border-emerald-500/20 text-emerald-400 bg-emerald-500/5' :
                   act.status === 'SYNC' ? 'border-sky-500/20 text-sky-500 bg-sky-500/5' :
                   'border-white/10 text-slate-500 bg-white/5'
                 } tracking-tighter`}>
@@ -607,7 +607,7 @@ const BillingSection: React.FC<{ data: SubscriptionData | null }> = ({ data }) =
                   </div>
                 ))}
              </div>
-             <p className="mt-8 text-center text-[9px] font-medium text-slate-600 uppercase tracking-widest">Encrypted Billing by StockManch Ledger</p>
+             <p className="mt-8 text-center text-[9px] font-medium text-slate-600 uppercase tracking-widest">Encrypted Billing by StockMunch Ledger</p>
            </div>
         </div>
       </div>
@@ -714,7 +714,7 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    document.title = "Terminal Dashboard | StockManch";
+    document.title = "Terminal Dashboard | StockMunch";
     fetchCoreData();
 
     const handleOnline = () => setIsOnline(true);

@@ -1,6 +1,6 @@
 {
-  "name": "StockManch - Realtime Stock Market News Alerts",
-  "description": "StockManch provides on-time stock market alerts via Telegram and an advanced terminal featuring real-time, historical, and filtered news.",
+  "name": "StockMunch - Realtime Stock Market News Alerts",
+  "description": "StockMunch provides on-time stock market alerts via Telegram and an advanced terminal featuring real-time, historical, and filtered news.",
   "requestFramePermissions": [
     "camera",
     "microphone"

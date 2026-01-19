@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Modality } from "@google/genai";
 
 const API_KEY = process.env.API_KEY || "";
@@ -38,7 +37,7 @@ export const setupLiveAssistant = async (callbacks: any) => {
       speechConfig: {
         voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
       },
-      systemInstruction: 'You are the StockManch AI Assistant. You help traders understand market news and corporate filings. Keep answers concise and professional.',
+      systemInstruction: 'You are the StockMunch AI Assistant. You help traders understand market news and corporate filings. Keep answers concise and professional.',
     },
   });
 };

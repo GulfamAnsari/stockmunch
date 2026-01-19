@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { MOCK_NEWS } from '../constants';
 import { StockNews } from '../types';
@@ -129,7 +128,7 @@ const Terminal: React.FC = () => {
           </div>
           <div className="h-6 w-px bg-white/5 mx-2"></div>
           <div className="bg-slate-950/60 px-5 py-2 rounded-xl border border-white/5 text-[11px] text-slate-500 font-mono flex items-center shadow-inner min-w-[320px]">
-            <span className="opacity-60">stockmanch.com/terminal/live-feed</span>
+            <span className="opacity-60">stockmunch.com/terminal/live-feed</span>
           </div>
         </div>
         <div className="flex items-center space-x-6">
@@ -213,7 +212,7 @@ const Terminal: React.FC = () => {
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 opacity-40"></div>
-            <span className="opacity-60 italic">STOCKMANCH TERMINAL SHOWCASE V4.1.0</span>
+            <span className="opacity-60 italic">STOCKMUNCH TERMINAL SHOWCASE V4.1.0</span>
           </div>
         </div>
       </footer>

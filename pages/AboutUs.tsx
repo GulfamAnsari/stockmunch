@@ -1,11 +1,10 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const AboutUs: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "About Us | StockManch";
+    document.title = "About Us | StockMunch";
   }, []);
 
   return (
@@ -22,11 +21,11 @@ const AboutUs: React.FC = () => {
           
           <div className="space-y-16">
             <section className="bg-[#161b27]/40 border border-white/5 p-8 md:p-12 rounded-[2.5rem] backdrop-blur-sm shadow-2xl">
-              <h2 className="text-2xl font-bold text-white mb-6">The StockManch Story</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">The StockMunch Story</h2>
               <p className="text-lg leading-relaxed text-slate-400 font-medium">
-                StockManch was born from a simple realization: in the stock market, information is only as valuable as the speed at which it is received. For too long, millisecond-level data advantage was reserved for institutional desks and high-frequency firms.
+                StockMunch was born from a simple realization: in the stock market, information is only as valuable as the speed at which it is received. For too long, millisecond-level data advantage was reserved for institutional desks and high-frequency firms.
                 <br /><br />
-                We built StockManch to democratize market intelligence. By combining direct exchange data feeds with advanced AI sentiment analysis, we provide retail traders with a professional-grade alerting engine that levels the playing field.
+                We built StockMunch to democratize market intelligence. By combining direct exchange data feeds with advanced AI sentiment analysis, we provide retail traders with a professional-grade alerting engine that levels the playing field.
               </p>
             </section>
 

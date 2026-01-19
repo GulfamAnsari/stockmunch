@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StockManch | Real-Time Stock Market Alerts & News Dashboard</title>
+  <title>StockMunch | Real-Time Stock Market Alerts & News Dashboard</title>
   
   <!-- Primary Meta Tags -->
-  <meta name="title" content="StockManch | Real-Time Stock Market Alerts & News Dashboard">
-  <meta name="description" content="Get institutional-grade stock market news alerts via Telegram. StockManch provides on-time alerts, historical news archives, and a professional terminal for serious traders.">
-  <meta name="keywords" content="stock market alerts, telegram stock news, real-time market dashboard, NSE BSE alerts, historical stock news, Indian stock market terminal, StockManch">
-  <meta name="author" content="StockManch">
-  <link rel="canonical" href="https://stockmanch.com/">
+  <meta name="title" content="StockMunch | Real-Time Stock Market Alerts & News Dashboard">
+  <meta name="description" content="Get institutional-grade stock market news alerts via Telegram. StockMunch provides on-time alerts, historical news archives, and a professional terminal for serious traders.">
+  <meta name="keywords" content="stock market alerts, telegram stock news, real-time market dashboard, NSE BSE alerts, historical stock news, Indian stock market terminal, StockMunch">
+  <meta name="author" content="StockMunch">
+  <link rel="canonical" href="https://stockmunch.com/">
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://stockmanch.com/">
-  <meta property="og:title" content="StockManch | Real-Time Stock Market Alerts & News Dashboard">
+  <meta property="og:url" content="https://stockmunch.com/">
+  <meta property="og:title" content="StockMunch | Real-Time Stock Market Alerts & News Dashboard">
   <meta property="og:description" content="The fastest stock market alerts in India. Institutional-grade news terminal with AI sentiment analysis and Telegram integration.">
-  <meta property="og:image" content="https://stockmanch.com/og-image.jpg">
+  <meta property="og:image" content="https://stockmunch.com/og-image.jpg">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://stockmanch.com/">
-  <meta property="twitter:title" content="StockManch | Real-Time Stock Market Alerts & News Dashboard">
+  <meta property="twitter:url" content="https://stockmunch.com/">
+  <meta property="twitter:title" content="StockMunch | Real-Time Stock Market Alerts & News Dashboard">
   <meta property="twitter:description" content="Get the edge with instant Telegram alerts and our live market terminal. NSE/BSE news processed by AI in milliseconds.">
-  <meta property="twitter:image" content="https://stockmanch.com/twitter-image.jpg">
+  <meta property="twitter:image" content="https://stockmunch.com/twitter-image.jpg">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,6 +57,11 @@
       background: #1fa84f;
       border-radius: 10px;
     }
+    /* Date Input Webkit Styles */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(100) contrast(100);
+      cursor: pointer;
+    }
     @keyframes marquee {
       0% { transform: translateX(0); }
       100% { transform: translateX(-33.3333%); }
@@ -83,8 +88,8 @@
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "StockManch",
-      "url": "https://stockmanch.com/",
+      "name": "StockMunch",
+      "url": "https://stockmunch.com/",
       "description": "Real-time stock market news alerts and professional trading terminal.",
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "All",
@@ -104,7 +109,7 @@
       "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
       "react-router-dom": "https://esm.sh/react-router-dom@^6.22.0",
       "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
-      "recharts": "https://esm.sh/recharts@^3.6.0"
+      "recharts": "https://esm.sh/recharts@^2.12.0"
     }
   }
   </script>
