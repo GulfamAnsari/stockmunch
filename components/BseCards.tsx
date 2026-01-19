@@ -28,9 +28,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
 
       if (json.status === "success" && json.data) {
         const allItems: StockNews[] = [];
-        Object.keys(json.data).forEach((dateKey) => {
-          const rawItems = json.data[dateKey];
-          const mappedItems: StockNews[] = rawItems.map((item: any) => ({
+        const mappedItems: StockNews[] = json.data.map((item: any) => ({
             id: item.postId,
             symbol: item.data.cta?.[0]?.meta?.nseScriptCode || "NSE",
             bseCode: item.data.cta?.[0]?.meta?.bseScriptCode || item.data.cta?.[0]?.meta?.bseCode,
@@ -52,7 +50,6 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
             logoColor: "bg-blue-600"
           }));
           allItems.push(...mappedItems);
-        });
         setBseNews(allItems);
       } else {
         setError("Invalid stream response format.");
