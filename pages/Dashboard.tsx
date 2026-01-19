@@ -30,6 +30,12 @@ interface SubscriptionData {
   auto_renew: string | number | boolean;
 }
 
+interface TelegramInvite {
+  invite_link: string;
+  used: number | boolean;
+  created_at: string;
+}
+
 interface ProfileData {
   id: string | number;
   name: string;
@@ -74,9 +80,10 @@ const Toggle: React.FC<{
 
 const OverviewSection: React.FC<{ 
   data: SubscriptionData | null; 
+  invites: TelegramInvite[];
   loading: boolean;
   onNavigate: (section: any) => void 
-}> = ({ data, loading, onNavigate }) => {
+}> = ({ data, invites, loading, onNavigate }) => {
   if (loading) {
     return (
       <div className="flex-grow flex items-center justify-center bg-[#0b0f1a]">
@@ -87,6 +94,18 @@ const OverviewSection: React.FC<{
       </div>
     );
   }
+
+  const handleInviteInteraction = async () => {
+    try {
+      const token = getAuthToken();
+      await fetch(`${API_BASE}/mark-invite-used`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    } catch (e) {
+      console.warn("Invite telemetry sync failed", e);
+    }
+  };
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'N/A';
@@ -100,6 +119,7 @@ const OverviewSection: React.FC<{
   };
 
   const isAutoRenewOn = data?.auto_renew === 1 || data?.auto_renew === '1' || data?.auto_renew === true || data?.auto_renew === 'true';
+  const activeInvite = invites.length > 0 ? invites[0] : null;
 
   return (
     <div className="flex-grow overflow-y-auto p-4 md:p-10 custom-scrollbar space-y-8 animate-in fade-in duration-700">
@@ -168,6 +188,40 @@ const OverviewSection: React.FC<{
             </button>
           </div>
         </div>
+
+        {activeInvite && (
+          <div className="bg-[#161b27] border border-white/5 rounded-[2.5rem] p-8 md:p-10 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center gap-8 group hover:border-emerald-500/20 transition-all">
+            <div className="shrink-0 relative group/qr" onClick={handleInviteInteraction}>
+              <div className="absolute inset-0 bg-emerald-500/10 blur-xl rounded-full scale-75 group-hover/qr:scale-110 transition-transform duration-500"></div>
+              <div className="relative p-3 bg-white rounded-3xl shadow-2xl">
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(activeInvite.invite_link)}`} 
+                  alt="Telegram QR"
+                  className="w-32 h-32 md:w-36 md:h-36 block"
+                />
+              </div>
+            </div>
+            <div className="flex-grow text-center md:text-left">
+               <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
+                  <h3 className="text-sm font-black text-white uppercase tracking-[0.2em]">Telegram Alert Node</h3>
+                  <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${activeInvite.used ? 'bg-slate-800 text-slate-500' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'} animate-pulse`}>
+                    {activeInvite.used ? 'ACTIVE' : 'READY'}
+                  </div>
+               </div>
+               <p className="text-slate-400 text-xs font-medium leading-relaxed mb-6">Scan the QR code or click the button below to join your private institutional alert dispatch channel.</p>
+               <a 
+                href={activeInvite.invite_link} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={handleInviteInteraction}
+                className="inline-flex items-center px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-500/20 group"
+               >
+                 Join Alert Channel
+                 <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.25.38-.51 1.05-.78 4.12-1.79 6.87-2.97 8.24-3.54 3.92-1.63 4.73-1.91 5.26-1.92.12 0 .38.03.55.17.14.12.18.28.2.44.02.16.02.32 0 .44z"/></svg>
+               </a>
+            </div>
+          </div>
+        )}
 
         <div className="bg-[#161b27] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl">
           <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] mb-8 flex items-center">
@@ -548,6 +602,7 @@ const Dashboard: React.FC = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isFullScreenMode, setIsFullScreenMode] = useState(false);
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
+  const [inviteData, setInviteData] = useState<TelegramInvite[]>([]);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [settingsData, setSettingsData] = useState<SettingsData | null>(null);
   const [alertData, setAlertData] = useState<AlertData[]>([]);
@@ -574,8 +629,12 @@ const Dashboard: React.FC = () => {
       const subResp = await fetch(`${API_BASE}/control-center`, { method: 'GET', headers });
       const subJson = await subResp.json();
       if (subResp.status === 401 || subJson.error === 'unauthorized') return handleLogout();
+      
       const subData = subJson.subscription || (subJson.data && subJson.data.subscription);
       if (subData) setSubscriptionData(subData);
+
+      const invites = subJson.telegram_invites || [];
+      setInviteData(invites);
 
       const profResp = await fetch(`${API_BASE}/profile`, { method: 'GET', headers });
       const profJson = await profResp.json();
@@ -771,7 +830,7 @@ const Dashboard: React.FC = () => {
         <main className="flex-grow flex flex-col min-w-0 bg-[#0b0f1a] relative overflow-hidden">
           <div className="flex-grow flex flex-col overflow-hidden">
             {activeSection === 'terminal' && <MarketTerminal onToggleFullScreen={setIsFullScreenMode} />}
-            {activeSection === 'overview' && <OverviewSection data={subscriptionData} loading={loadingCore} onNavigate={setActiveSection} />}
+            {activeSection === 'overview' && <OverviewSection data={subscriptionData} invites={inviteData} loading={loadingCore} onNavigate={setActiveSection} />}
             {activeSection === 'account' && <ProfileSection data={profileData} loading={loadingCore} />}
             {activeSection === 'notifications' && <AlertHistorySection data={alertData} loading={loadingAlerts} />}
             {activeSection === 'settings' && <SettingsSection data={settingsData} loading={loadingSettings} onUpdate={handleUpdateSettings} />}
