@@ -19,7 +19,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/bsefeed", {
+      const response = await fetch("https://lavender-goldfish-594505.hostingersite.com/api/bsefeed", {
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`
         }
