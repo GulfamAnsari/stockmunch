@@ -105,6 +105,7 @@ const OverviewSection: React.FC<{
       setInviteUsedLocal(true);
       await fetch(`${API_BASE_URL}/mark-invite-used`, {
         method: 'GET',
+        cache: 'no-store',
         headers: { 'Authorization': `Bearer ${token}` }
       });
     } catch (e) {
@@ -512,55 +513,10 @@ const AlertHistorySection: React.FC<{ data: AlertData[]; loading: boolean }> = (
   );
 };
 
-const BillingSection: React.FC<{ data: SubscriptionData | null }> = ({ data }) => {
-  return (
-    <div className="flex-grow p-4 md:p-10 lg:p-14 animate-in fade-in duration-700 w-full overflow-y-auto custom-scrollbar">
-      <div className="max-w-5xl mx-auto space-y-12">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.05] pb-10">
-          <div>
-            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Financial Ledger</h2>
-            <p className="text-emerald-600/60 text-sm mt-3 font-black uppercase tracking-widest">Billing and protocol management node.</p>
-          </div>
-        </header>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-           <div className="bg-[#111621] border border-white/[0.03] rounded-[2.5rem] p-10 flex flex-col shadow-2xl relative overflow-hidden group">
-             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-4">Current Access</span>
-             <h3 className="text-4xl font-black text-emerald-400 uppercase tracking-tighter mb-4">{data?.plan_code || 'TRIAL_PRO'}</h3>
-             <div className="flex items-center space-x-4 mb-10">
-                <div className="px-3 py-1 bg-emerald-600/10 text-emerald-600 border border-emerald-600/30 rounded-lg text-[9px] font-black uppercase tracking-widest">Active Status</div>
-                <div className="text-[10px] text-slate-500 font-mono font-black">EXP: {data?.end_date ? new Date(data.end_date).toLocaleDateString() : '30 Days'}</div>
-             </div>
-             <button className="mt-auto py-4 bg-emerald-600 text-slate-900 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-900/20">Upgrade Protocol</button>
-           </div>
-
-           <div className="bg-[#111621] border border-white/[0.03] rounded-[2.5rem] p-10 flex flex-col shadow-2xl">
-             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-6">Dispatch History</span>
-             <div className="space-y-4">
-                {[
-                  { date: 'Jan 10, 2026', amount: '₹0.00', status: 'COMPLETED', id: '#SM-9401' },
-                  { date: 'Dec 11, 2025', amount: '₹0.00', status: 'COMPLETED', id: '#SM-8212' },
-                ].map((inv, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-4 bg-slate-950/60 border border-white/[0.03] rounded-2xl group hover:border-emerald-600/30 transition-all">
-                    <div className="flex flex-col">
-                      <span className="text-[11px] font-bold text-slate-100">{inv.date}</span>
-                      <span className="text-[8px] font-mono text-slate-700 font-black">{inv.id}</span>
-                    </div>
-                    <span className="text-[11px] font-black text-emerald-500">{inv.amount}</span>
-                  </div>
-                ))}
-             </div>
-           </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const coreSyncStarted = useRef(false);
-  const [activeSection, setActiveSection] = useState<'overview' | 'terminal' | 'account' | 'notifications' | 'settings' | 'billing'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'terminal' | 'account' | 'notifications' | 'settings'>('overview');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isFullScreenMode, setIsFullScreenMode] = useState(false);
@@ -589,7 +545,7 @@ const Dashboard: React.FC = () => {
       if (!token) return navigate('/login');
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      const subResp = await fetch(`${API_BASE_URL}/control-center`, { method: 'GET', headers });
+      const subResp = await fetch(`${API_BASE_URL}/control-center`, { method: 'GET', cache: 'no-store', headers });
       const subJson = await subResp.json();
       if (subResp.status === 401 || subJson.error === 'unauthorized') return handleLogout();
       
@@ -599,7 +555,7 @@ const Dashboard: React.FC = () => {
       const invites = subJson.telegram_invites || [];
       setInviteData(invites);
 
-      const profResp = await fetch(`${API_BASE_URL}/profile`, { method: 'GET', headers });
+      const profResp = await fetch(`${API_BASE_URL}/profile`, { method: 'GET', cache: 'no-store', headers });
       const profJson = await profResp.json();
       if (profResp.status === 401 || profJson.error === 'unauthorized') return handleLogout();
       const finalProf = profJson.data || profJson.profile || profJson;
@@ -618,7 +574,7 @@ const Dashboard: React.FC = () => {
       if (!token) return;
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      const setResp = await fetch(`${API_BASE_URL}/settings`, { method: 'GET', headers });
+      const setResp = await fetch(`${API_BASE_URL}/settings`, { method: 'GET', cache: 'no-store', headers });
       const setJson = await setResp.json();
       if (setResp.status === 401 || setJson.error === 'unauthorized') return handleLogout();
       if (setJson.settings) {
@@ -643,7 +599,7 @@ const Dashboard: React.FC = () => {
       if (!token) return;
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      const alertResp = await fetch(`${API_BASE_URL}/alerts`, { method: 'GET', headers });
+      const alertResp = await fetch(`${API_BASE_URL}/alerts`, { method: 'GET', cache: 'no-store', headers });
       const alertJson = await alertResp.json();
       if (alertResp.status === 401 || alertJson.error === 'unauthorized') return handleLogout();
       const finalAlerts = alertJson.alerts || alertJson.data || alertJson;
@@ -688,7 +644,7 @@ const Dashboard: React.FC = () => {
       body.append('daily_email', updated.daily_email ? '1' : '0');
       body.append('ai_insight', updated.ai_insight ? '1' : '0');
       body.append('terminal_audio', updated.terminal_audio ? '1' : '0');
-      const response = await fetch(`${API_BASE_URL}/settings`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body });
+      const response = await fetch(`${API_BASE_URL}/settings`, { method: 'POST', cache: 'no-store', headers: { 'Authorization': `Bearer ${token}` }, body });
       const result = await response.json();
       if (!response.ok || result.status === 'error') throw new Error("Server Update Failed");
     } catch (e) {
@@ -701,7 +657,6 @@ const Dashboard: React.FC = () => {
     { id: 'terminal', label: 'Market Terminal', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
     { id: 'notifications', label: 'Alert History', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
     { id: 'account', label: 'My Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-    { id: 'billing', label: 'Billing Node', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
     { id: 'settings', label: 'App Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
   ];
 
@@ -710,8 +665,7 @@ const Dashboard: React.FC = () => {
     terminal: 'Market Terminal',
     notifications: 'Recent Alerts',
     account: 'My Profile',
-    settings: 'App Settings',
-    billing: 'Billing Node'
+    settings: 'App Settings'
   };
 
   const SidebarContent = () => (
@@ -776,7 +730,7 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center space-x-6">
               <Logo className="h-7 w-auto hidden sm:block opacity-80" />
               <div className="h-6 w-px bg-white/[0.05] hidden md:block"></div>
-              <h2 className="text-white font-black uppercase tracking-[0.2em] text-xs hidden md:block">{sectionTitles[activeSection]}</h2>
+              <h2 className="text-white font-black uppercase tracking-[0.2em] text-xs hidden md:block">{sectionTitles[activeSection as keyof typeof sectionTitles]}</h2>
             </div>
           </div>
           <div className="flex items-center space-x-4 md:space-x-6">
@@ -807,7 +761,6 @@ const Dashboard: React.FC = () => {
             {activeSection === 'account' && <ProfileSection data={profileData} loading={loadingCore} />}
             {activeSection === 'notifications' && <AlertHistorySection data={alertData} loading={loadingAlerts} />}
             {activeSection === 'settings' && <SettingsSection data={settingsData} loading={loadingSettings} onUpdate={handleUpdateSettings} />}
-            {activeSection === 'billing' && <BillingSection data={subscriptionData} />}
           </div>
         </main>
       </div>

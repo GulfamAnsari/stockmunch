@@ -51,7 +51,7 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
             <p className="text-[8px] sm:text-[9px] text-slate-400 font-mono font-bold uppercase tracking-tighter leading-none mb-1">
               {news.timestamp.split(",")[1]?.trim() || ""}
             </p>
-            <p className="text-[7px] sm:text-[9px] text-slate-600 font-mono uppercase tracking-tighter">
+            <p className="text-[7px] text-slate-600 font-mono uppercase tracking-tighter">
               {news.timestamp.split(",")[0]?.trim() || ""}
             </p>
           </div>
@@ -128,13 +128,16 @@ const BseCards: React.FC<BseCardsProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [displayLimit, setDisplayLimit] = useState(10);
   const loaderRef = useRef<HTMLDivElement>(null);
-  const initialFetchDone = useRef(false);
+  const isFetchingRef = useRef(false);
 
   const fetchBseFeeds = useCallback(async (isInitial = false) => {
+    if (isFetchingRef.current) return;
     if (isInitial) setLoading(true);
+    isFetchingRef.current = true;
     setError(null);
     try {
       const response = await fetch(`${API_BASE_URL}/bsefeed`, {
+        cache: "no-store",
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`
         }
@@ -180,15 +183,13 @@ const BseCards: React.FC<BseCardsProps> = ({
       console.error("BSE Fetch Error:", err);
       setError("Unable to connect to BSE data tunnel.");
     } finally {
+      isFetchingRef.current = false;
       if (isInitial) setLoading(false);
     }
   }, [onCategoriesLoad]);
 
   useEffect(() => {
-    if (!initialFetchDone.current) {
-      initialFetchDone.current = true;
-      fetchBseFeeds(true);
-    }
+    fetchBseFeeds(true);
   }, [fetchBseFeeds]);
 
   useEffect(() => {

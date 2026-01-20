@@ -50,6 +50,7 @@ export const NewsCard: React.FC<{
         const resp = await fetch(
           `${API_BASE_URL}/chart?symbol=${querySymbol}&interval=1d&range=1d`,
           {
+            cache: "no-store",
             headers: {
               'Authorization': `Bearer ${getAuthToken()}`
             }
@@ -336,6 +337,7 @@ const MarketTerminal: React.FC<{
       };
       const url = `${API_BASE_URL}/terminal?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}&source=g`;
       const response = await fetch(url, {
+        cache: "no-store",
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`
         }
@@ -403,12 +405,11 @@ const MarketTerminal: React.FC<{
     } else {
       lastFetchedRef.current = "";
     }
-  }, [activeTab, fromDateInput, toDateInput]);
+  }, [activeTab, fromDateInput, toDateInput, fetchNews]);
 
   useEffect(() => {
     let interval: number | undefined;
     if (autoRefresh && activeTab === "ALL FEEDS") {
-      // Robust interval that works even in background by avoiding frequent clearing
       interval = window.setInterval(() => {
         if (!isFetchingRef.current) fetchNews(true);
       }, 15000);
