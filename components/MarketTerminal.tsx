@@ -14,73 +14,6 @@ const getAuthToken = () => {
   return document.cookie.split('; ').find(row => row.startsWith('sm_token='))?.split('=')[1] || null;
 };
 
-export const AnimatedTooltip: React.FC<{
-  text: string;
-  children: React.ReactNode;
-  label?: string;
-}> = ({ text, children }) => {
-  const [position, setPosition] = useState<"left" | "right" | "top" | "bottom">("right");
-  const triggerRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseEnter = () => {
-    if (triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
-
-      if (windowWidth < 768) {
-        if (rect.top > (windowHeight - rect.bottom)) {
-          setPosition("top");
-        } else {
-          setPosition("bottom");
-        }
-      } else {
-        if (rect.right + 300 > windowWidth) {
-          setPosition("left");
-        } else {
-          setPosition("right");
-        }
-      }
-    }
-  };
-
-  const getPositionClasses = () => {
-    switch (position) {
-      case "right": return "top-0 left-full ml-4";
-      case "left": return "top-0 right-full mr-4";
-      case "top": return "bottom-full left-0 mb-4";
-      case "bottom": return "top-full left-0 mt-4";
-      default: return "top-0 left-full ml-4";
-    }
-  };
-
-  const getArrowClasses = () => {
-    switch (position) {
-      case "right": return "-left-2 top-4 border-r-white/10 border-r-8 border-y-transparent border-y-8";
-      case "left": return "-right-2 top-4 border-l-white/10 border-l-8 border-y-transparent border-y-8";
-      case "top": return "-bottom-2 left-4 border-t-white/10 border-t-8 border-x-transparent border-x-8";
-      case "bottom": return "-top-2 left-4 border-b-white/10 border-b-8 border-x-transparent border-x-8";
-      default: return "";
-    }
-  };
-
-  return (
-    <div
-      className="group/tooltip relative flex flex-col"
-      ref={triggerRef}
-      onMouseEnter={handleMouseEnter}
-    >
-      {children}
-      <div
-        className={`absolute z-[100] ${getPositionClasses()} px-4 py-4 bg-[#1a2235]/98 backdrop-blur-2xl text-slate-300 text-[11px] font-medium rounded-2xl border border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-72 pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 ease-out text-left leading-relaxed`}
-      >
-        {text}
-        <div className={`absolute ${getArrowClasses()}`}></div>
-      </div>
-    </div>
-  );
-};
-
 const percentageMap = new Map();
 
 export const NewsCard: React.FC<{
@@ -92,6 +25,7 @@ export const NewsCard: React.FC<{
 }> = ({ news, isWatchlist, onWatchlistAdd, onPriceUpdate }) => {
   const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
   const [isRead, setIsRead] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [isNew] = useState(() => {
@@ -164,11 +98,11 @@ export const NewsCard: React.FC<{
     <div
       onClick={() => setIsRead(true)}
       className={`bg-[#111621] border ${
-        shouldHighlight ? "border-emerald-600/50 shadow-[0_0_15px_rgba(16,185,129,0.2)]" : "border-white/[0.05]"
-      } rounded-xl flex flex-col h-full hover:border-emerald-500/20 transition-all group shadow-2xl relative cursor-pointer`}
+        shouldHighlight ? "border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.1)]" : "border-white/[0.06]"
+      } rounded-2xl flex flex-col h-full hover:border-blue-500/30 transition-all group shadow-2xl relative cursor-pointer group/card`}
     >
       {shouldHighlight && (
-        <div className="absolute -top-2 right-2 px-2 py-0.5 bg-emerald-600 text-slate-950 text-[8px] font-black uppercase rounded z-20 shadow-lg animate-pulse">
+        <div className="absolute -top-2 right-4 px-2 py-0.5 bg-emerald-600 text-slate-950 text-[8px] font-black uppercase rounded z-20 shadow-lg animate-pulse">
           New Alert
         </div>
       )}
@@ -182,15 +116,15 @@ export const NewsCard: React.FC<{
       )}
 
       {news.image && (
-        <div className="w-full h-32 overflow-hidden bg-slate-900 border-b border-white/[0.05] rounded-t-xl">
-          <img src={news.image} alt={news.symbol} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-70 group-hover:opacity-100" />
+        <div className="w-full h-32 overflow-hidden bg-slate-900 border-b border-white/[0.05] rounded-t-2xl">
+          <img src={news.image} alt={news.symbol} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60 group-hover:opacity-90" />
         </div>
       )}
 
-      <div className="p-4 flex flex-col flex-grow">
-        <div className="flex items-start justify-between mb-3 gap-2">
+      <div className="p-6 flex flex-col h-full relative z-10">
+        <div className="flex items-start justify-between mb-5 gap-4">
           <div className="flex items-center space-x-3 min-w-0">
-            <div className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-300 text-[11px] font-black shadow-inner overflow-hidden border border-white/[0.05]`}>
+            <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center text-slate-400 text-[11px] font-black shadow-inner overflow-hidden border border-white/[0.08]`}>
               {news.logoUrl ? (
                 <img src={news.logoUrl} alt={news.symbol} className="w-full h-full object-contain p-1 bg-white/[0.03]" />
               ) : (
@@ -198,97 +132,112 @@ export const NewsCard: React.FC<{
               )}
             </div>
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-x-2">
-                <h3 className="text-[11px] font-black text-blue-500/90 tracking-tight uppercase leading-none truncate max-w-[120px]">
+              <div className="flex items-center gap-x-2">
+                <h3 className="text-[12px] font-extrabold text-blue-400/80 tracking-tight uppercase leading-none truncate max-w-[140px]">
                   {news.companyName}
                 </h3>
-                <span className={`text-[9px] font-bold flex items-center ${
+                <span className={`text-[10px] font-mono font-bold flex items-center ${
                     hasPriceData && news.priceChange !== 0 ? news.priceChange >= 0 ? "text-emerald-500/80" : "text-rose-500/80" : "text-slate-600"
                   }`}>
                   {hasPriceData && news.priceChange !== 0 ? (news.priceChange >= 0 ? "↑" : "↓") : "•"}{" "}
                   {hasPriceData ? Math.abs(news.priceChange).toFixed(2) : "0.00"}%
                 </span>
               </div>
-              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider truncate max-w-[140px] mt-1">
-                {news.symbol || news?.bseCode}
+              <p className="text-[9px] text-slate-500/80 font-mono font-bold uppercase tracking-widest truncate max-w-[140px] mt-1.5">
+                {news.symbol || (news as any).bseCode}
               </p>
             </div>
           </div>
           <div className="text-right shrink-0">
-            <p className="text-[9.5px] text-slate-400 font-mono font-bold uppercase tracking-tight leading-none mb-1">
-              {news.timestamp.split(",")[1]?.trim() || ""}
+            <p className="text-[10px] text-slate-400 font-mono font-bold uppercase tracking-tighter leading-none mb-1">
+              {news.timestamp.split(",")[1]?.trim() || news.timestamp.split(' ').slice(2).join(' ')}
             </p>
-            <p className="text-[8.5px] text-slate-500 font-mono uppercase tracking-tight">
-              {news.timestamp.split(",")[0]?.trim() || ""}
+            <p className="text-[9px] text-slate-600 font-mono uppercase tracking-tighter">
+              {news.timestamp.split(",")[0]?.trim() || news.timestamp.split(' ').slice(0, 2).join(' ')}
             </p>
           </div>
         </div>
 
-        <AnimatedTooltip text={news.title}>
-          <h4 className="text-[13px] font-bold text-slate-200 leading-snug mb-3 line-clamp-2 group-hover:text-emerald-500/90 transition-colors">
-            {news.title}
-          </h4>
-        </AnimatedTooltip>
+        <h4 className="text-[15px] font-medium text-slate-400/90 leading-[1.4] mb-3 line-clamp-2 group-hover:text-blue-300 transition-colors tracking-tight">
+          {news.title}
+        </h4>
 
-        <div className="flex-grow">
-          <AnimatedTooltip text={news.content}>
-            <p className="text-[11px] text-slate-400 line-clamp-4 leading-relaxed mb-4 font-medium italic border-l-2 border-emerald-600/30 pl-3 transition-colors group-hover:text-slate-200">
-              {news.content}
-            </p>
-          </AnimatedTooltip>
+        <div className="flex-grow relative min-w-0">
+          <p className={`text-[12px] text-slate-500 leading-relaxed mb-4 font-medium border-l-2 border-slate-800/50 pl-4 transition-all duration-300 ${isExpanded ? 'line-clamp-none bg-white/[0.02] py-2' : 'line-clamp-3'}`}>
+            {news.content}
+          </p>
+          {news.content.length > 120 && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+              className="flex items-center space-x-1 text-[10px] font-black text-slate-600 hover:text-blue-400 uppercase tracking-widest mb-4 transition-colors"
+            >
+              <span>{isExpanded ? 'Read Less' : 'Read More'}</span>
+              <svg className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          )}
         </div>
 
         <div className="mt-auto">
           {news.aiAnalysis && (
-            <div className="mb-3 p-3 bg-white/[0.02] rounded-lg border border-white/[0.05]">
-              <span className="text-[8.5px] font-black text-emerald-600 uppercase tracking-widest block mb-1">AI Deep Analysis</span>
-              <AnimatedTooltip text={news.aiAnalysis}>
-                <p className="text-[9.5px] text-slate-400 leading-tight line-clamp-2 font-medium">{news.aiAnalysis}</p>
-              </AnimatedTooltip>
+            <div className="mb-4 p-4 bg-white/[0.015] rounded-xl border border-white/[0.04]">
+              <span className="text-[9px] font-black text-emerald-600/80 uppercase tracking-widest block mb-2">Analysis Node</span>
+              <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2 font-medium italic">{news.aiAnalysis}</p>
             </div>
           )}
 
-          <div className="flex items-center gap-2 mb-4">
-            <div className={`px-2 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-widest inline-flex items-center ${getSentimentStyles(news.sentiment)}`}>
-              <div className={`w-1.5 h-1.5 rounded-full mr-2 ${news.sentiment === "bullish" ? "bg-emerald-500" : news.sentiment === "bearish" ? "bg-rose-500" : "bg-amber-500"} animate-pulse`}></div>
-              AI ANALYSIS: {news.sentiment}
+          <div className="flex items-center justify-between gap-2 mb-5">
+            <div className="flex items-center gap-2">
+              <div className={`px-2.5 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-widest inline-flex items-center ${getSentimentStyles(news.sentiment)}`}>
+                <div className={`w-1.5 h-1.5 rounded-full mr-2 ${news.sentiment === "bullish" ? "bg-emerald-500" : news.sentiment === "bearish" ? "bg-rose-500" : "bg-amber-500"} animate-pulse`}></div>
+                AI: {news.sentiment}
+              </div>
+              <div className="bg-white/[0.02] border border-white/[0.05] px-2.5 py-1.5 rounded-lg text-[9px] font-mono text-slate-600 uppercase tracking-tight whitespace-nowrap">
+                Conf: <span className="text-slate-400 font-bold">{news.sentimentScore}%</span>
+              </div>
             </div>
-            <div className="bg-white/[0.02] border border-white/[0.05] px-2 py-1.5 rounded-lg text-[9px] font-mono text-slate-500 uppercase tracking-tight whitespace-nowrap">
-              Confidence: <span className="text-slate-300 font-bold">{news.sentimentScore}%</span>
-            </div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); fetchLocalPercent(true); }} 
+              className="p-2 bg-white/[0.03] hover:bg-blue-500/10 text-slate-600 hover:text-blue-500 rounded-xl border border-white/[0.08] transition-all" 
+              title="Sync live pricing"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
           </div>
         </div>
 
-        <div className="pt-4 flex items-center justify-between border-t border-white/[0.05] gap-2">
-          <div className="flex items-center gap-1.5 relative" ref={dropdownRef}>
+        <div className="pt-5 flex items-center justify-between border-t border-white/[0.05] gap-3 min-w-0">
+          <div className="flex items-center gap-2 relative shrink-0" ref={dropdownRef}>
             <button
               onClick={(e) => { e.stopPropagation(); setShowWatchlistOpts(!showWatchlistOpts); }}
-              className="px-3 py-1.5 bg-white/[0.03] hover:bg-emerald-600/10 text-slate-500 hover:text-emerald-500 border border-white/[0.05] rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
+              className="px-4 py-2 bg-white/[0.03] hover:bg-emerald-500/10 text-slate-600 hover:text-emerald-500 border border-white/[0.08] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
             >
               + WATCHLIST
             </button>
             {showWatchlistOpts && (
-              <div className="absolute bottom-full left-0 mb-2 w-32 bg-[#1c2230] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2">
+              <div className="absolute bottom-full left-0 mb-3 w-36 bg-[#1c2230] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-50 animate-in fade-in slide-in-from-bottom-2">
                 <button
                   onClick={(e) => { e.stopPropagation(); onWatchlistAdd?.({ ...news, userSentiment: "BULLISH" }); setShowWatchlistOpts(false); }}
-                  className="w-full text-left px-4 py-2.5 text-[9.5px] font-black text-emerald-500 hover:bg-emerald-600/10 uppercase tracking-widest border-b border-white/[0.05]"
+                  className="w-full text-left px-5 py-3 text-[10px] font-black text-emerald-500 hover:bg-emerald-600/10 uppercase tracking-widest border-b border-white/[0.05]"
                 >
                   BULLISH
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); onWatchlistAdd?.({ ...news, userSentiment: "BEARISH" }); setShowWatchlistOpts(false); }}
-                  className="w-full text-left px-4 py-2.5 text-[9.5px] font-black text-rose-500 hover:bg-rose-600/10 uppercase tracking-widest"
+                  className="w-full text-left px-5 py-3 text-[10px] font-black text-rose-500 hover:bg-rose-600/10 uppercase tracking-widest"
                 >
                   BEARISH
                 </button>
               </div>
             )}
-            <button onClick={(e) => { e.stopPropagation(); fetchLocalPercent(true); }} className="p-1.5 bg-white/[0.03] hover:bg-sky-600/10 text-slate-500 hover:text-sky-500 rounded-lg border border-white/[0.05] transition-all" title="Refresh price">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-            </button>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">{news.source}</span>
+          <div className="flex items-center min-w-0">
+            <span className="text-[9px] text-slate-700 font-black uppercase tracking-[0.1em] block text-right whitespace-nowrap">
+              {news.source || 'SM DISPATCH'}
+            </span>
           </div>
         </div>
       </div>
@@ -498,28 +447,28 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
 
       <div className={`${isControlsVisible ? 'flex' : 'hidden lg:flex'} px-4 md:px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/[0.05] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-y-4 gap-x-6`}>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-wrap">
-          <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/[0.05] shadow-inner shrink-0 self-start sm:self-auto">
+          <div className="flex bg-slate-950 rounded-2xl p-1 border border-white/[0.08] shadow-inner shrink-0 self-start sm:self-auto">
             {["ALL FEEDS", "BSE FEEDS", "WATCHLIST"].map((tab) => (
-              <button key={tab} onClick={() => { setActiveTab(tab); setIsFilterPanelOpen(false); }} className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${ activeTab === tab ? "bg-emerald-700 text-slate-100 shadow-lg" : "text-slate-500 hover:text-slate-300" }`}>{tab}</button>
+              <button key={tab} onClick={() => { setActiveTab(tab); setIsFilterPanelOpen(false); }} className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all ${ activeTab === tab ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" : "text-slate-500 hover:text-slate-300" }`}>{tab}</button>
             ))}
           </div>
           <div className="relative w-full sm:w-48 lg:w-72 shrink-0">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
-            <input type="text" placeholder="SEARCH SYMBOL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-950/40 border border-white/[0.05] rounded-lg pl-10 pr-3 py-2 text-[10px] text-slate-300 focus:outline-none focus:border-emerald-600/50 transition-all font-mono placeholder:text-slate-700" />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
+            <input type="text" placeholder="FILTER TERMINAL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-950/60 border border-white/[0.08] rounded-xl pl-12 pr-4 py-3 text-[11px] text-slate-300 focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-800" />
           </div>
           {activeTab === "ALL FEEDS" && (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-              <div className="flex items-center space-x-2 bg-slate-900/50 p-1 rounded-lg border border-white/[0.05]">
-                <input type="date" value={fromDateInput} onChange={(e) => setFromDateInput(e.target.value)} className="bg-slate-900 border border-white/10 rounded-md px-2 py-1 text-[9px] text-slate-400 font-mono focus:border-emerald-600/50 focus:outline-none w-full sm:w-[110px] cursor-pointer" />
-                <span className="text-slate-600 text-[10px]">→</span>
-                <input type="date" value={toDateInput} onChange={(e) => setToDateInput(e.target.value)} className="bg-slate-900 border border-white/10 rounded-md px-2 py-1 text-[9px] text-slate-400 font-mono focus:border-emerald-600/50 focus:outline-none w-full sm:w-[110px] cursor-pointer" />
-                <button onClick={fetchNews} disabled={loading} className="p-1.5 bg-emerald-600/10 text-emerald-500 rounded-md border border-emerald-600/20 hover:bg-emerald-600/20 transition-all flex items-center justify-center min-w-[32px]" title="Sync Feed">
-                  {loading ? (<div className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>) : (<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>)}
+              <div className="flex items-center space-x-2 bg-slate-950 p-1.5 rounded-xl border border-white/[0.08]">
+                <input type="date" value={fromDateInput} onChange={(e) => setFromDateInput(e.target.value)} className="bg-slate-900 border border-white/5 rounded-lg px-3 py-1.5 text-[10px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-full sm:w-[125px] cursor-pointer" />
+                <span className="text-slate-700 text-[10px]">→</span>
+                <input type="date" value={toDateInput} onChange={(e) => setToDateInput(e.target.value)} className="bg-slate-900 border border-white/5 rounded-lg px-3 py-1.5 text-[10px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-full sm:w-[125px] cursor-pointer" />
+                <button onClick={fetchNews} disabled={loading} className="p-2 bg-blue-600/10 text-blue-500 rounded-lg border border-blue-500/20 hover:bg-blue-600/20 transition-all flex items-center justify-center min-w-[36px]" title="Sync Feed">
+                  {loading ? (<div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>) : (<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>)}
                 </button>
               </div>
-              <button onClick={() => setAutoRefresh(!autoRefresh)} className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 sm:w-auto w-full ${ autoRefresh ? "bg-emerald-600/10 border-emerald-600/50 text-emerald-500" : "bg-slate-950/40 border-white/[0.05] text-slate-500 hover:text-slate-300" }`}>
-                <div className={`w-2 h-2 rounded-full ${ autoRefresh ? "bg-emerald-600 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.3)]" : "bg-slate-700" }`}></div>
-                <span>Live Monitoring</span>
+              <button onClick={() => setAutoRefresh(!autoRefresh)} className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 sm:w-auto w-full ${ autoRefresh ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-500" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" }`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${ autoRefresh ? "bg-emerald-500 animate-pulse" : "bg-slate-700" }`}></div>
+                <span>Live Monitor</span>
               </button>
             </div>
           )}
@@ -528,35 +477,35 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         {activeTab !== "BSE FEEDS" && (
           <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 relative">
             <div className="flex items-center gap-3">
-              <button ref={filterBtnRef} onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)} className={`px-3 sm:px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-1.5 relative ${ isFilterPanelOpen ? "bg-emerald-600 text-slate-100 border-emerald-600" : "bg-slate-950/40 border-white/[0.05] text-slate-500 hover:text-slate-300" }`}>
-                {isFiltered && (<span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-600 rounded-full border-2 border-[#0d121f] z-10 animate-pulse"></span>)}
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
-                <span className="hidden sm:inline">Filters</span>
+              <button ref={filterBtnRef} onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)} className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 relative ${ isFilterPanelOpen ? "bg-blue-600 text-white border-blue-600" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" }`}>
+                {isFiltered && (<span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-[#0d121f] z-10"></span>)}
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                <span className="hidden sm:inline">Analytics</span>
               </button>
-              <button onClick={copyAllTitles} className="p-2 bg-slate-950/40 hover:bg-slate-900 text-slate-600 hover:text-slate-300 rounded-lg border border-white/[0.05] transition-all flex items-center justify-center" title="Copy Current Dispatch"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg></button>
-              <button onClick={toggleFullScreen} className={`p-2 bg-slate-950/40 hover:bg-slate-900 rounded-lg border border-white/[0.05] transition-all flex items-center justify-center ${ isFullScreen ? "text-emerald-500 border-emerald-500/30" : "text-slate-600 hover:text-slate-300" }`} title={isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" /></svg></button>
+              <button onClick={copyAllTitles} className="p-3 bg-slate-950/40 hover:bg-slate-900 text-slate-600 hover:text-slate-300 rounded-xl border border-white/[0.08] transition-all flex items-center justify-center" title="Copy Current Dispatch"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg></button>
+              <button onClick={toggleFullScreen} className={`p-3 bg-slate-950/40 hover:bg-slate-900 rounded-xl border border-white/[0.08] transition-all flex items-center justify-center ${ isFullScreen ? "text-blue-500 border-blue-500/30" : "text-slate-600 hover:text-slate-300" }`} title={isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" /></svg></button>
             </div>
             {isFilterPanelOpen && (
-              <div ref={filterPanelRef} className={`absolute top-full mt-3 w-72 bg-[#161b27] border border-white/[0.05] rounded-2xl shadow-2xl p-6 z-[100] animate-in fade-in zoom-in-95 duration-200 ${ filterDropdownSide === "left" ? "right-0" : "left-0" }`}>
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest block">AI Sentiment</span>
-                    <div className="grid grid-cols-1 gap-2">
+              <div ref={filterPanelRef} className={`absolute top-full mt-4 w-72 bg-[#161b27] border border-white/10 rounded-[2rem] shadow-[0_30px_70px_rgba(0,0,0,0.8)] p-8 z-[100] animate-in fade-in zoom-in-95 duration-200 ${ filterDropdownSide === "left" ? "right-0" : "left-0" }`}>
+                <div className="space-y-8">
+                  <div className="space-y-4">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">AI SENTIMENT FILTER</span>
+                    <div className="grid grid-cols-1 gap-3">
                       {["ALL", "BULLISH", "BEARISH", "NEUTRAL"].map((opt) => (
-                        <label key={opt} className="flex items-center space-x-3 cursor-pointer group">
+                        <label key={opt} className="flex items-center space-x-4 cursor-pointer group">
                           <div className="relative flex items-center">
-                            <input type="checkbox" checked={sentimentFilters.includes(opt)} onChange={() => handleSentimentToggle(opt)} className="peer h-4 w-4 appearance-none border border-white/20 rounded bg-slate-900 checked:bg-emerald-600 checked:border-emerald-600 transition-all cursor-pointer" />
-                            <svg className="absolute w-3 h-3 text-slate-950 left-0.5 pointer-events-none hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4"><path d="M5 13l4 4L19 7" /></svg>
+                            <input type="checkbox" checked={sentimentFilters.includes(opt)} onChange={() => handleSentimentToggle(opt)} className="peer h-5 w-5 appearance-none border border-white/10 rounded-lg bg-slate-950 checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer" />
+                            <svg className="absolute w-3.5 h-3.5 text-white left-0.5 pointer-events-none hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4"><path d="M5 13l4 4L19 7" /></svg>
                           </div>
-                          <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${ sentimentFilters.includes(opt) ? "text-slate-200" : "text-slate-600 group-hover:text-slate-400" }`}>{opt}</span>
+                          <span className={`text-[11px] font-black uppercase tracking-widest transition-colors ${ sentimentFilters.includes(opt) ? "text-slate-100" : "text-slate-600 group-hover:text-slate-400" }`}>{opt}</span>
                         </label>
                       ))}
                     </div>
                   </div>
-                  <div className="h-px bg-white/[0.03]"></div>
-                  <div className="space-y-3">
-                    <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest block">Sort Method</span>
-                    <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-slate-300 font-mono uppercase focus:outline-none"><option value="TIME">Newest First</option><option value="SENTIMENT">AI Confidence</option><option value="CHANGE">Volatility</option></select>
+                  <div className="h-px bg-white/[0.05]"></div>
+                  <div className="space-y-4">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">SORT ENGINE</span>
+                    <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-[11px] text-slate-300 font-mono uppercase focus:outline-none focus:border-blue-500/40 transition-all"><option value="TIME">Time Descending</option><option value="SENTIMENT">AI Confidence</option><option value="CHANGE">Market Volatility</option></select>
                   </div>
                 </div>
               </div>
@@ -565,31 +514,31 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         )}
       </div>
 
-      <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-grow overflow-y-auto px-4 md:px-8 py-8 custom-scrollbar bg-black/[0.02] overflow-x-hidden">
+      <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-grow overflow-y-auto px-4 md:px-8 py-10 custom-scrollbar bg-black/10 overflow-x-hidden">
         {activeTab === "BSE FEEDS" ? (
           <BseCards onWatchlistAdd={handleWatchlistAdd} />
         ) : loading && news.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center space-y-6"><div className="w-16 h-16 border-4 border-emerald-600/30 border-t-emerald-600 rounded-full animate-spin"></div><p className="text-[12px] font-black uppercase tracking-[0.4em] opacity-20 text-center">Connecting Stream...</p></div>
+          <div className="h-full flex flex-col items-center justify-center space-y-8"><div className="w-20 h-20 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div><p className="text-[14px] font-black uppercase tracking-[0.5em] text-slate-700 text-center">INITIALIZING TERMINAL TUNNEL...</p></div>
         ) : processedNews.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center opacity-20"><p className="text-lg sm:text-xl font-black uppercase tracking-[0.3em] px-4">No Match in Tunnel</p></div>
+          <div className="h-full flex flex-col items-center justify-center text-center opacity-30"><p className="text-xl font-black uppercase tracking-[0.4em] px-6">NO DISPATCHES FOUND IN REGION</p></div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 pt-2">
               {pagedNews.map((newsItem) => (
                 <div key={newsItem.id} className="relative">
                   <NewsCard news={newsItem} isWatchlist={activeTab === "WATCHLIST"} onWatchlistAdd={handleWatchlistAdd} onPriceUpdate={updatePriceChange} autoRefresh={autoRefresh} />
-                  {activeTab === "WATCHLIST" && (<button onClick={() => removeFromWatchlist(newsItem.id)} className="absolute -top-2 -right-2 w-6 h-6 bg-rose-600 text-slate-100 rounded-full flex items-center justify-center text-[10px] font-bold shadow-lg hover:scale-110 transition-all z-40 border border-white/10">✕</button>)}
+                  {activeTab === "WATCHLIST" && (<button onClick={() => removeFromWatchlist(newsItem.id)} className="absolute -top-3 -right-3 w-8 h-8 bg-rose-600 text-white rounded-full flex items-center justify-center text-[12px] font-black shadow-2xl hover:scale-110 transition-all z-40 border-4 border-[#0b0f1a]">✕</button>)}
                 </div>
               ))}
             </div>
-            {displayLimit < processedNews.length && (<div className="py-10 flex justify-center"><div className="w-8 h-8 border-2 border-emerald-600/20 border-t-emerald-600 rounded-full animate-spin"></div></div>)}
+            {displayLimit < processedNews.length && (<div className="py-16 flex justify-center"><div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div></div>)}
           </>
         )}
       </div>
 
-      <footer className="shrink-0 bg-[#111621] border-t border-white/[0.05] px-4 md:px-8 py-3 flex flex-col sm:flex-row items-center justify-between text-[9px] font-black font-mono text-slate-700 tracking-[0.2em] uppercase gap-2">
-        <div className="flex items-center space-x-6 md:space-x-10"><div className="flex items-center space-x-2"><span className="text-emerald-600/80 font-black">SYSTEM:</span><span>READY</span></div><div className="flex items-center space-x-2"><span className="text-emerald-600/80 font-black">STREAM:</span><span>{activeTab === "BSE FEEDS" ? "BSE SYNCED" : `${processedNews.length} SYNCED`}</span></div></div>
-        <div className="flex items-center space-x-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-600 opacity-30"></div><span className="opacity-40 italic tracking-tight uppercase text-center">StockManch</span></div>
+      <footer className="shrink-0 bg-[#0d121f] border-t border-white/[0.05] px-6 md:px-10 py-4 flex flex-col sm:flex-row items-center justify-between text-[10px] font-black font-mono text-slate-700 tracking-[0.3em] uppercase gap-3">
+        <div className="flex items-center space-x-8 md:space-x-12"><div className="flex items-center space-x-3"><span className="text-blue-500/60 font-black">NODE:</span><span>READY</span></div><div className="flex items-center space-x-3"><span className="text-blue-500/60 font-black">STREAM:</span><span>{activeTab === "BSE FEEDS" ? "BSE TUNNEL SYNCED" : `${processedNews.length} DISPATCHES SYNCED`}</span></div></div>
+        <div className="flex items-center space-x-3"><div className="w-1.5 h-1.5 rounded-full bg-blue-500/40"></div><span className="opacity-40 italic tracking-tighter uppercase text-center">StockManch Terminal Build v5.0.1</span></div>
       </footer>
     </div>
   );
