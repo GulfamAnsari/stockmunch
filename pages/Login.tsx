@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Logo } from '../constants';
-
-const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
+import { API_BASE_URL } from '../config';
 
 const setAuthCookie = (token: string) => {
-  // Fixed: Increased max-age from 300 to 2592000 (30 days)
   document.cookie = `sm_token=${token}; max-age=2592000; path=/; SameSite=Lax`;
 };
 
@@ -58,7 +56,7 @@ const Login: React.FC = () => {
     setNotRegistered(false);
     try {
       if (method === 'OTP') {
-        const resp = await fetch(`${API_BASE}/send-otp-login`, {
+        const resp = await fetch(`${API_BASE_URL}/auth/send-otp-login`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -80,7 +78,7 @@ const Login: React.FC = () => {
           }
         }
       } else if (method === 'PASSWORD') {
-        const resp = await fetch(`${API_BASE}/login`, {
+        const resp = await fetch(`${API_BASE_URL}/auth/login`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -96,7 +94,7 @@ const Login: React.FC = () => {
           setError(data.message || data.error || "Incorrect login details.");
         }
       } else if (method === 'RESET') {
-        const resp = await fetch(`${API_BASE}/send-otp-reset`, {
+        const resp = await fetch(`${API_BASE_URL}/auth/send-otp-reset`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -135,7 +133,7 @@ const Login: React.FC = () => {
     setError(null);
     try {
       if (method === 'RESET') {
-        const resp = await fetch(`${API_BASE}/reset-password`, {
+        const resp = await fetch(`${API_BASE_URL}/auth/reset-password`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -151,7 +149,7 @@ const Login: React.FC = () => {
           setError(data.message || data.error || "Failed to update password.");
         }
       } else {
-        const resp = await fetch(`${API_BASE}/verify-otp`, {
+        const resp = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',

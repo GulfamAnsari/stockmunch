@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../constants';
+import { API_BASE_URL } from '../config';
 
 interface TrialFlowModalProps {
   isOpen: boolean;
@@ -12,10 +13,7 @@ interface TrialFlowModalProps {
 
 type Step = 'PHONE' | 'OTP' | 'PROFILE' | 'SUCCESS';
 
-const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
-
 const setAuthCookie = (token: string) => {
-  // Fixed: Increased max-age from 300 to 2592000 (30 days)
   document.cookie = `sm_token=${token}; max-age=2592000; path=/; SameSite=Lax`;
 };
 
@@ -80,7 +78,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
     setError(null);
     setUserExists(false);
     try {
-      const resp = await fetch(`${API_BASE}/send-otp-signup`, {
+      const resp = await fetch(`${API_BASE_URL}/auth/send-otp-signup`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -117,7 +115,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
     setLoading(true);
     setError(null);
     try {
-      const resp = await fetch(`${API_BASE}/verify-otp`, {
+      const resp = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -181,7 +179,7 @@ const TrialFlowModal: React.FC<TrialFlowModalProps> = ({ isOpen, onClose, planNa
     setError(null);
     try {
       const mappedPlanId = getMappedPlanId(planId);
-      const resp = await fetch(`${API_BASE}/set-password`, {
+      const resp = await fetch(`${API_BASE_URL}/auth/set-password`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

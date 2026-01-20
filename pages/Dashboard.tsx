@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import MarketTerminal from '../components/MarketTerminal';
 import { User } from '../types';
 import { Logo } from '../constants';
-
-const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api";
+import { API_BASE_URL } from '../config';
 
 const getAuthToken = () => {
   const name = "sm_token=";
@@ -104,7 +103,7 @@ const OverviewSection: React.FC<{
       const token = getAuthToken();
       window.open(inviteLink, '_blank');
       setInviteUsedLocal(true);
-      await fetch(`${API_BASE}/mark-invite-used`, {
+      await fetch(`${API_BASE_URL}/mark-invite-used`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -250,6 +249,7 @@ const OverviewSection: React.FC<{
           <div className="space-y-4">
             {[
               { msg: 'Access token validated via secure node', time: 'Just now', status: 'SUCCESS' },
+              /* DO NOT use subscriptionData as it is not in scope here; use the 'data' prop instead. */
               { msg: `Subscription node synchronized: ${data?.plan_code || 'PRO'}`, time: '5m ago', status: 'SYNC' },
               { msg: 'Global market feed connection stable', time: '12m ago', status: 'INFO' }
             ].map((act, i) => (
@@ -401,7 +401,7 @@ const SettingsSection: React.FC<{
       key: 'ai_insight', 
       label: 'AI News Analysis', 
       desc: 'Enable AI-powered insights for every market alert.',
-      icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+      icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
       color: 'emerald'
     },
     { 
@@ -645,7 +645,7 @@ const Dashboard: React.FC = () => {
       if (!token) return navigate('/login');
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      const subResp = await fetch(`${API_BASE}/control-center`, { method: 'GET', headers });
+      const subResp = await fetch(`${API_BASE_URL}/control-center`, { method: 'GET', headers });
       const subJson = await subResp.json();
       if (subResp.status === 401 || subJson.error === 'unauthorized') return handleLogout();
       
@@ -655,7 +655,7 @@ const Dashboard: React.FC = () => {
       const invites = subJson.telegram_invites || [];
       setInviteData(invites);
 
-      const profResp = await fetch(`${API_BASE}/profile`, { method: 'GET', headers });
+      const profResp = await fetch(`${API_BASE_URL}/profile`, { method: 'GET', headers });
       const profJson = await profResp.json();
       if (profResp.status === 401 || profJson.error === 'unauthorized') return handleLogout();
       const finalProf = profJson.data || profJson.profile || profJson;
@@ -674,7 +674,7 @@ const Dashboard: React.FC = () => {
       if (!token) return;
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      const setResp = await fetch(`${API_BASE}/settings`, { method: 'GET', headers });
+      const setResp = await fetch(`${API_BASE_URL}/settings`, { method: 'GET', headers });
       const setJson = await setResp.json();
       if (setResp.status === 401 || setJson.error === 'unauthorized') return handleLogout();
       if (setJson.settings) {
@@ -699,7 +699,7 @@ const Dashboard: React.FC = () => {
       if (!token) return;
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      const alertResp = await fetch(`${API_BASE}/alerts`, { method: 'GET', headers });
+      const alertResp = await fetch(`${API_BASE_URL}/alerts`, { method: 'GET', headers });
       const alertJson = await alertResp.json();
       if (alertResp.status === 401 || alertJson.error === 'unauthorized') return handleLogout();
       const finalAlerts = alertJson.alerts || alertJson.data || alertJson;
@@ -744,7 +744,7 @@ const Dashboard: React.FC = () => {
       body.append('daily_email', updated.daily_email ? '1' : '0');
       body.append('ai_insight', updated.ai_insight ? '1' : '0');
       body.append('terminal_audio', updated.terminal_audio ? '1' : '0');
-      const response = await fetch(`${API_BASE}/settings`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body });
+      const response = await fetch(`${API_BASE_URL}/settings`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body });
       const result = await response.json();
       if (!response.ok || result.status === 'error') throw new Error("Server Update Failed");
     } catch (e) {

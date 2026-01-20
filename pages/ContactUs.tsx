@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
-const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api";
+import { API_BASE_URL } from '../config';
 
 const ContactUs: React.FC = () => {
   const [formState, setFormState] = useState({ name: '', email: '', subject: '', message: '' });
@@ -45,7 +44,7 @@ const ContactUs: React.FC = () => {
       body.append('subject', formState.subject);
       body.append('message', formState.message);
 
-      const response = await fetch(`${API_BASE}/send-inquery`, {
+      const response = await fetch(`${API_BASE_URL}/send-inquery`, {
         method: 'POST',
         body: body
       });

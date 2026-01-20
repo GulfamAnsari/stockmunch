@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { API_BASE_URL } from '../config';
 
 const getAuthToken = () => {
   return document.cookie.split('; ').find(row => row.startsWith('sm_token='))?.split('=')[1] || null;
@@ -147,7 +148,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
     if (isInitial) setLoading(true);
     setError(null);
     try {
-      const response = await fetch("https://lavender-goldfish-594505.hostingersite.com/api/bsefeed", {
+      const response = await fetch(`${API_BASE_URL}/bsefeed`, {
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`
         }
@@ -159,7 +160,6 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
         const rawData = Array.isArray(json.data) ? json.data : Object.values(json.data).flat();
 
         rawData.forEach((item: any) => {
-          // Find PDF in media array
           const pdfMedia = item.data?.media?.find((m: any) => m.type === "PDF");
           
           allItems.push({
@@ -204,7 +204,6 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
     return () => clearInterval(interval);
   }, [autoRefresh, fetchBseFeeds]);
 
-  // Unique categories for filtering
   const categories = useMemo(() => {
     const set = new Set<string>();
     bseNews.forEach(n => set.add(n.category));
@@ -252,7 +251,6 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
 
   return (
     <div className="flex flex-col space-y-6">
-      {/* Component Specific Control Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-2 border-b border-white/[0.03]">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
@@ -299,7 +297,6 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
             ))}
           </div>
           
-          {/* Infinite Scroll Trigger */}
           <div ref={loaderRef} className="py-10 flex justify-center">
             {displayLimit < filteredNews.length && (
               <div className="flex flex-col items-center space-y-4">

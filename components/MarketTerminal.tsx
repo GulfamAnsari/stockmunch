@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { StockNews } from "../types";
 import BseCards from "./BseCards";
+import { API_BASE_URL } from "../config";
 
 const getAuthToken = () => {
   return document.cookie.split('; ').find(row => row.startsWith('sm_token='))?.split('=')[1] || null;
@@ -113,7 +114,7 @@ export const NewsCard: React.FC<{
         onPriceUpdate?.(news.id, percentageMap.get(querySymbol));
       } else {
         const resp = await fetch(
-          `https://lavender-goldfish-594505.hostingersite.com/api/chart?symbol=${querySymbol}&interval=1d&range=1d`,
+          `${API_BASE_URL}/chart?symbol=${querySymbol}&interval=1d&range=1d`,
           {
             headers: {
               'Authorization': `Bearer ${getAuthToken()}`
@@ -365,7 +366,7 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         const parts = d.split("-");
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
       };
-      const url = `https://lavender-goldfish-594505.hostingersite.com/api/terminal?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}&source=g`;
+      const url = `${API_BASE_URL}/terminal?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}&source=g`;
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`

@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../constants';
+import { API_BASE_URL } from '../config';
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSwitchToSignup?: () => void;
 }
-
-const API_BASE = "https://lavender-goldfish-594505.hostingersite.com/api/auth";
 
 const setAuthCookie = (token: string) => {
   document.cookie = `sm_token=${token}; max-age=2592000; path=/; SameSite=Lax`;
@@ -70,7 +69,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
     setNotRegistered(false);
     try {
       if (method === 'OTP') {
-        const resp = await fetch(`${API_BASE}/send-otp-login`, {
+        const resp = await fetch(`${API_BASE_URL}/auth/send-otp-login`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -92,7 +91,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
           }
         }
       } else if (method === 'PASSWORD') {
-        const resp = await fetch(`${API_BASE}/login`, {
+        const resp = await fetch(`${API_BASE_URL}/auth/login`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -109,7 +108,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
           setError(data.message || data.error || "Incorrect login details.");
         }
       } else if (method === 'RESET') {
-        const resp = await fetch(`${API_BASE}/send-otp-reset`, {
+        const resp = await fetch(`${API_BASE_URL}/auth/send-otp-reset`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -148,7 +147,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
     setError(null);
     try {
       if (method === 'RESET') {
-        const resp = await fetch(`${API_BASE}/reset-password`, {
+        const resp = await fetch(`${API_BASE_URL}/auth/reset-password`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -164,7 +163,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
           setError(data.message || data.error || "Reset failed.");
         }
       } else {
-        const resp = await fetch(`${API_BASE}/verify-otp`, {
+        const resp = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',

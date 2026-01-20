@@ -1,11 +1,10 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
-const API_KEY = process.env.API_KEY || "";
-
 // Standard Text Analysis
 export const analyzeNewsImpact = async (title: string, content: string) => {
   try {
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
+    // Always use process.env.API_KEY directly and create a new instance right before making an API call to ensure it always uses the most up-to-date API key.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `You are a professional stock market analyst. Analyze the following news and provide a 2-sentence "Traders Impact Summary". 
@@ -27,7 +26,8 @@ export const analyzeNewsImpact = async (title: string, content: string) => {
 
 // Live Audio Assistant Setup
 export const setupLiveAssistant = async (callbacks: any) => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // Always use process.env.API_KEY directly and create a new instance right before making an API call to ensure it always uses the most up-to-date API key.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   return ai.live.connect({
     model: 'gemini-2.5-flash-native-audio-preview-12-2025',
