@@ -118,6 +118,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [displayLimit, setDisplayLimit] = useState(10);
+  const [showAwardsOnly, setShowAwardsOnly] = useState(false);
   const loaderRef = useRef<HTMLDivElement>(null);
   const initialFetchDone = useRef(false);
 
@@ -195,6 +196,14 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
     if (externalCategory !== "ALL") {
       list = list.filter(n => n.category === externalCategory);
     }
+    if (showAwardsOnly) {
+      list = list.filter(n => 
+        n.title.toUpperCase().includes("AWARD OF ORDER") || 
+        n.title.toUpperCase().includes("RECEIPT OF ORDER") ||
+        n.category.toUpperCase().includes("AWARD OF ORDER") ||
+        n.category.toUpperCase().includes("RECEIPT OF ORDER")
+      );
+    }
     if (externalSearch) {
       const lower = externalSearch.toLowerCase();
       list = list.filter(n => 
@@ -204,7 +213,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
       );
     }
     return list;
-  }, [bseNews, externalCategory, externalSearch]);
+  }, [bseNews, externalCategory, externalSearch, showAwardsOnly]);
 
   const pagedNews = useMemo(() => filteredNews.slice(0, displayLimit), [filteredNews, displayLimit]);
 
@@ -248,7 +257,23 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
   }
 
   return (
-    <div className="flex flex-col space-y-8">
+    <div className="flex flex-col space-y-4">
+      <div className="flex flex-wrap gap-3 items-center">
+        <button 
+          onClick={() => setShowAwardsOnly(!showAwardsOnly)}
+          className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 ${
+            showAwardsOnly 
+              ? "bg-amber-500/20 border-amber-500/50 text-amber-500" 
+              : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300"
+          }`}
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Award_of_Order_Receipt_of_Order</span>
+        </button>
+      </div>
+
       {filteredNews.length === 0 ? (
         <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center opacity-20">
           <p className="text-xl font-black uppercase tracking-[0.4em] px-8">NO DISPATCHES IN REGION</p>

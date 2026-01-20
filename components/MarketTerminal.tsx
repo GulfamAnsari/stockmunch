@@ -274,6 +274,8 @@ const MarketTerminal: React.FC<{
   const [fromDateInput, setFromDateInput] = useState(new Date().toISOString().split("T")[0]);
   const [toDateInput, setToDateInput] = useState(new Date().toISOString().split("T")[0]);
 
+  const lastFetchedRef = useRef<string>("");
+
   const isFiltered = useMemo(() => sentimentFilters.some((f) => f !== "ALL"), [sentimentFilters]);
 
   useEffect(() => {
@@ -315,9 +317,13 @@ const MarketTerminal: React.FC<{
     });
   }, []);
 
-  const fetchNews = useCallback(async () => {
-    // CRITICAL: bail out immediately if not on ALL FEEDS to prevent redundant calls
+  const fetchNews = useCallback(async (isAuto = false) => {
+    // CRITICAL: bail out immediately if not on ALL FEEDS
     if (activeTab !== "ALL FEEDS") return;
+    
+    const paramsKey = `${fromDateInput}_${toDateInput}`;
+    // If not an auto-refresh and params haven't changed, skip to prevent double API call on mount/switch
+    if (!isAuto && lastFetchedRef.current === paramsKey && news.length > 0) return;
     
     setLoading(true);
     try {
@@ -340,6 +346,7 @@ const MarketTerminal: React.FC<{
       }
       
       if (json.status === "success" && json.data) {
+        lastFetchedRef.current = paramsKey;
         const allItems: StockNews[] = [];
         Object.keys(json.data).forEach((dateKey) => {
           const rawItems = json.data[dateKey];
@@ -384,19 +391,22 @@ const MarketTerminal: React.FC<{
     } finally {
       setLoading(false);
     }
-  }, [fromDateInput, toDateInput, activeTab]);
+  }, [fromDateInput, toDateInput, activeTab, news.length]);
 
   useEffect(() => { 
-    // Only call fetchNews when tab actually switches to ALL FEEDS or dates change
+    // Trigger on tab switch to ALL FEEDS or when date inputs change
     if (activeTab === "ALL FEEDS") {
-      fetchNews(); 
+      fetchNews(false); 
+    } else {
+      // Clear ref if we leave the tab, allowing a clean refetch when returning
+      lastFetchedRef.current = "";
     }
-  }, [fetchNews, activeTab]);
+  }, [activeTab, fromDateInput, toDateInput]);
 
   useEffect(() => {
     let interval: number | undefined;
     if (autoRefresh && !loading && activeTab === "ALL FEEDS") {
-      interval = window.setInterval(fetchNews, 15000);
+      interval = window.setInterval(() => fetchNews(true), 15000);
     }
     return () => clearInterval(interval);
   }, [autoRefresh, loading, fetchNews, activeTab]);
@@ -523,7 +533,7 @@ const MarketTerminal: React.FC<{
                 <input type="date" value={fromDateInput} onChange={(e) => setFromDateInput(e.target.value)} className="bg-slate-900 border border-white/5 rounded-lg px-3 py-1.5 text-[10px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-full sm:w-[125px] cursor-pointer" />
                 <span className="text-slate-700 text-[10px]">→</span>
                 <input type="date" value={toDateInput} onChange={(e) => setToDateInput(e.target.value)} className="bg-slate-900 border border-white/5 rounded-lg px-3 py-1.5 text-[10px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-full sm:w-[125px] cursor-pointer" />
-                <button onClick={fetchNews} disabled={loading} className="p-2 bg-blue-600/10 text-blue-500 rounded-lg border border-blue-500/20 hover:bg-blue-600/20 transition-all flex items-center justify-center min-w-[36px]" title="Sync Feed">
+                <button onClick={() => fetchNews(false)} disabled={loading} className="p-2 bg-blue-600/10 text-blue-500 rounded-lg border border-blue-500/20 hover:bg-blue-600/20 transition-all flex items-center justify-center min-w-[36px]" title="Sync Feed">
                   {loading ? (<div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>) : (<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>)}
                 </button>
               </div>
