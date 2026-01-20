@@ -44,7 +44,7 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
             <p className="text-[8px] sm:text-[9px] text-slate-400 font-mono font-bold uppercase tracking-tighter leading-none mb-1">
               {news.timestamp.split(",")[1]?.trim() || ""}
             </p>
-            <p className="text-[7px] text-slate-600 font-mono uppercase tracking-tighter">
+            <p className="text-[7px] sm:text-[9px] text-slate-600 font-mono uppercase tracking-tighter">
               {news.timestamp.split(",")[0]?.trim() || ""}
             </p>
           </div>
@@ -218,11 +218,11 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
   }, [filteredNews.length, displayLimit]);
 
   const gridClasses = useMemo(() => {
-    // Match strict grid logic from MarketTerminal
+    // Shared strict grid logic with MarketTerminal
     if (isSidebarCollapsed) {
-      return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-4 animate-in fade-in duration-700";
+      return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-5 gap-4 pt-4 animate-in fade-in duration-700";
     }
-    return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pt-4 animate-in fade-in duration-700";
+    return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 pt-4 animate-in fade-in duration-700";
   }, [isSidebarCollapsed]);
 
   if (loading) {
@@ -246,8 +246,6 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
 
   return (
     <div className="flex flex-col space-y-8">
-      {/* Sub-header removed as controls moved to main terminal row */}
-
       {filteredNews.length === 0 ? (
         <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center opacity-20">
           <p className="text-xl font-black uppercase tracking-[0.4em] px-8">NO DISPATCHES IN REGION</p>
@@ -276,7 +274,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
         </>
       )}
 
-      {/* PDF Integrated Modal with connection fixes */}
+      {/* PDF Integrated Modal with robust fixes */}
       {pdfModalUrl && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setPdfModalUrl(null)}>
           <div className="w-full max-w-6xl h-[90vh] bg-[#0b0f1a] border border-white/10 rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -287,7 +285,15 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-200 uppercase tracking-tighter">Corporate Filing Viewer</h3>
-                  <a href={pdfModalUrl} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black text-emerald-500 uppercase hover:underline">Problems viewing? Click to Open in New Tab</a>
+                  <a 
+                    href={pdfModalUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-[10px] font-black text-emerald-500 uppercase hover:underline flex items-center mt-1"
+                  >
+                    Direct View: Open in New Tab
+                    <svg className="w-3 h-3 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                  </a>
                 </div>
               </div>
               <button 
@@ -298,13 +304,12 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
               </button>
             </div>
             <div className="flex-grow bg-slate-900 relative">
-              {/* Note: Iframe may still fail due to X-Frame-Options, hence the fallback link above */}
               <iframe 
                 src={pdfModalUrl} 
                 className="w-full h-full border-none" 
                 title="BSE Filing PDF" 
                 loading="lazy"
-                sandbox="allow-same-origin allow-scripts allow-popups"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
               />
             </div>
             <div className="p-4 bg-[#111621] border-t border-white/5 text-center">

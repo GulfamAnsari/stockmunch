@@ -158,7 +158,7 @@ export const NewsCard: React.FC<{
           </div>
         </div>
 
-        {/* Expansion Logic for Title and Description */}
+        {/* Sync expansion for Title */}
         <h4 className={`text-[13px] sm:text-[14px] font-medium text-slate-400/90 leading-[1.3] mb-3 group-hover:text-blue-300 transition-colors tracking-tight uppercase ${isExpanded ? '' : 'line-clamp-2'}`}>
           {news.title}
         </h4>
@@ -255,7 +255,7 @@ const MarketTerminal: React.FC<{
   const [bseCategory, setBseCategory] = useState("ALL");
   const [bseCategories, setBseCategories] = useState<string[]>(["ALL"]);
   const [bseAutoRefresh, setBseAutoRefresh] = useState(false);
-  
+
   const [activeTab, setActiveTab] = useState("ALL FEEDS");
   const [news, setNews] = useState<StockNews[]>([]);
   const [loading, setLoading] = useState(false);
@@ -453,11 +453,12 @@ const MarketTerminal: React.FC<{
   };
 
   const gridClasses = useMemo(() => {
-    // Ensuring STRICT 4 cards per row on laptop when sidebar is expanded
+    // Laptop Expanded: strictly 4 columns
+    // Laptop Collapsed: strictly 5 columns
     if (isSidebarCollapsed) {
-      return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-2";
+      return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-5 gap-4 pt-2";
     }
-    return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pt-2";
+    return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 pt-2";
   }, [isSidebarCollapsed]);
 
   return (
@@ -477,10 +478,10 @@ const MarketTerminal: React.FC<{
             ))}
           </div>
 
-          {/* Unified Filters relocated to the primary header row */}
+          {/* Combined Header Row for BSE controls */}
           {activeTab === "BSE FEEDS" ? (
-             <div className="flex items-center space-x-4 animate-in fade-in slide-in-from-left-2 duration-300">
-                <div className="flex items-center space-x-3 bg-slate-950 px-4 py-2 rounded-xl border border-white/[0.08]">
+             <div className="flex items-center space-x-3 flex-wrap gap-y-2 animate-in fade-in slide-in-from-left-2 duration-300">
+                <div className="flex items-center space-x-3 bg-slate-950 px-4 py-2.5 rounded-xl border border-white/[0.08]">
                   <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">CATEGORY</span>
                   <select 
                     value={bseCategory} 
@@ -492,15 +493,16 @@ const MarketTerminal: React.FC<{
                 </div>
                 <div className="relative w-full sm:w-48 lg:w-64 shrink-0">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
-                  <input type="text" placeholder="SEARCH BSE FILINGS..." value={bseSearchTerm} onChange={(e) => setBseSearchTerm(e.target.value)} className="w-full bg-slate-950 border border-white/[0.08] rounded-xl pl-12 pr-4 py-3 text-[11px] text-slate-300 focus:outline-none focus:border-emerald-500/40 transition-all font-mono placeholder:text-slate-800" />
+                  <input type="text" placeholder="SEARCH FILINGS..." value={bseSearchTerm} onChange={(e) => setBseSearchTerm(e.target.value)} className="w-full bg-slate-950 border border-white/[0.08] rounded-xl pl-12 pr-4 py-2.5 text-[11px] text-slate-300 focus:outline-none focus:border-emerald-500/40 transition-all font-mono placeholder:text-slate-800" />
                 </div>
+                {/* BSE Live Monitor right of tabs */}
                 <button 
                   onClick={() => setBseAutoRefresh(!bseAutoRefresh)} 
-                  className={`px-4 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 ${ 
-                    bseAutoRefresh ? "bg-emerald-600/10 border-emerald-600/50 text-emerald-500" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" 
+                  className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 ${ 
+                    bseAutoRefresh ? "bg-blue-600/10 border-blue-600/50 text-blue-500" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" 
                   }`}
                 >
-                  <div className={`w-1 h-1 rounded-full ${ bseAutoRefresh ? "bg-emerald-600 animate-pulse" : "bg-slate-700" }`}></div>
+                  <div className={`w-1 h-1 rounded-full ${ bseAutoRefresh ? "bg-blue-600 animate-pulse" : "bg-slate-700" }`}></div>
                   <span>LIVE MONITOR</span>
                 </button>
              </div>
