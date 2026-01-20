@@ -316,7 +316,9 @@ const MarketTerminal: React.FC<{
   }, []);
 
   const fetchNews = useCallback(async () => {
-    if (activeTab === "WATCHLIST" || activeTab === "BSE FEEDS") return;
+    // CRITICAL: bail out immediately if not on ALL FEEDS to prevent redundant calls
+    if (activeTab !== "ALL FEEDS") return;
+    
     setLoading(true);
     try {
       const toApiDate = (d: string) => {
@@ -384,11 +386,18 @@ const MarketTerminal: React.FC<{
     }
   }, [fromDateInput, toDateInput, activeTab]);
 
-  useEffect(() => { fetchNews(); }, [fetchNews]);
+  useEffect(() => { 
+    // Only call fetchNews when tab actually switches to ALL FEEDS or dates change
+    if (activeTab === "ALL FEEDS") {
+      fetchNews(); 
+    }
+  }, [fetchNews, activeTab]);
 
   useEffect(() => {
     let interval: number | undefined;
-    if (autoRefresh && !loading && activeTab !== "WATCHLIST" && activeTab !== "BSE FEEDS") interval = window.setInterval(fetchNews, 15000);
+    if (autoRefresh && !loading && activeTab === "ALL FEEDS") {
+      interval = window.setInterval(fetchNews, 15000);
+    }
     return () => clearInterval(interval);
   }, [autoRefresh, loading, fetchNews, activeTab]);
 
@@ -452,11 +461,6 @@ const MarketTerminal: React.FC<{
   };
 
   const gridClasses = useMemo(() => {
-    /**
-     * Scaling Logic (Synced for Terminal and BSE):
-     * Sidebar Expanded: md(2) -> lg(3) -> xl(4)
-     * Sidebar Collapsed: md(3) -> lg(4) -> xl(5)
-     */
     if (isSidebarCollapsed) {
       return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-2";
     }
