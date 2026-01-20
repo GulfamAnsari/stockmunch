@@ -90,7 +90,7 @@ const OverviewSection: React.FC<{
       <div className="flex-grow flex items-center justify-center bg-[#0b0f1a]">
         <div className="flex flex-col items-center space-y-4">
           <div className="w-12 h-12 border-4 border-emerald-600/20 border-t-emerald-600 rounded-full animate-spin"></div>
-          <p className="text-[10px] font-black text-emerald-600/60 uppercase tracking-[0.3em]">Syncing Overview...</p>
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">Syncing Overview...</p>
         </div>
       </div>
     );
@@ -134,8 +134,8 @@ const OverviewSection: React.FC<{
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <svg className="w-16 h-16 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           </div>
-          <p className="text-[10px] font-black text-emerald-600/40 uppercase tracking-[0.2em] mb-6">Subscription Node</p>
-          <h3 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-6">Subscription Node</p>
+          <h3 className="text-3xl font-black text-slate-200 uppercase tracking-tighter mb-4">
             {data?.plan_code || '---'}
           </h3>
           <div className="flex items-center justify-between">
@@ -144,29 +144,29 @@ const OverviewSection: React.FC<{
             }`}>
               Status: {data?.status || '---'}
             </div>
-            <span className="text-slate-500 text-[9px] font-mono font-bold uppercase">EXP: {formatDate(data?.end_date)}</span>
+            <span className="text-slate-600 text-[9px] font-mono font-bold uppercase">EXP: {formatDate(data?.end_date)}</span>
           </div>
         </div>
 
         <div className="bg-[#111621] border border-white/[0.03] p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group hover:border-sky-600/20 transition-all">
-          <p className="text-[10px] font-black text-sky-600/40 uppercase tracking-[0.2em] mb-6">Auto Renewal</p>
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-6">Auto Renewal</p>
           <div className="flex items-center space-x-6">
-            <h3 className={`text-5xl font-black uppercase tracking-tighter ${isAutoRenewOn ? 'text-white' : 'text-slate-800'}`}>
+            <h3 className={`text-5xl font-black uppercase tracking-tighter ${isAutoRenewOn ? 'text-slate-200' : 'text-slate-700'}`}>
               {isAutoRenewOn ? 'ON' : 'OFF'}
             </h3>
             <div className="flex flex-col">
               <span className="text-sky-600 text-[10px] font-black uppercase tracking-widest mb-1">System Secure</span>
-              <span className="text-slate-500 text-[9px] font-medium leading-tight">Billing is automated <br />via encrypted node.</span>
+              <span className="text-slate-600 text-[9px] font-medium leading-tight">Billing is automated <br />via encrypted node.</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-[#111621] border border-white/[0.03] p-8 rounded-[2rem] shadow-2xl group hover:border-amber-600/20 transition-all text-center md:text-left">
-          <p className="text-[10px] font-black text-amber-600/40 uppercase tracking-[0.2em] mb-6">Member Since</p>
-          <h3 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">
+        <div className="bg-[#111621] border border-white/[0.03] p-8 rounded-[2rem] shadow-2xl group hover:border-amber-600/20 transition-all">
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-6">Account Verified</p>
+          <h3 className="text-3xl font-black text-slate-200 uppercase tracking-tighter mb-4">
             {formatDate(data?.created_at)}
           </h3>
-          <div className="flex items-center space-x-2 justify-center md:justify-start">
+          <div className="flex items-center space-x-2">
             <div className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></div>
             <span className="text-amber-600 text-[10px] font-black uppercase tracking-widest">Active Member</span>
           </div>
@@ -175,22 +175,22 @@ const OverviewSection: React.FC<{
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-[#161b27] border border-white/[0.03] rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
-          <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] mb-8 flex items-center">
-            <span className="w-2.5 h-2.5 bg-emerald-600 rounded-full mr-4 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.3)]"></span>
+          <h3 className="text-sm font-black text-slate-300 uppercase tracking-[0.2em] mb-8 flex items-center">
+            <span className="w-2 h-2 bg-emerald-600 rounded-full mr-4 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.2)]"></span>
             Terminal Quick-Launch
           </h3>
           <div className="grid grid-cols-2 gap-5">
-            <button onClick={() => onNavigate('terminal')} className="p-6 bg-slate-900/60 border border-white/[0.05] rounded-3xl hover:bg-emerald-600/10 hover:border-emerald-600/20 transition-all text-left group">
+            <button onClick={() => onNavigate('terminal')} className="p-6 bg-slate-900/40 border border-white/[0.03] rounded-2xl hover:bg-emerald-600/10 hover:border-emerald-600/20 transition-all text-left group">
               <div className="w-10 h-10 rounded-xl bg-emerald-600/10 flex items-center justify-center text-emerald-600 mb-4 group-hover:scale-105 transition-transform">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
               </div>
-              <span className="text-[11px] font-black text-white uppercase tracking-widest block">Market Feed</span>
+              <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest block">Market Feed</span>
             </button>
-            <button onClick={() => onNavigate('notifications')} className="p-6 bg-slate-900/60 border border-white/[0.05] rounded-3xl hover:bg-sky-600/10 hover:border-sky-600/20 transition-all text-left group">
+            <button onClick={() => onNavigate('notifications')} className="p-6 bg-slate-900/40 border border-white/[0.03] rounded-2xl hover:bg-sky-600/10 hover:border-sky-600/20 transition-all text-left group">
               <div className="w-10 h-10 rounded-xl bg-sky-600/10 flex items-center justify-center text-sky-600 mb-4 group-hover:scale-105 transition-transform">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
               </div>
-              <span className="text-[11px] font-black text-white uppercase tracking-widest block">Alert Vault</span>
+              <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest block">Alert Vault</span>
             </button>
           </div>
         </div>
@@ -202,7 +202,7 @@ const OverviewSection: React.FC<{
               onClick={() => !isActuallyUsed && handleInviteInteraction(activeInvite.invite_link)}
             >
               <div className="absolute inset-0 bg-emerald-600/5 blur-xl rounded-full scale-75 group-hover/qr:scale-105 transition-transform duration-500"></div>
-              <div className="relative p-3 bg-slate-100 rounded-3xl shadow-2xl">
+              <div className="relative p-3 bg-slate-200 rounded-3xl shadow-2xl opacity-90 group-hover:opacity-100 transition-opacity">
                 <img 
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(activeInvite.invite_link)}`} 
                   alt="Telegram QR"
@@ -212,13 +212,13 @@ const OverviewSection: React.FC<{
             </div>
             <div className="flex-grow text-center md:text-left">
                <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
-                  <h3 className="text-sm font-black text-white uppercase tracking-[0.2em]">Telegram Dispatch</h3>
-                  <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${isActuallyUsed ? 'bg-slate-800 text-slate-600' : 'bg-emerald-600/10 text-emerald-500 border-emerald-600/20 animate-pulse'}`}>
-                    {isActuallyUsed ? 'SYNCED' : 'READY'}
+                  <h3 className="text-sm font-black text-slate-300 uppercase tracking-[0.2em]">Telegram Alert Node</h3>
+                  <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${isActuallyUsed ? 'bg-slate-800 text-slate-600 border border-white/[0.03]' : 'bg-emerald-600/10 text-emerald-500 border-emerald-600/20 animate-pulse'}`}>
+                    {isActuallyUsed ? 'DEACTIVATED' : 'READY'}
                   </div>
                </div>
-               <p className="text-slate-400 text-xs font-medium leading-relaxed mb-4">
-                 Join your private high-speed dispatch node.
+               <p className="text-slate-500 text-xs font-medium leading-relaxed mb-4">
+                 Scan the QR code or click the button to join your private dispatch channel.
                </p>
                <div className="flex flex-col items-center md:items-start gap-3">
                   <button 
@@ -230,34 +230,37 @@ const OverviewSection: React.FC<{
                       : 'bg-emerald-700 hover:bg-emerald-600 text-slate-200 shadow-emerald-900/20'
                     }`}
                   >
-                    Start Real-Time Alerts
+                    Join Alert Channel
                     <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.25.38-.51 1.05-.78 4.12-1.79 6.87-2.97 8.24-3.54 3.92-1.63 4.73-1.91 5.26-1.92.12 0 .38.03.55.17.14.12.18.28.2.44.02.16.02.32 0 .44z"/></svg>
                   </button>
+                  <p className="text-[9px] font-black uppercase text-amber-700/80 tracking-widest">
+                    ⚠️ One time link with 7 days expiry
+                  </p>
                </div>
             </div>
           </div>
         )}
 
         <div className="bg-[#161b27] border border-white/[0.03] rounded-[2.5rem] p-10 shadow-2xl">
-          <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] mb-8 flex items-center">
-            <span className="w-2.5 h-2.5 bg-amber-500 rounded-full mr-4 animate-pulse shadow-[0_0_15px_rgba(245,158,11,0.3)]"></span>
+          <h3 className="text-sm font-black text-slate-300 uppercase tracking-[0.2em] mb-8 flex items-center">
+            <span className="w-2 h-2 bg-amber-600 rounded-full mr-4 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.2)]"></span>
             System Integrity Log
           </h3>
           <div className="space-y-4">
             {[
               { msg: 'Access token validated via secure node', time: 'Just now', status: 'SUCCESS' },
-              { msg: `Subscription synchronized: ${data?.plan_code || 'PRO'}`, time: '5m ago', status: 'SYNC' },
+              { msg: `Subscription node synchronized: ${data?.plan_code || 'PRO'}`, time: '5m ago', status: 'SYNC' },
               { msg: 'Global market feed connection stable', time: '12m ago', status: 'INFO' }
             ].map((act, i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-slate-950/40 rounded-2xl border border-white/[0.03]">
+              <div key={i} className="flex items-center justify-between p-4 bg-slate-950/20 rounded-2xl border border-white/[0.03]">
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-bold text-slate-100">{act.msg}</span>
-                  <span className="text-[8px] text-slate-500 uppercase font-mono mt-1">{act.time}</span>
+                  <span className="text-[11px] font-bold text-slate-400">{act.msg}</span>
+                  <span className="text-[8px] text-slate-600 uppercase font-mono mt-1">{act.time}</span>
                 </div>
                 <span className={`text-[8px] font-black px-2 py-1 rounded border ${
-                  act.status === 'SUCCESS' ? 'border-emerald-600/30 text-emerald-500 bg-emerald-600/5' :
-                  act.status === 'SYNC' ? 'border-sky-600/30 text-sky-600 bg-sky-600/5' :
-                  'border-white/10 text-slate-500'
+                  act.status === 'SUCCESS' ? 'border-emerald-600/20 text-emerald-600 bg-emerald-600/5' :
+                  act.status === 'SYNC' ? 'border-sky-600/20 text-sky-600 bg-sky-600/5' :
+                  'border-white/[0.03] text-slate-600 bg-white/[0.01]'
                 } tracking-tighter`}>
                   {act.status}
                 </span>
@@ -279,7 +282,7 @@ const ProfileSection: React.FC<{ data: ProfileData | null; loading: boolean }> =
     );
   }
 
-  if (!data) return <div className="p-10 text-center opacity-30 font-black uppercase text-xs tracking-widest text-slate-500">Unable to load profile telemetry.</div>;
+  if (!data) return <div className="p-10 text-center opacity-30 font-black uppercase text-xs tracking-widest">Unable to load profile telemetry.</div>;
 
   const VerificationBadge = ({ verified, label }: { verified: boolean | number, label: string }) => (
     <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-widest ${
@@ -307,12 +310,15 @@ const ProfileSection: React.FC<{ data: ProfileData | null; loading: boolean }> =
               <div className="w-32 h-32 rounded-[2.5rem] bg-emerald-600/10 border-2 border-emerald-600/20 flex items-center justify-center text-emerald-600 text-4xl font-black shadow-2xl">
                 {data.logo ? <img src={data.logo} alt="User" className="w-full h-full object-cover rounded-[2.5rem]" /> : data.name.substring(0, 2).toUpperCase()}
               </div>
+              <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-slate-900 border border-white/10 rounded-full flex items-center justify-center text-slate-400 shadow-xl">
+                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+              </div>
             </div>
 
             <div className="flex-grow text-center md:text-left space-y-6">
               <div>
-                <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-2">{data.name}</h2>
-                <p className="text-emerald-600/60 font-mono text-[10px] font-black uppercase tracking-widest">User Access Node: {data.id}</p>
+                <h2 className="text-4xl font-black text-slate-200 uppercase tracking-tighter mb-2">{data.name}</h2>
+                <p className="text-slate-600 font-mono text-sm uppercase">User ID: {data.id}</p>
               </div>
 
               <div className="flex flex-wrap justify-center md:justify-start gap-3">
@@ -322,16 +328,16 @@ const ProfileSection: React.FC<{ data: ProfileData | null; loading: boolean }> =
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-8 border-t border-white/[0.05]">
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-black text-blue-500/70 uppercase tracking-widest block">Primary Contact</span>
-                  <p className="text-slate-100 font-bold tracking-tight text-lg">+91 {data.phone}</p>
+                  <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest block">Primary Contact</span>
+                  <p className="text-slate-300 font-bold tracking-tight text-lg">+91 {data.phone}</p>
                 </div>
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-black text-blue-500/70 uppercase tracking-widest block">Dispatch Hub</span>
-                  <p className="text-slate-100 font-bold tracking-tight text-lg">{data.email || 'None set'}</p>
+                  <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest block">Communication Hub</span>
+                  <p className="text-slate-300 font-bold tracking-tight text-lg">{data.email || 'No email provided'}</p>
                 </div>
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-black text-blue-500/70 uppercase tracking-widest block">Session Since</span>
-                  <p className="text-slate-100 font-bold tracking-tight text-lg">{new Date(data.joined_at).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                  <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest block">Commencement Date</span>
+                  <p className="text-slate-300 font-bold tracking-tight text-lg">{new Date(data.joined_at).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
                 </div>
               </div>
             </div>
@@ -354,7 +360,7 @@ const SettingsSection: React.FC<{
       <div className="flex-grow flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="w-10 h-10 border-2 border-emerald-600/20 border-t-emerald-600 rounded-full animate-spin"></div>
-          <p className="text-[9px] font-black text-emerald-600/60 uppercase tracking-[0.2em]">Syncing Preferences...</p>
+          <p className="text-[9px] font-black text-slate-700 uppercase tracking-[0.2em]">Syncing Preferences...</p>
         </div>
       </div>
     );
@@ -362,7 +368,8 @@ const SettingsSection: React.FC<{
 
   if (!data) return (
     <div className="flex-grow flex items-center justify-center">
-       <div className="text-center opacity-20 text-slate-500">
+       <div className="text-center opacity-20">
+          <svg className="w-16 h-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
           <p className="font-black uppercase text-xs tracking-widest">Configuration offline</p>
        </div>
     </div>
@@ -377,29 +384,29 @@ const SettingsSection: React.FC<{
   const settingsList = [
     { 
       key: 'telegram_push', 
-      label: 'Telegram Push Node', 
-      desc: 'Instant stock alerts via verified Telegram protocol.',
+      label: 'Telegram Alerts', 
+      desc: 'Get instant stock alerts on your Telegram account.',
       icon: 'M13 10V3L4 14h7v7l9-11h-7z',
       color: 'sky'
     },
     { 
       key: 'daily_email', 
-      label: 'Daily Market Brief', 
-      desc: 'Curation of critical news delivered to your hub.',
+      label: 'Daily Email Report', 
+      desc: 'Receive a summary of market news every evening.',
       icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z',
       color: 'indigo'
     },
     { 
       key: 'ai_insight', 
-      label: 'AI Impact Engine', 
-      desc: 'Contextual analysis powered by Gemini 3 Flash.',
+      label: 'AI News Analysis', 
+      desc: 'Enable AI-powered insights for every market alert.',
       icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
       color: 'emerald'
     },
     { 
       key: 'terminal_audio', 
-      label: 'Audio Notification', 
-      desc: 'High-frequency sound alerts for prioritized news.',
+      label: 'Sound Notifications', 
+      desc: 'Play a sound alert when new high-priority news breaks.',
       icon: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z',
       color: 'rose'
     }
@@ -410,12 +417,12 @@ const SettingsSection: React.FC<{
       <div className="max-w-6xl mx-auto space-y-12">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.05] pb-10">
           <div>
-            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Node Configuration</h2>
-            <p className="text-blue-500/60 text-sm mt-3 font-black uppercase tracking-widest">Customize your market intelligence parameters.</p>
+            <h2 className="text-4xl font-black text-slate-200 uppercase tracking-tighter">Terminal Settings</h2>
+            <p className="text-slate-600 text-sm mt-3 font-medium">Customize how you receive market intelligence and alerts.</p>
           </div>
-          <div className="flex items-center space-x-3 bg-slate-900/60 px-4 py-2 rounded-xl border border-white/[0.05]">
-             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-             <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Preferences Synced</span>
+          <div className="flex items-center space-x-3 bg-slate-900/50 px-4 py-2 rounded-xl border border-white/[0.05]">
+             <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></div>
+             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Settings Node Active</span>
           </div>
         </header>
         
@@ -424,12 +431,12 @@ const SettingsSection: React.FC<{
             <div 
               key={item.key} 
               className={`bg-[#111621] border transition-all duration-300 rounded-[2.5rem] p-8 md:p-10 group relative overflow-hidden flex flex-col justify-between h-full ${
-                activeSaveKey === item.key ? 'border-emerald-600 shadow-[0_0_25px_rgba(16,185,129,0.2)] scale-[1.01]' : 'border-white/[0.03] hover:border-white/[0.05]'
+                activeSaveKey === item.key ? 'border-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.15)] scale-[1.01]' : 'border-white/[0.03] hover:border-white/[0.05] hover:bg-slate-900/30'
               }`}
             >
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-8">
-                  <div className={`w-14 h-14 rounded-2xl bg-slate-950 border border-white/5 flex items-center justify-center text-${item.color}-500/80 group-hover:scale-105 transition-transform`}>
+                  <div className={`w-14 h-14 rounded-2xl bg-slate-950/80 border border-white/5 flex items-center justify-center text-${item.color}-600/80 group-hover:scale-105 transition-transform`}>
                     <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
                     </svg>
@@ -442,13 +449,33 @@ const SettingsSection: React.FC<{
                 </div>
                 
                 <div>
-                  <h4 className="text-slate-100 font-black uppercase tracking-tight text-lg mb-2">{item.label}</h4>
+                  <h4 className="text-slate-300 font-black uppercase tracking-tight text-lg mb-2">{item.label}</h4>
                   <p className="text-slate-500 text-[13px] font-medium leading-relaxed max-w-[240px]">{item.desc}</p>
                 </div>
               </div>
+
+              {activeSaveKey === item.key && (
+                <div className="absolute inset-x-0 bottom-0 py-1 bg-emerald-700 text-center text-[8px] font-black text-slate-100 uppercase tracking-[0.3em] animate-in slide-in-from-bottom-full">
+                  Applying Changes...
+                </div>
+              )}
+
+              <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-emerald-600/5 blur-[50px] rounded-full group-hover:bg-emerald-600/10 transition-all"></div>
             </div>
           ))}
         </div>
+
+        <footer className="p-8 bg-slate-950/20 border border-white/[0.03] rounded-[2rem] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <div className="w-10 h-10 rounded-full bg-white/[0.02] flex items-center justify-center text-slate-600">
+               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <p className="text-xs text-slate-600 font-medium">Settings are automatically synchronized across all your devices.</p>
+          </div>
+          <div className="px-6 py-2 rounded-full border border-white/[0.03] bg-slate-900/30 text-[10px] font-black text-slate-600 uppercase tracking-widest">
+            Last Sync: Just Now
+          </div>
+        </footer>
       </div>
     </div>
   );
@@ -460,8 +487,20 @@ const AlertHistorySection: React.FC<{ data: AlertData[]; loading: boolean }> = (
       <div className="flex-grow flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="w-10 h-10 border-2 border-emerald-600/20 border-t-emerald-600 rounded-full animate-spin"></div>
-          <p className="text-[9px] font-black text-emerald-600/60 uppercase tracking-[0.2em]">Retrieving logs...</p>
+          <p className="text-[9px] font-black text-slate-700 uppercase tracking-[0.2em]">Retrieving Dispatch Logs...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="flex-grow flex flex-col items-center justify-center p-12 text-center opacity-20">
+        <div className="w-20 h-20 bg-sky-600/5 rounded-3xl flex items-center justify-center text-sky-700 mb-6 border border-sky-600/10">
+          <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+        </div>
+        <h3 className="text-2xl font-black text-slate-300 uppercase tracking-tighter mb-2">No Alerts Dispatched</h3>
+        <p className="text-slate-600 text-sm max-w-xs font-medium uppercase tracking-widest leading-loose">The secure dispatch tunnel is currently clear of notification history.</p>
       </div>
     );
   }
@@ -471,42 +510,47 @@ const AlertHistorySection: React.FC<{ data: AlertData[]; loading: boolean }> = (
       <div className="max-w-6xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.05] pb-10">
           <div>
-            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Dispatch Vault</h2>
-            <p className="text-blue-500/60 text-sm mt-3 font-black uppercase tracking-widest">Historical notification telemetry node.</p>
+            <h2 className="text-4xl font-black text-slate-200 uppercase tracking-tighter">Alert Dispatch History</h2>
+            <p className="text-slate-600 text-sm mt-3 font-medium">Review your historical stock alert transmission telemetry.</p>
+          </div>
+          <div className="bg-sky-600/10 px-4 py-2 rounded-xl border border-sky-600/20 flex items-center space-x-3">
+             <div className="w-1.5 h-1.5 rounded-full bg-sky-600 animate-pulse"></div>
+             <span className="text-[10px] font-black text-sky-600 uppercase tracking-widest">Tunnel Sync: Real-Time</span>
           </div>
         </header>
 
-        {data.length === 0 ? (
-          <div className="text-center py-20 opacity-30 text-slate-600">
-             <p className="font-black uppercase tracking-[0.4em] text-sm">Vault Empty</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {data.map((alert, idx) => (
-              <div key={idx} className="bg-[#111621] border border-white/[0.03] rounded-3xl p-6 md:p-8 hover:bg-slate-900/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group">
-                <div className="flex items-start gap-6">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-center text-blue-500 flex-shrink-0">
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.25.38-.51 1.05-.78 4.12-1.79 6.87-2.97 8.24-3.54 3.92-1.63 4.73-1.91 5.26-1.92.12 0 .38.03.55.17.14.12.18.28.2.44.02.16.02.32 0 .44z"/></svg>
-                  </div>
-                  <div>
-                    <h4 className="text-blue-400 font-black uppercase tracking-tight text-base mb-1">{alert.title}</h4>
-                    <p className="text-slate-300 text-sm font-medium leading-relaxed max-w-2xl">{alert.message}</p>
-                  </div>
+        <div className="space-y-4">
+          {data.map((alert, idx) => (
+            <div key={idx} className="bg-[#111621] border border-white/[0.03] rounded-3xl p-6 md:p-8 hover:bg-slate-900/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group">
+              <div className="flex items-start gap-6">
+                <div className="w-12 h-12 rounded-2xl bg-sky-600/5 border border-sky-600/10 flex items-center justify-center text-sky-700 group-hover:scale-105 transition-transform flex-shrink-0">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.25.38-.51 1.05-.78 4.12-1.79 6.87-2.97 8.24-3.54 3.92-1.63 4.73-1.91 5.26-1.92.12 0 .38.03.55.17.14.12.18.28.2.44.02.16.02.32 0 .44z"/></svg>
                 </div>
-
-                <div className="flex md:flex-col items-center md:items-end justify-between gap-2 shrink-0">
-                  <div className="px-3 py-1 rounded-lg border border-emerald-600/20 bg-emerald-600/5 text-emerald-500 text-[9px] font-black uppercase tracking-widest">
-                    {alert.delivery_status}
+                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h4 className="text-slate-300 font-black uppercase tracking-tight text-base">{alert.title}</h4>
+                    <span className="px-2 py-0.5 rounded bg-white/[0.02] border border-white/[0.05] text-[8px] font-black text-slate-700 uppercase tracking-widest">{alert.channel}</span>
                   </div>
-                  <div className="text-right">
-                    <p className="text-slate-100 font-mono text-[10px] font-bold">{new Date(alert.delivered_at || alert.created_at).toLocaleTimeString('en-IN')}</p>
-                    <p className="text-slate-600 font-mono text-[9px] font-black uppercase">{new Date(alert.delivered_at || alert.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</p>
-                  </div>
+                  <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-2xl">{alert.message}</p>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+
+              <div className="flex md:flex-col items-center md:items-end justify-between gap-2 shrink-0">
+                <div className={`px-3 py-1 rounded-lg border text-[9px] font-black uppercase tracking-widest ${
+                  alert.delivery_status.toLowerCase() === 'delivered' || alert.delivery_status.toLowerCase() === 'success'
+                    ? 'bg-emerald-700/10 text-emerald-600 border-emerald-700/20' 
+                    : 'bg-amber-700/10 text-amber-600 border-amber-700/20'
+                }`}>
+                  {alert.delivery_status}
+                </div>
+                <div className="text-right">
+                  <p className="text-slate-400 font-mono text-[10px] font-bold">{new Date(alert.delivered_at || alert.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</p>
+                  <p className="text-slate-700 font-mono text-[9px]">{new Date(alert.delivered_at || alert.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -518,38 +562,49 @@ const BillingSection: React.FC<{ data: SubscriptionData | null }> = ({ data }) =
       <div className="max-w-5xl mx-auto space-y-12">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.05] pb-10">
           <div>
-            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Financial Ledger</h2>
-            <p className="text-emerald-600/60 text-sm mt-3 font-black uppercase tracking-widest">Billing and protocol management node.</p>
+            <h2 className="text-4xl font-black text-slate-200 uppercase tracking-tighter">Billing Ledger</h2>
+            <p className="text-slate-600 text-sm mt-3 font-medium">Manage your subscription protocol and financial telemetry.</p>
+          </div>
+          <div className="bg-indigo-700/10 px-4 py-2 rounded-xl border border-indigo-700/20 flex items-center space-x-3">
+             <div className="w-1.5 h-1.5 rounded-full bg-indigo-700 animate-pulse"></div>
+             <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Financial Node Secure</span>
           </div>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
            <div className="bg-[#111621] border border-white/[0.03] rounded-[2.5rem] p-10 flex flex-col shadow-2xl relative overflow-hidden group">
-             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-4">Current Access</span>
-             <h3 className="text-4xl font-black text-emerald-400 uppercase tracking-tighter mb-4">{data?.plan_code || 'TRIAL_PRO'}</h3>
-             <div className="flex items-center space-x-4 mb-10">
-                <div className="px-3 py-1 bg-emerald-600/10 text-emerald-600 border border-emerald-600/30 rounded-lg text-[9px] font-black uppercase tracking-widest">Active Status</div>
-                <div className="text-[10px] text-slate-500 font-mono font-black">EXP: {data?.end_date ? new Date(data.end_date).toLocaleDateString() : '30 Days'}</div>
+             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                <svg className="w-24 h-24 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
              </div>
-             <button className="mt-auto py-4 bg-emerald-600 text-slate-900 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-900/20">Upgrade Protocol</button>
+             <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest block mb-4">Current Subscription</span>
+             <h3 className="text-4xl font-black text-slate-300 uppercase tracking-tighter mb-4">{data?.plan_code || 'TRIAL_PRO'}</h3>
+             <div className="flex items-center space-x-4 mb-10">
+                <div className="px-3 py-1 bg-emerald-700/10 text-emerald-600 border border-emerald-700/20 rounded-lg text-[9px] font-black uppercase tracking-widest">Active</div>
+                <div className="text-[10px] text-slate-600 font-mono">Renews: {data?.end_date ? new Date(data.end_date).toLocaleDateString() : '30 Days Remaining'}</div>
+             </div>
+             <button className="mt-auto py-4 bg-white/[0.02] border border-white/[0.05] rounded-2xl text-[10px] font-black text-slate-600 uppercase tracking-widest hover:bg-emerald-700 hover:text-slate-100 transition-all">Upgrade Protocol</button>
            </div>
 
            <div className="bg-[#111621] border border-white/[0.03] rounded-[2.5rem] p-10 flex flex-col shadow-2xl">
-             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-6">Dispatch History</span>
+             <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest block mb-6">Invoice History</span>
              <div className="space-y-4">
                 {[
                   { date: 'Jan 10, 2026', amount: '₹0.00', status: 'COMPLETED', id: '#SM-9401' },
                   { date: 'Dec 11, 2025', amount: '₹0.00', status: 'COMPLETED', id: '#SM-8212' },
                 ].map((inv, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-4 bg-slate-950/60 border border-white/[0.03] rounded-2xl group hover:border-emerald-600/30 transition-all">
+                  <div key={idx} className="flex items-center justify-between p-4 bg-slate-900/30 border border-white/[0.03] rounded-2xl group hover:border-emerald-700/30 transition-all">
                     <div className="flex flex-col">
-                      <span className="text-[11px] font-bold text-slate-100">{inv.date}</span>
-                      <span className="text-[8px] font-mono text-slate-700 font-black">{inv.id}</span>
+                      <span className="text-[11px] font-bold text-slate-400">{inv.date}</span>
+                      <span className="text-[8px] font-mono text-slate-700">{inv.id}</span>
                     </div>
-                    <span className="text-[11px] font-black text-emerald-500">{inv.amount}</span>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-[11px] font-black text-slate-300">{inv.amount}</span>
+                      <svg className="w-4 h-4 text-slate-800 hover:text-emerald-700 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    </div>
                   </div>
                 ))}
              </div>
+             <p className="mt-8 text-center text-[9px] font-medium text-slate-800 uppercase tracking-widest">Encrypted Billing by StockManch Ledger</p>
            </div>
         </div>
       </div>
@@ -701,7 +756,7 @@ const Dashboard: React.FC = () => {
     { id: 'terminal', label: 'Market Terminal', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
     { id: 'notifications', label: 'Alert History', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
     { id: 'account', label: 'My Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-    { id: 'billing', label: 'Billing Node', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
+    { id: 'billing', label: 'Billing and Payments', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', disabled: true },
     { id: 'settings', label: 'App Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
   ];
 
@@ -711,7 +766,7 @@ const Dashboard: React.FC = () => {
     notifications: 'Recent Alerts',
     account: 'My Profile',
     settings: 'App Settings',
-    billing: 'Billing Node'
+    billing: 'Billing and Payments'
   };
 
   const SidebarContent = () => (
@@ -723,8 +778,8 @@ const Dashboard: React.FC = () => {
         {!isSidebarCollapsed && (
           <div className="space-y-1 animate-in fade-in slide-in-from-left-2 duration-300">
             <h2 className="text-slate-400 font-black uppercase text-[10px] tracking-[0.2em]">Terminal Node</h2>
-            <p className={`text-[8px] font-mono uppercase ${isOnline ? 'text-emerald-700 font-black' : 'text-rose-700 font-bold'}`}>
-              {isOnline ? 'Operational' : 'Offline'}
+            <p className={`text-[8px] font-mono uppercase ${isOnline ? 'text-slate-700' : 'text-rose-700 font-bold'}`}>
+              {isOnline ? 'Online' : 'Offline'}
             </p>
           </div>
         )}
@@ -733,11 +788,14 @@ const Dashboard: React.FC = () => {
         {menuItems.map((item) => (
           <button 
             key={item.id} 
+            disabled={(item as any).disabled}
             onClick={() => { 
+              if ((item as any).disabled) return;
               setActiveSection(item.id as any); 
               setIsMobileSidebarOpen(false); 
             }} 
             className={`w-full flex items-center space-x-4 p-4 rounded-2xl transition-all group ${
+              (item as any).disabled ? 'opacity-20 cursor-not-allowed grayscale' :
               activeSection === item.id ? 'bg-emerald-700 text-slate-100 shadow-xl shadow-emerald-900/10' : 'text-slate-600 hover:text-slate-300 hover:bg-white/[0.02]'
             }`} 
             title={isSidebarCollapsed ? item.label : ''}
@@ -746,6 +804,7 @@ const Dashboard: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
             </svg>
             <span className={`${isSidebarCollapsed ? 'hidden' : 'block'} uppercase tracking-[0.15em] text-[10px] font-black truncate`}>{item.label}</span>
+            {(item as any).disabled && !isSidebarCollapsed && <span className="text-[7px] font-bold bg-white/[0.05] px-1.5 py-0.5 rounded ml-auto text-slate-700 tracking-tighter">SOON</span>}
           </button>
         ))}
       </nav>
@@ -776,13 +835,13 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center space-x-6">
               <Logo className="h-7 w-auto hidden sm:block opacity-80" />
               <div className="h-6 w-px bg-white/[0.05] hidden md:block"></div>
-              <h2 className="text-white font-black uppercase tracking-[0.2em] text-xs hidden md:block">{sectionTitles[activeSection]}</h2>
+              <h2 className="text-slate-400 font-black uppercase tracking-[0.2em] text-xs hidden md:block">{sectionTitles[activeSection]}</h2>
             </div>
           </div>
           <div className="flex items-center space-x-4 md:space-x-6">
             <div className="flex flex-col items-end">
-              <span className="text-[9px] font-black text-blue-500/60 uppercase tracking-widest">{subscriptionData?.plan_code || '---'}</span>
-              <span className="text-[10px] text-white font-black uppercase tracking-tight">{profileData?.name || 'SYNCING...'}</span>
+              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{subscriptionData?.plan_code || '---'}</span>
+              <span className="text-[10px] text-emerald-600 font-black uppercase tracking-tight">{profileData?.name || 'SYNCING...'}</span>
             </div>
             <div 
               onClick={() => setActiveSection('account')}

@@ -19,16 +19,9 @@ interface BseNewsItem {
   source: string;
 }
 
-const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => void }> = ({ news, onWatchlistAdd }) => {
+const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => void; onPdfView: (url: string) => void }> = ({ news, onWatchlistAdd, onPdfView }) => {
   const [isRead, setIsRead] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const handlePdfClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (news.pdfUrl) {
-      window.open(news.pdfUrl, '_blank', 'noopener,noreferrer');
-    }
-  };
 
   return (
     <div
@@ -57,6 +50,7 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
           </div>
         </div>
 
+        {/* Sync Title and Content Expansion */}
         <h4 className={`text-[13px] sm:text-[14px] font-medium text-slate-400/90 leading-[1.3] mb-3 group-hover:text-emerald-300 transition-colors uppercase tracking-tight ${isExpanded ? '' : 'line-clamp-2'}`}>
           {news.title}
         </h4>
@@ -85,7 +79,7 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
           
           {news.pdfUrl ? (
             <button
-              onClick={handlePdfClick}
+              onClick={(e) => { e.stopPropagation(); onPdfView(news.pdfUrl!); }}
               className="flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 text-slate-900 font-black rounded-lg text-[8px] uppercase tracking-widest transition-all hover:bg-emerald-500 shadow-[0_10px_30px_rgba(5,150,105,0.3)] shrink-0"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -118,6 +112,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [displayLimit, setDisplayLimit] = useState(10);
+  const [pdfModalUrl, setPdfModalUrl] = useState<string | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
   const initialFetchDone = useRef(false);
 
@@ -159,6 +154,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
         allItems.sort((a, b) => new Date(b.rawPublishedAt).getTime() - new Date(a.rawPublishedAt).getTime());
         setBseNews(allItems);
         
+        // Report categories back to parent
         if (onCategoriesLoad) {
           const set = new Set<string>();
           allItems.forEach(n => set.add(n.category));
@@ -222,6 +218,11 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
   }, [filteredNews.length, displayLimit]);
 
   const gridClasses = useMemo(() => {
+    /**
+     * Scaling Logic (Synced for Terminal and BSE):
+     * Sidebar Expanded: md(2) -> lg(3) -> xl(4)
+     * Sidebar Collapsed: md(3) -> lg(4) -> xl(5)
+     */
     if (isSidebarCollapsed) {
       return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-4 animate-in fade-in duration-700";
     }
@@ -261,6 +262,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
                 key={newsItem.id} 
                 news={newsItem} 
                 onWatchlistAdd={onWatchlistAdd} 
+                onPdfView={(url) => setPdfModalUrl(url)}
               />
             ))}
           </div>
@@ -274,6 +276,51 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
             )}
           </div>
         </>
+      )}
+
+      {/* PDF Integrated Modal with robust fixes */}
+      {pdfModalUrl && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setPdfModalUrl(null)}>
+          <div className="w-full max-w-6xl h-[90vh] bg-[#0b0f1a] border border-white/10 rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-[#111621]">
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-600/10 flex items-center justify-center text-emerald-600">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-200 uppercase tracking-tighter">Corporate Filing Viewer</h3>
+                  <a 
+                    href={pdfModalUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-[10px] font-black text-emerald-500 uppercase hover:underline flex items-center mt-1"
+                  >
+                    Direct View: Open in New Tab
+                    <svg className="w-3 h-3 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                  </a>
+                </div>
+              </div>
+              <button 
+                onClick={() => setPdfModalUrl(null)}
+                className="p-3 bg-white/5 hover:bg-rose-600/20 text-slate-400 hover:text-rose-500 rounded-xl transition-all"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="flex-grow bg-slate-900 relative">
+              <iframe 
+                src={pdfModalUrl} 
+                className="w-full h-full border-none" 
+                title="BSE Filing PDF" 
+                loading="lazy"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              />
+            </div>
+            <div className="p-4 bg-[#111621] border-t border-white/5 text-center">
+               <p className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">StockManch Secure Document Node</p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
