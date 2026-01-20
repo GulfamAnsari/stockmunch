@@ -28,44 +28,40 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
       onClick={() => setIsRead(true)}
       className={`bg-[#111621] border border-white/[0.06] rounded-2xl flex flex-col h-full hover:border-emerald-500/30 transition-all group shadow-2xl relative cursor-pointer group/card ${isRead ? 'opacity-80' : ''}`}
     >
-      <div className="p-6 flex flex-col h-full relative z-10">
-        <div className="flex items-start justify-between mb-5 gap-4">
+      <div className="p-4 sm:p-5 flex flex-col h-full relative z-10">
+        <div className="flex items-start justify-between mb-5 gap-2">
           <div className="min-w-0">
-            <h3 className="text-[12px] font-extrabold text-emerald-400/90 tracking-tight uppercase leading-none truncate max-w-[200px] mb-1.5">
+            <h3 className="text-[10px] sm:text-[11px] font-extrabold text-emerald-400/90 tracking-tight uppercase leading-none truncate max-w-[140px] mb-1.5">
               {news.companyName}
             </h3>
             <div className="flex items-center space-x-3">
-              <span className="text-[10px] text-slate-500 font-mono font-bold uppercase tracking-widest">
+              <span className="text-[9px] sm:text-[10px] text-slate-500 font-mono font-bold uppercase tracking-widest">
                 {news.bseCode}
-              </span>
-              <span className="text-slate-800">•</span>
-              <span className="text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-400 font-black uppercase tracking-widest rounded-lg border border-blue-500/20">
-                BSE INDIA
               </span>
             </div>
           </div>
           <div className="text-right shrink-0">
-            <p className="text-[10px] text-slate-400 font-mono font-bold uppercase tracking-tighter leading-none mb-1">
+            <p className="text-[8px] sm:text-[9px] text-slate-400 font-mono font-bold uppercase tracking-tighter leading-none mb-1">
               {news.timestamp.split(",")[1]?.trim() || ""}
             </p>
-            <p className="text-[9px] text-slate-600 font-mono uppercase tracking-tighter">
+            <p className="text-[7px] sm:text-[9px] text-slate-600 font-mono uppercase tracking-tighter">
               {news.timestamp.split(",")[0]?.trim() || ""}
             </p>
           </div>
         </div>
 
-        <h4 className="text-[15px] font-medium text-slate-400/90 leading-[1.4] mb-3 line-clamp-2 group-hover:text-emerald-300 transition-colors uppercase tracking-tight">
+        <h4 className={`text-[13px] sm:text-[14px] font-medium text-slate-400/90 leading-[1.3] mb-3 group-hover:text-emerald-300 transition-colors uppercase tracking-tight ${isExpanded ? '' : 'line-clamp-2'}`}>
           {news.title}
         </h4>
 
         <div className="flex-grow relative">
-          <p className={`text-[12px] text-slate-500 leading-relaxed mb-4 font-medium border-l-2 border-emerald-900/30 pl-4 group-hover:border-emerald-500/40 transition-all duration-300 ${isExpanded ? 'line-clamp-none bg-emerald-500/[0.02] py-2' : 'line-clamp-3'}`}>
+          <p className={`text-[11px] text-slate-500 leading-relaxed mb-4 font-medium border-l-2 border-emerald-900/30 pl-3 group-hover:border-emerald-500/40 transition-all duration-300 ${isExpanded ? 'line-clamp-none bg-emerald-500/[0.02] py-2' : 'line-clamp-3'}`}>
             {news.content}
           </p>
           {news.content.length > 120 && (
             <button 
               onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
-              className="flex items-center space-x-1 text-[10px] font-black text-slate-600 hover:text-emerald-400 uppercase tracking-widest mb-4 transition-colors"
+              className="flex items-center space-x-1 text-[9px] font-black text-slate-600 hover:text-emerald-400 uppercase tracking-widest mb-4 transition-colors"
             >
               <span>{isExpanded ? 'Read Less' : 'Read More'}</span>
               <svg className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,23 +71,25 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
           )}
         </div>
 
-        <div className="pt-5 mt-auto flex items-center justify-between border-t border-white/[0.05] gap-4">
-          <div className="px-3 py-1.5 bg-white/[0.03] text-slate-500 border border-white/[0.06] rounded-xl text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
+        <div className="pt-4 mt-auto flex items-center justify-between border-t border-white/[0.05] gap-3">
+          <div className="px-2 py-1 bg-white/[0.03] text-slate-500 border border-white/[0.06] rounded-lg text-[8px] font-black uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] sm:max-w-none">
             {news.category}
           </div>
           
           {news.pdfUrl ? (
             <button
               onClick={(e) => { e.stopPropagation(); onPdfView(news.pdfUrl!); }}
-              className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-slate-900 font-black rounded-xl text-[10px] uppercase tracking-widest transition-all hover:bg-emerald-500 shadow-[0_10px_30px_rgba(5,150,105,0.3)] shrink-0"
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 text-slate-900 font-black rounded-lg text-[8px] uppercase tracking-widest transition-all hover:bg-emerald-500 shadow-[0_10px_30px_rgba(5,150,105,0.3)] shrink-0"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span>FILING</span>
             </button>
           ) : (
-            <span className="text-[10px] text-slate-700 font-black uppercase tracking-widest whitespace-nowrap">BSE DATA</span>
+            <span className="text-[8px] sm:text-[10px] text-slate-700 font-black uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis">
+              {news.source || 'BSE DATA'}
+            </span>
           )}
         </div>
       </div>
@@ -101,16 +99,19 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
 
 interface BseCardsProps {
   onWatchlistAdd: (item: any) => void;
+  isSidebarCollapsed?: boolean;
+  externalSearch?: string;
+  externalCategory?: string;
+  onCategoriesLoad?: (cats: string[]) => void;
 }
 
-const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
+const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed, externalSearch = "", externalCategory = "ALL", onCategoriesLoad }) => {
   const [bseNews, setBseNews] = useState<BseNewsItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [displayLimit, setDisplayLimit] = useState(10);
-  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [pdfModalUrl, setPdfModalUrl] = useState<string | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
   const initialFetchDone = useRef(false);
 
@@ -151,6 +152,13 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
 
         allItems.sort((a, b) => new Date(b.rawPublishedAt).getTime() - new Date(a.rawPublishedAt).getTime());
         setBseNews(allItems);
+        
+        // Load categories up to parent for external filter
+        if (onCategoriesLoad) {
+          const set = new Set<string>();
+          allItems.forEach(n => set.add(n.category));
+          onCategoriesLoad(["ALL", ...Array.from(set)].sort());
+        }
       } else {
         setError("BSE data stream temporarily unavailable.");
       }
@@ -160,7 +168,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
     } finally {
       if (isInitial) setLoading(false);
     }
-  }, []);
+  }, [onCategoriesLoad]);
 
   useEffect(() => {
     if (!initialFetchDone.current) {
@@ -177,19 +185,13 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
     return () => clearInterval(interval);
   }, [autoRefresh, fetchBseFeeds]);
 
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    bseNews.forEach(n => set.add(n.category));
-    return ["ALL", ...Array.from(set)].sort();
-  }, [bseNews]);
-
   const filteredNews = useMemo(() => {
     let list = bseNews;
-    if (selectedCategory !== "ALL") {
-      list = list.filter(n => n.category === selectedCategory);
+    if (externalCategory !== "ALL") {
+      list = list.filter(n => n.category === externalCategory);
     }
-    if (searchTerm) {
-      const lower = searchTerm.toLowerCase();
+    if (externalSearch) {
+      const lower = externalSearch.toLowerCase();
       list = list.filter(n => 
         n.companyName.toLowerCase().includes(lower) || 
         n.bseCode.toLowerCase().includes(lower) || 
@@ -197,7 +199,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
       );
     }
     return list;
-  }, [bseNews, selectedCategory, searchTerm]);
+  }, [bseNews, externalCategory, externalSearch]);
 
   const pagedNews = useMemo(() => filteredNews.slice(0, displayLimit), [filteredNews, displayLimit]);
 
@@ -214,9 +216,13 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
     return () => observer.disconnect();
   }, [filteredNews.length, displayLimit]);
 
-  const handlePdfOpen = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
+  const gridClasses = useMemo(() => {
+    // Shared grid logic with MarketTerminal
+    if (isSidebarCollapsed) {
+      return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-4 animate-in fade-in duration-700";
+    }
+    return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-4 animate-in fade-in duration-700";
+  }, [isSidebarCollapsed]);
 
   if (loading) {
     return (
@@ -239,49 +245,16 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
 
   return (
     <div className="flex flex-col space-y-8">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.05]">
-        <div className="flex items-center space-x-6 flex-wrap gap-y-4">
-          <div className="flex items-center space-x-3">
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">CATEGORY</span>
-            <select 
-              value={selectedCategory} 
-              onChange={(e) => { setSelectedCategory(e.target.value); setDisplayLimit(10); }}
-              className="bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-[11px] font-black uppercase tracking-tight text-slate-300 focus:outline-none focus:border-blue-500/50 transition-all"
-            >
-              {categories.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-          
-          <div className="relative w-full sm:w-64 shrink-0">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <input 
-              type="text" 
-              placeholder="SEARCH BSE FEEDS..." 
-              value={searchTerm} 
-              onChange={(e) => { setSearchTerm(e.target.value); setDisplayLimit(10); }} 
-              className="w-full bg-slate-950/60 border border-white/10 rounded-xl pl-12 pr-4 py-2.5 text-[11px] text-slate-300 focus:outline-none focus:border-emerald-500/40 transition-all font-mono placeholder:text-slate-800" 
-            />
-          </div>
-
-          <div className="h-5 w-px bg-white/10 hidden sm:block"></div>
-          <div className="flex items-center space-x-3">
-            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">PIPELINE</span>
-            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-          </div>
-        </div>
-        
+      {/* Sub-header removed as controls moved to main terminal row */}
+      <div className="flex justify-end -mt-4 mb-2">
         <button 
           onClick={() => setAutoRefresh(!autoRefresh)} 
-          className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 ${ 
+          className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 ${ 
             autoRefresh ? "bg-blue-600/10 border-blue-600/50 text-blue-500" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" 
           }`}
         >
-          <div className={`w-1.5 h-1.5 rounded-full ${ autoRefresh ? "bg-blue-600 animate-pulse" : "bg-slate-700" }`}></div>
-          <span>BSE LIVE (10s)</span>
+          <div className={`w-1 h-1 rounded-full ${ autoRefresh ? "bg-blue-600 animate-pulse" : "bg-slate-700" }`}></div>
+          <span>BSE LIVE MONITOR</span>
         </button>
       </div>
 
@@ -291,13 +264,13 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 pt-4 animate-in fade-in duration-700">
+          <div className={gridClasses}>
             {pagedNews.map((newsItem) => (
               <BseNewsCard 
                 key={newsItem.id} 
                 news={newsItem} 
                 onWatchlistAdd={onWatchlistAdd} 
-                onPdfView={handlePdfOpen}
+                onPdfView={(url) => setPdfModalUrl(url)}
               />
             ))}
           </div>
@@ -311,6 +284,43 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
             )}
           </div>
         </>
+      )}
+
+      {/* PDF Integrated Modal with connection fixes */}
+      {pdfModalUrl && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setPdfModalUrl(null)}>
+          <div className="w-full max-w-6xl h-[90vh] bg-[#0b0f1a] border border-white/10 rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-[#111621]">
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-600/10 flex items-center justify-center text-emerald-600">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-200 uppercase tracking-tighter">Corporate Filing Viewer</h3>
+                  <a href={pdfModalUrl} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black text-emerald-500 uppercase hover:underline">Problems viewing? Open in New Tab</a>
+                </div>
+              </div>
+              <button 
+                onClick={() => setPdfModalUrl(null)}
+                className="p-3 bg-white/5 hover:bg-rose-600/20 text-slate-400 hover:text-rose-500 rounded-xl transition-all"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="flex-grow bg-slate-900 relative">
+              <iframe 
+                src={pdfModalUrl} 
+                className="w-full h-full border-none" 
+                title="BSE Filing PDF" 
+                loading="lazy"
+                sandbox="allow-same-origin allow-scripts allow-popups"
+              />
+            </div>
+            <div className="p-4 bg-[#111621] border-t border-white/5 text-center">
+               <p className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">StockManch Secure Document Node</p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

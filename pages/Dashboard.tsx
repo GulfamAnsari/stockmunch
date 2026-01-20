@@ -249,7 +249,6 @@ const OverviewSection: React.FC<{
           <div className="space-y-4">
             {[
               { msg: 'Access token validated via secure node', time: 'Just now', status: 'SUCCESS' },
-              /* DO NOT use subscriptionData as it is not in scope here; use the 'data' prop instead. */
               { msg: `Subscription node synchronized: ${data?.plan_code || 'PRO'}`, time: '5m ago', status: 'SYNC' },
               { msg: 'Global market feed connection stable', time: '12m ago', status: 'INFO' }
             ].map((act, i) => (
@@ -862,7 +861,7 @@ const Dashboard: React.FC = () => {
         {!isFullScreenMode && <aside className={`hidden lg:flex ${isSidebarCollapsed ? 'w-24' : 'w-72'} bg-[#0d121f] border-r border-white/[0.03] flex-col shrink-0 z-10 transition-all duration-500`}><SidebarContent /></aside>}
         <main className="flex-grow flex flex-col min-w-0 bg-[#0b0f1a] relative overflow-hidden">
           <div className="flex-grow flex flex-col overflow-hidden">
-            {activeSection === 'terminal' && <MarketTerminal onToggleFullScreen={setIsFullScreenMode} />}
+            {activeSection === 'terminal' && <MarketTerminal onToggleFullScreen={setIsFullScreenMode} isSidebarCollapsed={isSidebarCollapsed} />}
             {activeSection === 'overview' && <OverviewSection data={subscriptionData} invites={inviteData} loading={loadingCore} onNavigate={setActiveSection} />}
             {activeSection === 'account' && <ProfileSection data={profileData} loading={loadingCore} />}
             {activeSection === 'notifications' && <AlertHistorySection data={alertData} loading={loadingAlerts} />}

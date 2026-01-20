@@ -121,10 +121,10 @@ export const NewsCard: React.FC<{
         </div>
       )}
 
-      <div className="p-6 flex flex-col h-full relative z-10">
-        <div className="flex items-start justify-between mb-5 gap-4">
-          <div className="flex items-center space-x-3 min-w-0">
-            <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center text-slate-400 text-[11px] font-black shadow-inner overflow-hidden border border-white/[0.08]`}>
+      <div className="p-4 sm:p-5 flex flex-col h-full relative z-10">
+        <div className="flex items-start justify-between mb-5 gap-2">
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+            <div className={`w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-400 text-[10px] font-black shadow-inner overflow-hidden border border-white/[0.08]`}>
               {news.logoUrl ? (
                 <img src={news.logoUrl} alt={news.symbol} className="w-full h-full object-contain p-1 bg-white/[0.03]" />
               ) : (
@@ -132,44 +132,44 @@ export const NewsCard: React.FC<{
               )}
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-x-2">
-                <h3 className="text-[12px] font-extrabold text-blue-400/80 tracking-tight uppercase leading-none truncate max-w-[140px]">
+              <div className="flex items-center gap-x-1.5">
+                <h3 className="text-[10px] sm:text-[11px] font-extrabold text-blue-400/80 tracking-tight uppercase leading-none truncate max-w-[140px]">
                   {news.companyName}
                 </h3>
-                <span className={`text-[10px] font-mono font-bold flex items-center ${
+                <span className={`text-[8px] sm:text-[9px] font-mono font-bold flex items-center ${
                     hasPriceData && news.priceChange !== 0 ? news.priceChange >= 0 ? "text-emerald-500/80" : "text-rose-500/80" : "text-slate-600"
                   }`}>
                   {hasPriceData && news.priceChange !== 0 ? (news.priceChange >= 0 ? "↑" : "↓") : "•"}{" "}
                   {hasPriceData ? Math.abs(news.priceChange).toFixed(2) : "0.00"}%
                 </span>
               </div>
-              <p className="text-[9px] text-slate-500/80 font-mono font-bold uppercase tracking-widest truncate max-w-[140px] mt-1.5">
+              <p className="text-[8px] text-slate-500/80 font-mono font-bold uppercase tracking-widest truncate max-w-[140px] mt-1">
                 {news.symbol || (news as any).bseCode}
               </p>
             </div>
           </div>
           <div className="text-right shrink-0">
-            <p className="text-[10px] text-slate-400 font-mono font-bold uppercase tracking-tighter leading-none mb-1">
+            <p className="text-[8px] text-slate-400 font-mono font-bold uppercase tracking-tighter leading-none mb-1">
               {news.timestamp.split(",")[1]?.trim() || news.timestamp.split(' ').slice(2).join(' ')}
             </p>
-            <p className="text-[9px] text-slate-600 font-mono uppercase tracking-tighter">
+            <p className="text-[7px] text-slate-600 font-mono uppercase tracking-tighter">
               {news.timestamp.split(",")[0]?.trim() || news.timestamp.split(' ').slice(0, 2).join(' ')}
             </p>
           </div>
         </div>
 
-        <h4 className="text-[15px] font-medium text-slate-400/90 leading-[1.4] mb-3 line-clamp-2 group-hover:text-blue-300 transition-colors tracking-tight">
+        <h4 className={`text-[13px] sm:text-[14px] font-medium text-slate-400/90 leading-[1.3] mb-3 group-hover:text-blue-300 transition-colors tracking-tight uppercase ${isExpanded ? '' : 'line-clamp-2'}`}>
           {news.title}
         </h4>
 
         <div className="flex-grow relative min-w-0">
-          <p className={`text-[12px] text-slate-500 leading-relaxed mb-4 font-medium border-l-2 border-slate-800/50 pl-4 transition-all duration-300 ${isExpanded ? 'line-clamp-none bg-white/[0.02] py-2' : 'line-clamp-3'}`}>
+          <p className={`text-[11px] text-slate-500 leading-relaxed mb-4 font-medium border-l-2 border-slate-800/50 pl-3 transition-all duration-300 ${isExpanded ? 'line-clamp-none bg-white/[0.02] py-2' : 'line-clamp-3'}`}>
             {news.content}
           </p>
           {news.content.length > 120 && (
             <button 
               onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
-              className="flex items-center space-x-1 text-[10px] font-black text-slate-600 hover:text-blue-400 uppercase tracking-widest mb-4 transition-colors"
+              className="flex items-center space-x-1 text-[9px] font-black text-slate-600 hover:text-blue-400 uppercase tracking-widest mb-4 transition-colors"
             >
               <span>{isExpanded ? 'Read Less' : 'Read More'}</span>
               <svg className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,53 +181,53 @@ export const NewsCard: React.FC<{
 
         <div className="mt-auto">
           {news.aiAnalysis && (
-            <div className="mb-4 p-4 bg-white/[0.015] rounded-xl border border-white/[0.04]">
-              <span className="text-[9px] font-black text-emerald-600/80 uppercase tracking-widest block mb-2">Analysis Node</span>
-              <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2 font-medium italic">{news.aiAnalysis}</p>
+            <div className="mb-4 p-3 bg-white/[0.015] rounded-xl border border-white/[0.04]">
+              <span className="text-[8px] font-black text-emerald-600/80 uppercase tracking-widest block mb-1.5">Analysis Node</span>
+              <p className="text-[10px] text-slate-500 leading-relaxed line-clamp-2 font-medium italic">{news.aiAnalysis}</p>
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-2 mb-5">
+          <div className="flex items-center justify-between gap-2 mb-4">
             <div className="flex items-center gap-2">
-              <div className={`px-2.5 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-widest inline-flex items-center ${getSentimentStyles(news.sentiment)}`}>
-                <div className={`w-1.5 h-1.5 rounded-full mr-2 ${news.sentiment === "bullish" ? "bg-emerald-500" : news.sentiment === "bearish" ? "bg-rose-500" : "bg-amber-500"} animate-pulse`}></div>
-                AI: {news.sentiment}
+              <div className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest inline-flex items-center ${getSentimentStyles(news.sentiment)}`}>
+                <div className={`w-1 h-1 rounded-full mr-1.5 ${news.sentiment === "bullish" ? "bg-emerald-500" : news.sentiment === "bearish" ? "bg-rose-500" : "bg-amber-500"} animate-pulse`}></div>
+                {news.sentiment}
               </div>
-              <div className="bg-white/[0.02] border border-white/[0.05] px-2.5 py-1.5 rounded-lg text-[9px] font-mono text-slate-600 uppercase tracking-tight whitespace-nowrap">
+              <div className="bg-white/[0.02] border border-white/[0.05] px-2 py-1 rounded-lg text-[8px] font-mono text-slate-600 uppercase tracking-tight whitespace-nowrap">
                 Conf: <span className="text-slate-400 font-bold">{news.sentimentScore}%</span>
               </div>
             </div>
             <button 
               onClick={(e) => { e.stopPropagation(); fetchLocalPercent(true); }} 
-              className="p-2 bg-white/[0.03] hover:bg-blue-500/10 text-slate-600 hover:text-blue-500 rounded-xl border border-white/[0.08] transition-all" 
+              className="p-1.5 bg-white/[0.03] hover:bg-blue-500/10 text-slate-600 hover:text-blue-500 rounded-lg border border-white/[0.08] transition-all" 
               title="Sync live pricing"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
           </div>
         </div>
 
-        <div className="pt-5 flex items-center justify-between border-t border-white/[0.05] gap-3 min-w-0">
+        <div className="pt-4 flex items-center justify-between border-t border-white/[0.05] gap-2 min-w-0">
           <div className="flex items-center gap-2 relative shrink-0" ref={dropdownRef}>
             <button
               onClick={(e) => { e.stopPropagation(); setShowWatchlistOpts(!showWatchlistOpts); }}
-              className="px-4 py-2 bg-white/[0.03] hover:bg-emerald-500/10 text-slate-600 hover:text-emerald-500 border border-white/[0.08] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
+              className="px-3 py-1.5 bg-white/[0.03] hover:bg-emerald-500/10 text-slate-600 hover:text-emerald-500 border border-white/[0.08] rounded-lg text-[8px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
             >
               + WATCHLIST
             </button>
             {showWatchlistOpts && (
-              <div className="absolute bottom-full left-0 mb-3 w-36 bg-[#1c2230] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-50 animate-in fade-in slide-in-from-bottom-2">
+              <div className="absolute bottom-full left-0 mb-3 w-32 bg-[#1c2230] border border-white/10 rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-50 animate-in fade-in slide-in-from-bottom-2">
                 <button
                   onClick={(e) => { e.stopPropagation(); onWatchlistAdd?.({ ...news, userSentiment: "BULLISH" }); setShowWatchlistOpts(false); }}
-                  className="w-full text-left px-5 py-3 text-[10px] font-black text-emerald-500 hover:bg-emerald-600/10 uppercase tracking-widest border-b border-white/[0.05]"
+                  className="w-full text-left px-4 py-2 text-[9px] font-black text-emerald-500 hover:bg-emerald-600/10 uppercase tracking-widest border-b border-white/[0.05]"
                 >
                   BULLISH
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); onWatchlistAdd?.({ ...news, userSentiment: "BEARISH" }); setShowWatchlistOpts(false); }}
-                  className="w-full text-left px-5 py-3 text-[10px] font-black text-rose-500 hover:bg-rose-600/10 uppercase tracking-widest"
+                  className="w-full text-left px-4 py-2 text-[9px] font-black text-rose-500 hover:bg-rose-600/10 uppercase tracking-widest"
                 >
                   BEARISH
                 </button>
@@ -235,7 +235,7 @@ export const NewsCard: React.FC<{
             )}
           </div>
           <div className="flex items-center min-w-0">
-            <span className="text-[9px] text-slate-700 font-black uppercase tracking-[0.1em] block text-right whitespace-nowrap">
+            <span className="text-[8px] text-slate-700 font-black uppercase tracking-[0.1em] block text-right whitespace-nowrap overflow-hidden text-ellipsis">
               {news.source || 'SM DISPATCH'}
             </span>
           </div>
@@ -245,8 +245,15 @@ export const NewsCard: React.FC<{
   );
 };
 
-const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }> = ({ onToggleFullScreen }) => {
+const MarketTerminal: React.FC<{ 
+  onToggleFullScreen?: (state: boolean) => void;
+  isSidebarCollapsed?: boolean;
+}> = ({ onToggleFullScreen, isSidebarCollapsed }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [bseSearchTerm, setBseSearchTerm] = useState("");
+  const [bseCategory, setBseCategory] = useState("ALL");
+  const [bseCategories, setBseCategories] = useState<string[]>(["ALL"]);
+  
   const [activeTab, setActiveTab] = useState("ALL FEEDS");
   const [news, setNews] = useState<StockNews[]>([]);
   const [loading, setLoading] = useState(false);
@@ -333,27 +340,34 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         const allItems: StockNews[] = [];
         Object.keys(json.data).forEach((dateKey) => {
           const rawItems = json.data[dateKey];
-          const mappedItems: StockNews[] = rawItems.map((item: any) => ({
-            id: item.postId,
-            symbol: item.data.cta?.[0]?.meta?.nseScriptCode,
-            bseCode: item.data.cta?.[0]?.meta?.bseScriptCode,
-            companyName: item.data.cta?.[0]?.ctaText,
-            title: item.data.title || "",
-            content: (item.data.body || "").split("Source:")[0],
-            image: item.data.image || item.data.featuredImage,
-            logoUrl: item.data.cta?.[0]?.logoUrl,
-            aiAnalysis: item.summary || item.data.summary || item.machineLearningSentiments?.explanation,
-            timestamp: new Date(item.publishedAt).toLocaleString("en-IN", {
-              day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
-            }),
-            rawPublishedAt: item.publishedAt,
-            priceChange: 0,
-            sentiment: item.machineLearningSentiments?.label === "negative" ? "bearish" : item.machineLearningSentiments?.label === "positive" ? "bullish" : "neutral",
-            sentimentScore: Math.round((item.machineLearningSentiments?.confidence || 0.5) * 100),
-            from: item.from,
-            source: (item.data.body || "").split("\n")[(item.data.body || "").split("\n").length - 1],
-            logoColor: "bg-indigo-600"
-          }));
+          const mappedItems: StockNews[] = rawItems.map((item: any) => {
+             const rawBody = item.data.body || "";
+             const bodyLines = rawBody.split("\n");
+             const rawSourceLine = bodyLines[bodyLines.length - 1] || "";
+             const cleanedSource = rawSourceLine.replace(/Source:\s*/i, '').trim();
+
+             return {
+              id: item.postId,
+              symbol: item.data.cta?.[0]?.meta?.nseScriptCode,
+              bseCode: item.data.cta?.[0]?.meta?.bseScriptCode,
+              companyName: item.data.cta?.[0]?.ctaText,
+              title: item.data.title || "",
+              content: rawBody.split("Source:")[0],
+              image: item.data.image || item.data.featuredImage,
+              logoUrl: item.data.cta?.[0]?.logoUrl,
+              aiAnalysis: item.summary || item.data.summary || item.machineLearningSentiments?.explanation,
+              timestamp: new Date(item.publishedAt).toLocaleString("en-IN", {
+                day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+              }),
+              rawPublishedAt: item.publishedAt,
+              priceChange: 0,
+              sentiment: item.machineLearningSentiments?.label === "negative" ? "bearish" : item.machineLearningSentiments?.label === "positive" ? "bullish" : "neutral",
+              sentimentScore: Math.round((item.machineLearningSentiments?.confidence || 0.5) * 100),
+              from: item.from,
+              source: cleanedSource,
+              logoColor: "bg-indigo-600"
+            };
+          });
           allItems.push(...mappedItems);
         });
         setNews((prevNews) => allItems.map(newItem => {
@@ -436,6 +450,14 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
     if (onToggleFullScreen) onToggleFullScreen(next);
   };
 
+  const gridClasses = useMemo(() => {
+    // Fixed Laptop Expanded to strictly 4 columns
+    if (isSidebarCollapsed) {
+      return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-2";
+    }
+    return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-2";
+  }, [isSidebarCollapsed]);
+
   return (
     <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a] overflow-x-hidden relative">
       <div className="lg:hidden shrink-0 bg-[#0d121f] px-4 py-2 flex items-center justify-between border-b border-white/[0.05]">
@@ -445,19 +467,39 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         </button>
       </div>
 
-      <div className={`${isControlsVisible ? 'flex' : 'hidden lg:flex'} px-4 md:px-8 py-3 shrink-0 bg-[#0d121f] border-b border-white/[0.05] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-y-4 gap-x-6`}>
+      <div className={`${isControlsVisible ? 'flex' : 'hidden lg:flex'} px-4 md:px-5 py-3 shrink-0 bg-[#0d121f] border-b border-white/[0.05] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-y-4 gap-x-6 overflow-visible`}>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-wrap">
           <div className="flex bg-slate-950 rounded-2xl p-1 border border-white/[0.08] shadow-inner shrink-0 self-start sm:self-auto">
             {["ALL FEEDS", "BSE FEEDS", "WATCHLIST"].map((tab) => (
               <button key={tab} onClick={() => { setActiveTab(tab); setIsFilterPanelOpen(false); }} className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all ${ activeTab === tab ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" : "text-slate-500 hover:text-slate-300" }`}>{tab}</button>
             ))}
           </div>
-          {activeTab !== "BSE FEEDS" && (
+
+          {/* Unified Filters for both NSE and BSE */}
+          {activeTab === "BSE FEEDS" ? (
+             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-wrap">
+                <div className="flex items-center space-x-3 bg-slate-950 px-4 py-2 rounded-xl border border-white/[0.08]">
+                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">CATEGORY</span>
+                  <select 
+                    value={bseCategory} 
+                    onChange={(e) => setBseCategory(e.target.value)}
+                    className="bg-transparent border-none text-[10px] font-black uppercase tracking-tight text-slate-300 focus:outline-none cursor-pointer"
+                  >
+                    {bseCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="relative w-full sm:w-48 lg:w-64 shrink-0">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
+                  <input type="text" placeholder="SEARCH BSE..." value={bseSearchTerm} onChange={(e) => setBseSearchTerm(e.target.value)} className="w-full bg-slate-950 border border-white/[0.08] rounded-xl pl-12 pr-4 py-3 text-[11px] text-slate-300 focus:outline-none focus:border-emerald-500/40 transition-all font-mono placeholder:text-slate-800" />
+                </div>
+             </div>
+          ) : activeTab !== "BSE FEEDS" && (
             <div className="relative w-full sm:w-48 lg:w-72 shrink-0">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
-              <input type="text" placeholder="FILTER TERMINAL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-950/60 border border-white/[0.08] rounded-xl pl-12 pr-4 py-3 text-[11px] text-slate-300 focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-800" />
+              <input type="text" placeholder="FILTER TERMINAL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-950 border border-white/[0.08] rounded-xl pl-12 pr-4 py-3 text-[11px] text-slate-300 focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-800" />
             </div>
           )}
+
           {activeTab === "ALL FEEDS" && (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
               <div className="flex items-center space-x-2 bg-slate-950 p-1.5 rounded-xl border border-white/[0.08]">
@@ -516,16 +558,22 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
         )}
       </div>
 
-      <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-grow overflow-y-auto px-4 md:px-8 py-10 custom-scrollbar bg-black/10 overflow-x-hidden">
+      <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-grow overflow-y-auto px-2 sm:px-3 py-8 custom-scrollbar bg-black/10 overflow-x-hidden">
         {activeTab === "BSE FEEDS" ? (
-          <BseCards onWatchlistAdd={handleWatchlistAdd} />
+          <BseCards 
+            onWatchlistAdd={handleWatchlistAdd} 
+            isSidebarCollapsed={isSidebarCollapsed} 
+            externalSearch={bseSearchTerm}
+            externalCategory={bseCategory}
+            onCategoriesLoad={setBseCategories}
+          />
         ) : loading && news.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center space-y-8"><div className="w-20 h-20 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div><p className="text-[14px] font-black uppercase tracking-[0.5em] text-slate-700 text-center">INITIALIZING TERMINAL TUNNEL...</p></div>
         ) : processedNews.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-30"><p className="text-xl font-black uppercase tracking-[0.4em] px-6">NO DISPATCHES FOUND IN REGION</p></div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 pt-2">
+            <div className={gridClasses}>
               {pagedNews.map((newsItem) => (
                 <div key={newsItem.id} className="relative">
                   <NewsCard news={newsItem} isWatchlist={activeTab === "WATCHLIST"} onWatchlistAdd={handleWatchlistAdd} onPriceUpdate={updatePriceChange} autoRefresh={autoRefresh} />
