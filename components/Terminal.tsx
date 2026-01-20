@@ -152,7 +152,7 @@ const Terminal: React.FC = () => {
       {/* 3. Terminal Navigation Controls */}
       <div className="px-8 py-8 flex flex-wrap items-center gap-6 bg-black/[0.05]">
         <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/[0.05] shadow-inner">
-          {['ALL FEEDS', 'WATCHLIST', 'ANALYSIS'].map((tab) => (
+          {['ALL FEEDS', 'BSE FEEDS', 'WATCHLIST', 'ANALYSIS'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -186,7 +186,7 @@ const Terminal: React.FC = () => {
 
       {/* 4. News Grid */}
       <div className="px-8 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {filteredNews.map((news) => (
             <NewsCard key={news.id} news={news} />
           ))}
