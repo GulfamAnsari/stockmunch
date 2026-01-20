@@ -44,12 +44,13 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
             <p className="text-[8px] sm:text-[9px] text-slate-400 font-mono font-bold uppercase tracking-tighter leading-none mb-1">
               {news.timestamp.split(",")[1]?.trim() || ""}
             </p>
-            <p className="text-[7px] sm:text-[9px] text-slate-600 font-mono uppercase tracking-tighter">
+            <p className="text-[7px] text-slate-600 font-mono uppercase tracking-tighter">
               {news.timestamp.split(",")[0]?.trim() || ""}
             </p>
           </div>
         </div>
 
+        {/* Sync Title and Content Expansion */}
         <h4 className={`text-[13px] sm:text-[14px] font-medium text-slate-400/90 leading-[1.3] mb-3 group-hover:text-emerald-300 transition-colors uppercase tracking-tight ${isExpanded ? '' : 'line-clamp-2'}`}>
           {news.title}
         </h4>
@@ -82,7 +83,7 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
               className="flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 text-slate-900 font-black rounded-lg text-[8px] uppercase tracking-widest transition-all hover:bg-emerald-500 shadow-[0_10px_30px_rgba(5,150,105,0.3)] shrink-0"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span>FILING</span>
             </button>
@@ -102,13 +103,13 @@ interface BseCardsProps {
   isSidebarCollapsed?: boolean;
   externalSearch?: string;
   externalCategory?: string;
+  externalAutoRefresh?: boolean;
   onCategoriesLoad?: (cats: string[]) => void;
 }
 
-const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed, externalSearch = "", externalCategory = "ALL", onCategoriesLoad }) => {
+const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed, externalSearch = "", externalCategory = "ALL", externalAutoRefresh = false, onCategoriesLoad }) => {
   const [bseNews, setBseNews] = useState<BseNewsItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [displayLimit, setDisplayLimit] = useState(10);
   const [pdfModalUrl, setPdfModalUrl] = useState<string | null>(null);
@@ -153,7 +154,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
         allItems.sort((a, b) => new Date(b.rawPublishedAt).getTime() - new Date(a.rawPublishedAt).getTime());
         setBseNews(allItems);
         
-        // Load categories up to parent for external filter
+        // Report categories back to parent
         if (onCategoriesLoad) {
           const set = new Set<string>();
           allItems.forEach(n => set.add(n.category));
@@ -179,11 +180,11 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
 
   useEffect(() => {
     let interval: number | undefined;
-    if (autoRefresh) {
+    if (externalAutoRefresh) {
       interval = window.setInterval(() => fetchBseFeeds(false), 10000);
     }
     return () => clearInterval(interval);
-  }, [autoRefresh, fetchBseFeeds]);
+  }, [externalAutoRefresh, fetchBseFeeds]);
 
   const filteredNews = useMemo(() => {
     let list = bseNews;
@@ -217,11 +218,11 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
   }, [filteredNews.length, displayLimit]);
 
   const gridClasses = useMemo(() => {
-    // Shared grid logic with MarketTerminal
+    // Match strict grid logic from MarketTerminal
     if (isSidebarCollapsed) {
       return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-4 animate-in fade-in duration-700";
     }
-    return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-4 animate-in fade-in duration-700";
+    return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pt-4 animate-in fade-in duration-700";
   }, [isSidebarCollapsed]);
 
   if (loading) {
@@ -246,17 +247,6 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
   return (
     <div className="flex flex-col space-y-8">
       {/* Sub-header removed as controls moved to main terminal row */}
-      <div className="flex justify-end -mt-4 mb-2">
-        <button 
-          onClick={() => setAutoRefresh(!autoRefresh)} 
-          className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 ${ 
-            autoRefresh ? "bg-blue-600/10 border-blue-600/50 text-blue-500" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" 
-          }`}
-        >
-          <div className={`w-1 h-1 rounded-full ${ autoRefresh ? "bg-blue-600 animate-pulse" : "bg-slate-700" }`}></div>
-          <span>BSE LIVE MONITOR</span>
-        </button>
-      </div>
 
       {filteredNews.length === 0 ? (
         <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center opacity-20">
@@ -297,7 +287,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-200 uppercase tracking-tighter">Corporate Filing Viewer</h3>
-                  <a href={pdfModalUrl} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black text-emerald-500 uppercase hover:underline">Problems viewing? Open in New Tab</a>
+                  <a href={pdfModalUrl} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black text-emerald-500 uppercase hover:underline">Problems viewing? Click to Open in New Tab</a>
                 </div>
               </div>
               <button 
@@ -308,6 +298,7 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
               </button>
             </div>
             <div className="flex-grow bg-slate-900 relative">
+              {/* Note: Iframe may still fail due to X-Frame-Options, hence the fallback link above */}
               <iframe 
                 src={pdfModalUrl} 
                 className="w-full h-full border-none" 
