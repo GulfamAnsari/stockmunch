@@ -218,11 +218,15 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd, isSidebarCollapsed,
   }, [filteredNews.length, displayLimit]);
 
   const gridClasses = useMemo(() => {
-    // Shared strict grid logic with MarketTerminal
+    /**
+     * Scaling Logic (Synced for Terminal and BSE):
+     * Sidebar Expanded: md(2) -> lg(3) -> xl(4)
+     * Sidebar Collapsed: md(3) -> lg(4) -> xl(5)
+     */
     if (isSidebarCollapsed) {
-      return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-5 gap-4 pt-4 animate-in fade-in duration-700";
+      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-4 animate-in fade-in duration-700";
     }
-    return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 pt-4 animate-in fade-in duration-700";
+    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-4 animate-in fade-in duration-700";
   }, [isSidebarCollapsed]);
 
   if (loading) {
