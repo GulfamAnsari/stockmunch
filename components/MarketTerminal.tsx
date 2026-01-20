@@ -328,6 +328,9 @@ const MarketTerminal: React.FC<{
     // If not an auto-refresh and params haven't changed, skip to prevent double API call
     if (!isAuto && lastParamsRef.current === paramsKey) return;
     
+    // Lock parameters immediately to prevent concurrent identical requests
+    if (!isAuto) lastParamsRef.current = paramsKey;
+    
     isFetchingRef.current = true;
     setLoading(true);
     try {
@@ -351,7 +354,6 @@ const MarketTerminal: React.FC<{
       }
       
       if (json.status === "success" && json.data) {
-        lastParamsRef.current = paramsKey;
         const allItems: StockNews[] = [];
         Object.keys(json.data).forEach((dateKey) => {
           const rawItems = json.data[dateKey];
@@ -478,9 +480,9 @@ const MarketTerminal: React.FC<{
 
   const gridClasses = useMemo(() => {
     if (isSidebarCollapsed) {
-      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-2";
+      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 pt-2";
     }
-    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-2";
+    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pt-2";
   }, [isSidebarCollapsed]);
 
   return (

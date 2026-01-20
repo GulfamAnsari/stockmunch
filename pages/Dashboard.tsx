@@ -105,7 +105,7 @@ const OverviewSection: React.FC<{
       setInviteUsedLocal(true);
       await fetch(`${API_BASE_URL}/mark-invite-used`, {
         method: 'GET',
-        cache: 'no-store',
+        cache: "no-store",
         headers: { 'Authorization': `Bearer ${token}` }
       });
     } catch (e) {
@@ -545,7 +545,7 @@ const Dashboard: React.FC = () => {
       if (!token) return navigate('/login');
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      const subResp = await fetch(`${API_BASE_URL}/control-center`, { method: 'GET', cache: 'no-store', headers });
+      const subResp = await fetch(`${API_BASE_URL}/control-center`, { method: 'GET', cache: "no-store", headers });
       const subJson = await subResp.json();
       if (subResp.status === 401 || subJson.error === 'unauthorized') return handleLogout();
       
@@ -555,7 +555,7 @@ const Dashboard: React.FC = () => {
       const invites = subJson.telegram_invites || [];
       setInviteData(invites);
 
-      const profResp = await fetch(`${API_BASE_URL}/profile`, { method: 'GET', cache: 'no-store', headers });
+      const profResp = await fetch(`${API_BASE_URL}/profile`, { method: 'GET', cache: "no-store", headers });
       const profJson = await profResp.json();
       if (profResp.status === 401 || profJson.error === 'unauthorized') return handleLogout();
       const finalProf = profJson.data || profJson.profile || profJson;
@@ -574,7 +574,7 @@ const Dashboard: React.FC = () => {
       if (!token) return;
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      const setResp = await fetch(`${API_BASE_URL}/settings`, { method: 'GET', cache: 'no-store', headers });
+      const setResp = await fetch(`${API_BASE_URL}/settings`, { method: 'GET', cache: "no-store", headers });
       const setJson = await setResp.json();
       if (setResp.status === 401 || setJson.error === 'unauthorized') return handleLogout();
       if (setJson.settings) {
@@ -599,7 +599,7 @@ const Dashboard: React.FC = () => {
       if (!token) return;
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-      const alertResp = await fetch(`${API_BASE_URL}/alerts`, { method: 'GET', cache: 'no-store', headers });
+      const alertResp = await fetch(`${API_BASE_URL}/alerts`, { method: 'GET', cache: "no-store", headers });
       const alertJson = await alertResp.json();
       if (alertResp.status === 401 || alertJson.error === 'unauthorized') return handleLogout();
       const finalAlerts = alertJson.alerts || alertJson.data || alertJson;
@@ -644,7 +644,7 @@ const Dashboard: React.FC = () => {
       body.append('daily_email', updated.daily_email ? '1' : '0');
       body.append('ai_insight', updated.ai_insight ? '1' : '0');
       body.append('terminal_audio', updated.terminal_audio ? '1' : '0');
-      const response = await fetch(`${API_BASE_URL}/settings`, { method: 'POST', cache: 'no-store', headers: { 'Authorization': `Bearer ${token}` }, body });
+      const response = await fetch(`${API_BASE_URL}/settings`, { method: 'POST', cache: "no-store", headers: { 'Authorization': `Bearer ${token}` }, body });
       const result = await response.json();
       if (!response.ok || result.status === 'error') throw new Error("Server Update Failed");
     } catch (e) {
