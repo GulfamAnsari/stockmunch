@@ -51,7 +51,7 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
             <p className="text-[8px] sm:text-[9px] text-slate-400 font-mono font-bold uppercase tracking-tighter leading-none mb-1">
               {news.timestamp.split(",")[1]?.trim() || ""}
             </p>
-            <p className="text-[7px] text-slate-600 font-mono uppercase tracking-tighter">
+            <p className="text-[7px] sm:text-[9px] text-slate-600 font-mono uppercase tracking-tighter">
               {news.timestamp.split(",")[0]?.trim() || ""}
             </p>
           </div>

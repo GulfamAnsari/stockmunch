@@ -276,7 +276,7 @@ const MarketTerminal: React.FC<{
   const [fromDateInput, setFromDateInput] = useState(new Date().toISOString().split("T")[0]);
   const [toDateInput, setToDateInput] = useState(new Date().toISOString().split("T")[0]);
 
-  const lastFetchedRef = useRef<string>("");
+  const lastParamsRef = useRef<string>("");
   const isFetchingRef = useRef<boolean>(false);
 
   const isFiltered = useMemo(() => sentimentFilters.some((f) => f !== "ALL"), [sentimentFilters]);
@@ -326,7 +326,7 @@ const MarketTerminal: React.FC<{
     
     const paramsKey = `${fromDateInput}_${toDateInput}`;
     // If not an auto-refresh and params haven't changed, skip to prevent double API call
-    if (!isAuto && lastFetchedRef.current === paramsKey && news.length > 0) return;
+    if (!isAuto && lastParamsRef.current === paramsKey) return;
     
     isFetchingRef.current = true;
     setLoading(true);
@@ -351,7 +351,7 @@ const MarketTerminal: React.FC<{
       }
       
       if (json.status === "success" && json.data) {
-        lastFetchedRef.current = paramsKey;
+        lastParamsRef.current = paramsKey;
         const allItems: StockNews[] = [];
         Object.keys(json.data).forEach((dateKey) => {
           const rawItems = json.data[dateKey];
@@ -397,13 +397,13 @@ const MarketTerminal: React.FC<{
       isFetchingRef.current = false;
       setLoading(false);
     }
-  }, [fromDateInput, toDateInput, activeTab, news.length]);
+  }, [fromDateInput, toDateInput, activeTab]);
 
   useEffect(() => { 
     if (activeTab === "ALL FEEDS") {
       fetchNews(false); 
     } else {
-      lastFetchedRef.current = "";
+      lastParamsRef.current = "";
     }
   }, [activeTab, fromDateInput, toDateInput, fetchNews]);
 
