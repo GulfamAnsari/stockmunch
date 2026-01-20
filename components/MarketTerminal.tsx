@@ -254,6 +254,7 @@ const MarketTerminal: React.FC<{
   const [bseCategory, setBseCategory] = useState("ALL");
   const [bseCategories, setBseCategories] = useState<string[]>(["ALL"]);
   const [bseAutoRefresh, setBseAutoRefresh] = useState(false);
+  const [bseAwardsOnly, setBseAwardsOnly] = useState(false);
 
   const [activeTab, setActiveTab] = useState("ALL FEEDS");
   const [news, setNews] = useState<StockNews[]>([]);
@@ -275,6 +276,7 @@ const MarketTerminal: React.FC<{
   const [toDateInput, setToDateInput] = useState(new Date().toISOString().split("T")[0]);
 
   const lastFetchedRef = useRef<string>("");
+  const isFetchingRef = useRef<boolean>(false);
 
   const isFiltered = useMemo(() => sentimentFilters.some((f) => f !== "ALL"), [sentimentFilters]);
 
@@ -318,13 +320,14 @@ const MarketTerminal: React.FC<{
   }, []);
 
   const fetchNews = useCallback(async (isAuto = false) => {
-    // CRITICAL: bail out immediately if not on ALL FEEDS
-    if (activeTab !== "ALL FEEDS") return;
+    // CRITICAL: bail out immediately if not on ALL FEEDS or already fetching
+    if (activeTab !== "ALL FEEDS" || isFetchingRef.current) return;
     
     const paramsKey = `${fromDateInput}_${toDateInput}`;
-    // If not an auto-refresh and params haven't changed, skip to prevent double API call on mount/switch
+    // If not an auto-refresh and params haven't changed, skip to prevent double API call
     if (!isAuto && lastFetchedRef.current === paramsKey && news.length > 0) return;
     
+    isFetchingRef.current = true;
     setLoading(true);
     try {
       const toApiDate = (d: string) => {
@@ -389,27 +392,29 @@ const MarketTerminal: React.FC<{
     } catch (error) {
       console.error("Terminal API Error:", error);
     } finally {
+      isFetchingRef.current = false;
       setLoading(false);
     }
   }, [fromDateInput, toDateInput, activeTab, news.length]);
 
   useEffect(() => { 
-    // Trigger on tab switch to ALL FEEDS or when date inputs change
     if (activeTab === "ALL FEEDS") {
       fetchNews(false); 
     } else {
-      // Clear ref if we leave the tab, allowing a clean refetch when returning
       lastFetchedRef.current = "";
     }
   }, [activeTab, fromDateInput, toDateInput]);
 
   useEffect(() => {
     let interval: number | undefined;
-    if (autoRefresh && !loading && activeTab === "ALL FEEDS") {
-      interval = window.setInterval(() => fetchNews(true), 15000);
+    if (autoRefresh && activeTab === "ALL FEEDS") {
+      // Robust interval that works even in background by avoiding frequent clearing
+      interval = window.setInterval(() => {
+        if (!isFetchingRef.current) fetchNews(true);
+      }, 15000);
     }
     return () => clearInterval(interval);
-  }, [autoRefresh, loading, fetchNews, activeTab]);
+  }, [autoRefresh, activeTab, fetchNews]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
@@ -510,15 +515,31 @@ const MarketTerminal: React.FC<{
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
                   <input type="text" placeholder="SEARCH FILINGS..." value={bseSearchTerm} onChange={(e) => setBseSearchTerm(e.target.value)} className="w-full bg-slate-950 border border-white/[0.08] rounded-xl pl-12 pr-4 py-2.5 text-[11px] text-slate-300 focus:outline-none focus:border-emerald-500/40 transition-all font-mono placeholder:text-slate-800" />
                 </div>
-                <button 
-                  onClick={() => setBseAutoRefresh(!bseAutoRefresh)} 
-                  className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 ${ 
-                    bseAutoRefresh ? "bg-emerald-600/10 border-emerald-600/50 text-emerald-500" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" 
-                  }`}
-                >
-                  <div className={`w-1 h-1 rounded-full ${ bseAutoRefresh ? "bg-emerald-600 animate-pulse" : "bg-slate-700" }`}></div>
-                  <span>LIVE MONITOR</span>
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={() => setBseAwardsOnly(!bseAwardsOnly)}
+                    className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 ${
+                      bseAwardsOnly 
+                        ? "bg-amber-500/20 border-amber-500/50 text-amber-500" 
+                        : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300"
+                    }`}
+                    title="Filter: Award/Receipt of Order"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="hidden xl:inline">Order_Receipt</span>
+                  </button>
+                  <button 
+                    onClick={() => setBseAutoRefresh(!bseAutoRefresh)} 
+                    className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 ${ 
+                      bseAutoRefresh ? "bg-emerald-600/10 border-emerald-600/50 text-emerald-500" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" 
+                    }`}
+                  >
+                    <div className={`w-1 h-1 rounded-full ${ bseAutoRefresh ? "bg-emerald-600 animate-pulse" : "bg-slate-700" }`}></div>
+                    <span>LIVE MONITOR</span>
+                  </button>
+                </div>
              </div>
           ) : activeTab !== "BSE FEEDS" && (
             <div className="relative w-full sm:w-48 lg:w-72 shrink-0">
@@ -594,6 +615,7 @@ const MarketTerminal: React.FC<{
             externalCategory={bseCategory}
             externalAutoRefresh={bseAutoRefresh}
             onCategoriesLoad={setBseCategories}
+            showAwardsOnly={bseAwardsOnly}
           />
         ) : loading && news.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center space-y-8"><div className="w-20 h-20 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div><p className="text-[14px] font-black uppercase tracking-[0.5em] text-slate-700 text-center">INITIALIZING TERMINAL TUNNEL...</p></div>
