@@ -452,10 +452,12 @@ const MarketTerminal: React.FC<{ onToggleFullScreen?: (state: boolean) => void }
               <button key={tab} onClick={() => { setActiveTab(tab); setIsFilterPanelOpen(false); }} className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all ${ activeTab === tab ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" : "text-slate-500 hover:text-slate-300" }`}>{tab}</button>
             ))}
           </div>
-          <div className="relative w-full sm:w-48 lg:w-72 shrink-0">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
-            <input type="text" placeholder="FILTER TERMINAL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-950/60 border border-white/[0.08] rounded-xl pl-12 pr-4 py-3 text-[11px] text-slate-300 focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-800" />
-          </div>
+          {activeTab !== "BSE FEEDS" && (
+            <div className="relative w-full sm:w-48 lg:w-72 shrink-0">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
+              <input type="text" placeholder="FILTER TERMINAL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-950/60 border border-white/[0.08] rounded-xl pl-12 pr-4 py-3 text-[11px] text-slate-300 focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-800" />
+            </div>
+          )}
           {activeTab === "ALL FEEDS" && (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
               <div className="flex items-center space-x-2 bg-slate-950 p-1.5 rounded-xl border border-white/[0.08]">

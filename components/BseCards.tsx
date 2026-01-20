@@ -91,7 +91,7 @@ const BseNewsCard: React.FC<{ news: BseNewsItem; onWatchlistAdd: (item: any) => 
               <span>FILING</span>
             </button>
           ) : (
-            <span className="text-[10px] text-slate-700 font-black uppercase tracking-widest whitespace-nowrap">BSE</span>
+            <span className="text-[10px] text-slate-700 font-black uppercase tracking-widest whitespace-nowrap">BSE DATA</span>
           )}
         </div>
       </div>
@@ -214,4 +214,106 @@ const BseCards: React.FC<BseCardsProps> = ({ onWatchlistAdd }) => {
     return () => observer.disconnect();
   }, [filteredNews.length, displayLimit]);
 
-  const
+  const handlePdfOpen = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  if (loading) {
+    return (
+      <div className="h-full min-h-[400px] flex flex-col items-center justify-center space-y-8">
+        <div className="w-20 h-20 border-4 border-emerald-600/20 border-t-emerald-600 rounded-full animate-spin"></div>
+        <p className="text-[14px] font-black uppercase tracking-[0.5em] text-slate-700 text-center animate-pulse">SYNCING BSE PIPELINE...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-full min-h-[400px] flex flex-col items-center justify-center p-8 text-center opacity-40">
+        <p className="text-xl font-black uppercase tracking-[0.2em] mb-4 text-rose-500">Pipeline Offline</p>
+        <p className="text-slate-400 text-xs font-medium max-w-xs">{error}</p>
+        <button onClick={() => fetchBseFeeds(true)} className="mt-8 px-8 py-3 bg-slate-900 border border-white/10 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-300 hover:bg-slate-800 transition-all">Retry Link</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col space-y-8">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.05]">
+        <div className="flex items-center space-x-6 flex-wrap gap-y-4">
+          <div className="flex items-center space-x-3">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">CATEGORY</span>
+            <select 
+              value={selectedCategory} 
+              onChange={(e) => { setSelectedCategory(e.target.value); setDisplayLimit(10); }}
+              className="bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-[11px] font-black uppercase tracking-tight text-slate-300 focus:outline-none focus:border-blue-500/50 transition-all"
+            >
+              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          
+          <div className="relative w-full sm:w-64 shrink-0">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              placeholder="SEARCH BSE FEEDS..." 
+              value={searchTerm} 
+              onChange={(e) => { setSearchTerm(e.target.value); setDisplayLimit(10); }} 
+              className="w-full bg-slate-950/60 border border-white/10 rounded-xl pl-12 pr-4 py-2.5 text-[11px] text-slate-300 focus:outline-none focus:border-emerald-500/40 transition-all font-mono placeholder:text-slate-800" 
+            />
+          </div>
+
+          <div className="h-5 w-px bg-white/10 hidden sm:block"></div>
+          <div className="flex items-center space-x-3">
+            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">PIPELINE</span>
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+          </div>
+        </div>
+        
+        <button 
+          onClick={() => setAutoRefresh(!autoRefresh)} 
+          className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 ${ 
+            autoRefresh ? "bg-blue-600/10 border-blue-600/50 text-blue-500" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" 
+          }`}
+        >
+          <div className={`w-1.5 h-1.5 rounded-full ${ autoRefresh ? "bg-blue-600 animate-pulse" : "bg-slate-700" }`}></div>
+          <span>BSE LIVE (10s)</span>
+        </button>
+      </div>
+
+      {filteredNews.length === 0 ? (
+        <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center opacity-20">
+          <p className="text-xl font-black uppercase tracking-[0.4em] px-8">NO DISPATCHES IN REGION</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 pt-4 animate-in fade-in duration-700">
+            {pagedNews.map((newsItem) => (
+              <BseNewsCard 
+                key={newsItem.id} 
+                news={newsItem} 
+                onWatchlistAdd={onWatchlistAdd} 
+                onPdfView={handlePdfOpen}
+              />
+            ))}
+          </div>
+          
+          <div ref={loaderRef} className="py-16 flex justify-center">
+            {displayLimit < filteredNews.length && (
+              <div className="flex flex-col items-center space-y-6">
+                <div className="w-12 h-12 border-4 border-emerald-600/20 border-t-emerald-600 rounded-full animate-spin"></div>
+                <p className="text-[10px] font-black text-slate-700 uppercase tracking-[0.3em]">FETCHING REGIONAL DATA...</p>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default BseCards;
