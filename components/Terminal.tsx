@@ -1,223 +1,650 @@
-import React, { useState, useMemo } from 'react';
-import { MOCK_NEWS } from '../constants';
-import { StockNews } from '../types';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+  useLayoutEffect
+} from "react";
+import { StockNews } from "../types";
+import BseCards from "./BseCards";
+import { API_BASE_URL } from "../config";
 
-const TickerTape = () => {
-  const stocks = [
-    { symbol: 'BHARTIARTL', price: '1,120.45', change: '+0.5%' },
-    { symbol: 'SBIN', price: '612.90', change: '+1.7%' },
-    { symbol: 'RELIANCE', price: '2,543.20', change: '+1.2%' },
-    { symbol: 'TCS', price: '3,890.45', change: '-0.4%' },
-    { symbol: 'HDFCBANK', price: '1,678.10', change: '+0.8%' },
-    { symbol: 'INFY', price: '1,512.00', change: '+2.1%' },
-    { symbol: 'ICICIBANK', price: '987.30', change: '-1.1%' },
-  ];
-
-  return (
-    <div className="w-full bg-[#0b0f1a] border-y border-white/[0.05] py-2 overflow-hidden whitespace-nowrap">
-      <div className="inline-block animate-marquee">
-        {Array(3).fill(stocks).flat().map((stock, i) => (
-          <span key={i} className="inline-flex items-center mx-6 space-x-2">
-            <span className="text-[10px] font-black text-slate-300 tracking-tighter uppercase">{stock.symbol}</span>
-            <span className="text-[10px] font-mono text-slate-500">{stock.price}</span>
-            <span className={`text-[9px] font-bold ${stock.change.startsWith('+') ? 'text-emerald-600' : 'text-rose-600'}`}>
-              {stock.change}
-            </span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
+const getAuthToken = () => {
+  return document.cookie.split('; ').find(row => row.startsWith('sm_token='))?.split('=')[1] || null;
 };
 
-const NewsCard: React.FC<{ news: StockNews }> = ({ news }) => {
+const percentageMap = new Map();
+
+export const NewsCard: React.FC<{
+  news: StockNews;
+  isWatchlist?: boolean;
+  onWatchlistAdd?: (item: any) => void;
+  onPriceUpdate?: (id: string, pct: number) => void;
+  autoRefresh?: boolean;
+}> = ({ news, isWatchlist, onWatchlistAdd, onPriceUpdate }) => {
+  const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
+  const [isRead, setIsRead] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const [isNew] = useState(() => {
+    const publishedAt = new Date(news.rawPublishedAt).getTime();
+    const now = Date.now();
+    return (now - publishedAt) < 10 * 60 * 1000;
+  });
+
+  const shouldHighlight = isNew && !isRead;
+
+  const fetchLocalPercent = useCallback(async (manualUpdate = false) => {
+    const hasNse = news.symbol && news.symbol !== "NSE";
+    const bse = (news as any).bseCode;
+    const querySymbol = hasNse ? `${news.symbol}.NS` : bse ? `${bse}.BO` : null;
+
+    if (!querySymbol) return;
+
+    try {
+      if (percentageMap.has(querySymbol) && !manualUpdate) {
+        onPriceUpdate?.(news.id, percentageMap.get(querySymbol));
+      } else {
+        const resp = await fetch(
+          `${API_BASE_URL}/chart?symbol=${querySymbol}&interval=1d&range=1d`,
+          {
+            cache: "no-store",
+            headers: {
+              'Authorization': `Bearer ${getAuthToken()}`
+            }
+          }
+        );
+        const data = await resp.json();
+        if (data && data.chart && data.chart.result && data.chart.result[0]) {
+          const { chartPreviousClose, regularMarketPrice } = data.chart.result[0].meta;
+          if (chartPreviousClose && regularMarketPrice) {
+            const pct = ((regularMarketPrice - chartPreviousClose) / chartPreviousClose) * 100;
+            onPriceUpdate?.(news.id, pct);
+            percentageMap.set(querySymbol, pct);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn(`Could not fetch live percentage for ${querySymbol}`);
+    }
+  }, [news.id, news.symbol, (news as any).bseCode, onPriceUpdate]);
+
+  useEffect(() => {
+    fetchLocalPercent();
+  }, [fetchLocalPercent]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowWatchlistOpts(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const getSentimentStyles = (sentiment: string) => {
     switch (sentiment) {
-      case 'bullish':
-        return 'bg-emerald-600/5 text-emerald-600 border-emerald-600/20';
-      case 'bearish':
-        return 'bg-rose-600/5 text-rose-600 border-rose-600/20';
-      default:
-        return 'bg-amber-600/5 text-amber-600 border-amber-600/20';
+      case "bullish": return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+      case "bearish": return "bg-rose-500/10 text-rose-500 border-rose-500/20";
+      default: return "bg-amber-500/10 text-amber-500 border-amber-500/20";
     }
   };
 
-  const isPositive = news.priceChange >= 0;
+  const hasPriceData = typeof news.priceChange === 'number';
 
   return (
-    <div className="bg-[#111621] border border-white/[0.05] rounded-xl flex flex-col h-full overflow-hidden hover:border-emerald-600/20 transition-all group shadow-2xl">
-      <div className="p-4 flex flex-col h-full">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center space-x-3">
-            <div className={`w-9 h-9 rounded-lg ${news.logoColor || 'bg-slate-800'} flex items-center justify-center text-slate-400 text-[11px] font-black shadow-inner`}>
-              {news.symbol.substring(0, 2)}
+    <div
+      onClick={() => setIsRead(true)}
+      className={`bg-[#111621] border ${
+        shouldHighlight ? "border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.1)]" : "border-white/[0.06]"
+      } rounded-2xl flex flex-col h-full hover:border-blue-500/30 transition-all group shadow-2xl relative cursor-pointer group/card`}
+    >
+      {shouldHighlight && (
+        <div className="absolute -top-2 right-4 px-2 py-0.5 bg-emerald-600 text-slate-950 text-[8px] font-black uppercase rounded z-20 shadow-lg animate-pulse">
+          New Alert
+        </div>
+      )}
+
+      {isWatchlist && news.userSentiment && (
+        <div className={`absolute -top-2 -left-2 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest z-30 border shadow-lg ${
+            news.userSentiment === "BULLISH" ? "bg-emerald-600 text-slate-950 border-emerald-500" : "bg-rose-600 text-slate-100 border-rose-500"
+          }`}>
+          {news.userSentiment}
+        </div>
+      )}
+
+      {news.image && (
+        <div className="w-full h-32 overflow-hidden bg-slate-900 border-b border-white/[0.05] rounded-t-2xl">
+          <img src={news.image} alt={news.symbol} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60 group-hover:opacity-90" />
+        </div>
+      )}
+
+      <div className="p-4 sm:p-5 flex flex-col h-full relative z-10">
+        <div className="flex items-start justify-between mb-5 gap-2">
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+            <div className={`w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-400 text-[10px] font-black shadow-inner overflow-hidden border border-white/[0.08]`}>
+              {news.logoUrl ? (
+                <img src={news.logoUrl} alt={news.symbol} className="w-full h-full object-contain p-1 bg-white/[0.03]" />
+              ) : (
+                news.symbol?.substring(0, 2) || "SM"
+              )}
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <h3 className="text-[11px] font-black text-slate-300 tracking-wider uppercase leading-none">{news.companyName}</h3>
-                <span className={`text-[9px] font-bold flex items-center ${isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {isPositive ? '↑' : '↓'} {Math.abs(news.priceChange).toFixed(2)}%
+            <div className="min-w-0">
+              <div className="flex items-center gap-x-1.5">
+                <h3 className="text-[10px] sm:text-[11px] font-extrabold text-blue-400/80 tracking-tight uppercase leading-none truncate max-w-[140px]">
+                  {news.companyName}
+                </h3>
+                <span className={`text-[8px] sm:text-[9px] font-mono font-bold flex items-center ${
+                    hasPriceData && news.priceChange !== 0 ? news.priceChange >= 0 ? "text-emerald-500/80" : "text-rose-500/80" : "text-slate-600"
+                  }`}>
+                  {hasPriceData && news.priceChange !== 0 ? (news.priceChange >= 0 ? "↑" : "↓") : "•"}{" "}
+                  {hasPriceData ? Math.abs(news.priceChange).toFixed(2) : "0.00"}%
                 </span>
               </div>
-              <p className="text-[9px] text-slate-600 font-bold uppercase tracking-tight">{news.symbol}</p>
+              <p className="text-[8px] text-slate-500/80 font-mono font-bold uppercase tracking-widest truncate max-w-[140px] mt-1">
+                {news.symbol || (news as any).bseCode}
+              </p>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-[8px] text-slate-600 font-mono uppercase tracking-tighter leading-none">{news.timestamp.split(' ').slice(2).join(' ')}</p>
-            <p className="text-[8px] text-slate-700 font-mono uppercase tracking-tighter">{news.timestamp.split(' ').slice(0, 2).join(' ')}</p>
+          <div className="text-right shrink-0">
+            <p className="text-[8px] text-slate-400 font-mono font-bold uppercase tracking-tighter leading-none mb-1">
+              {news.timestamp.split(",")[1]?.trim() || news.timestamp.split(' ').slice(2).join(' ')}
+            </p>
+            <p className="text-[7px] text-slate-600 font-mono uppercase tracking-tighter">
+              {news.timestamp.split(",")[0]?.trim() || news.timestamp.split(' ').slice(0, 2).join(' ')}
+            </p>
           </div>
         </div>
 
-        {/* Title */}
-        <h4 className="text-[12px] font-bold text-slate-300 leading-snug mb-3 line-clamp-2 group-hover:text-emerald-500/80 transition-colors">
+        <h4 className={`text-[13px] sm:text-[14px] font-medium text-slate-400/90 leading-[1.3] mb-3 group-hover:text-blue-300 transition-colors tracking-tight uppercase ${isExpanded ? '' : 'line-clamp-2'}`}>
           {news.title}
         </h4>
 
-        {/* Content */}
-        <p className="text-[10px] text-slate-500 line-clamp-4 leading-relaxed mb-4 opacity-80 font-medium">
-          {news.content}
-        </p>
-
-        {/* AI Analysis */}
-        <div className={`mb-4 px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-[0.15em] inline-flex items-center self-start ${getSentimentStyles(news.sentiment)}`}>
-          <div className={`w-1 h-1 rounded-full mr-2 ${news.sentiment === 'bullish' ? 'bg-emerald-600' : news.sentiment === 'bearish' ? 'bg-rose-600' : 'bg-amber-600'} animate-pulse`}></div>
-          AI ANALYSIS: {news.sentiment}
+        <div className="flex-grow relative min-w-0">
+          <p className={`text-[11px] text-slate-500 leading-relaxed mb-4 font-medium border-l-2 border-slate-800/50 pl-3 transition-all duration-300 ${isExpanded ? 'line-clamp-none bg-white/[0.02] py-2' : 'line-clamp-3'}`}>
+            {news.content}
+          </p>
+          {news.content.length > 120 && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+              className="flex items-center space-x-1 text-[9px] font-black text-slate-600 hover:text-blue-400 uppercase tracking-widest mb-4 transition-colors"
+            >
+              <span>{isExpanded ? 'Read Less' : 'Read More'}</span>
+              <svg className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          )}
         </div>
 
-        {/* Footer */}
-        <div className="mt-auto pt-4 flex items-center justify-between border-t border-white/[0.05]">
-          <button className="px-3 py-1.5 bg-white/[0.02] hover:bg-white/[0.05] text-slate-600 hover:text-slate-300 border border-white/[0.05] rounded-lg text-[9px] font-black uppercase tracking-widest transition-all">
-            + WATCHLIST
-          </button>
-          <div className="flex items-center space-x-3">
-            <span className="text-[9px] text-slate-700 font-black uppercase tracking-widest">{news.source}</span>
-            <button className="text-slate-700 hover:text-slate-400 transition-colors">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        <div className="mt-auto">
+          {news.aiAnalysis && (
+            <div className="mb-4 p-3 bg-white/[0.015] rounded-xl border border-white/[0.04]">
+              <span className="text-[8px] font-black text-emerald-600/80 uppercase tracking-widest block mb-1.5">Analysis Node</span>
+              <p className="text-[10px] text-slate-500 leading-relaxed line-clamp-2 font-medium italic">{news.aiAnalysis}</p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div className="flex items-center gap-2">
+              <div className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest inline-flex items-center ${getSentimentStyles(news.sentiment)}`}>
+                <div className={`w-1 h-1 rounded-full mr-1.5 ${news.sentiment === "bullish" ? "bg-emerald-500" : news.sentiment === "bearish" ? "bg-rose-500" : "bg-amber-500"} animate-pulse`}></div>
+                {news.sentiment}
+              </div>
+              <div className="bg-white/[0.02] border border-white/[0.05] px-2 py-1 rounded-lg text-[8px] font-mono text-slate-600 uppercase tracking-tight whitespace-nowrap">
+                Conf: <span className="text-slate-400 font-bold">{news.sentimentScore}%</span>
+              </div>
+            </div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); fetchLocalPercent(true); }} 
+              className="p-1.5 bg-white/[0.03] hover:bg-blue-500/10 text-slate-600 hover:text-blue-500 rounded-lg border border-white/[0.08] transition-all" 
+              title="Sync live pricing"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
           </div>
         </div>
+
+        <div className="pt-4 flex items-center justify-between border-t border-white/[0.05] gap-2 min-w-0">
+          <div className="flex items-center gap-2 relative shrink-0" ref={dropdownRef}>
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowWatchlistOpts(!showWatchlistOpts); }}
+              className="px-3 py-1.5 bg-white/[0.03] hover:bg-emerald-500/10 text-slate-600 hover:text-emerald-500 border border-white/[0.08] rounded-lg text-[8px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
+            >
+              + WATCHLIST
+            </button>
+            {showWatchlistOpts && (
+              <div className="absolute bottom-full left-0 mb-3 w-32 bg-[#1c2230] border border-white/10 rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-50 animate-in fade-in slide-in-from-bottom-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onWatchlistAdd?.({ ...news, userSentiment: "BULLISH" }); setShowWatchlistOpts(false); }}
+                  className="w-full text-left px-4 py-2 text-[9px] font-black text-emerald-500 hover:bg-emerald-600/10 uppercase tracking-widest border-b border-white/[0.05]"
+                >
+                  BULLISH
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onWatchlistAdd?.({ ...news, userSentiment: "BEARISH" }); setShowWatchlistOpts(false); }}
+                  className="w-full text-left px-4 py-2 text-[9px] font-black text-rose-500 hover:bg-rose-600/10 uppercase tracking-widest"
+                >
+                  BEARISH
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center min-w-0">
+            <span className="text-[8px] text-slate-700 font-black uppercase tracking-[0.1em] block text-right whitespace-nowrap overflow-hidden text-ellipsis">
+              {news.source || 'SM DISPATCH'}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-const Terminal: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('ALL FEEDS');
+const MarketTerminal: React.FC<{ 
+  onToggleFullScreen?: (state: boolean) => void;
+  isSidebarCollapsed?: boolean;
+}> = ({ onToggleFullScreen, isSidebarCollapsed }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [bseSearchTerm, setBseSearchTerm] = useState("");
+  const [bseCategory, setBseCategory] = useState("ALL");
+  const [bseCategories, setBseCategories] = useState<string[]>(["ALL"]);
+  const [bseAutoRefresh, setBseAutoRefresh] = useState(false);
+  const [bseAwardsOnly, setBseAwardsOnly] = useState(false);
 
-  const filteredNews = useMemo(() => {
-    return MOCK_NEWS.filter(n => 
-      n.symbol.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      n.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm]);
+  const [activeTab, setActiveTab] = useState("ALL FEEDS");
+  const [news, setNews] = useState<StockNews[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isControlsVisible, setIsControlsVisible] = useState(true);
+  const [sortOrder, setSortOrder] = useState<"TIME" | "SENTIMENT" | "CHANGE">("TIME");
+  const [sentimentFilters, setSentimentFilters] = useState<string[]>(["ALL"]);
+  const [timeRange] = useState({ from: 0, to: 24 });
+  const [watchlist, setWatchlist] = useState<any[]>([]);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [filterDropdownSide, setFilterDropdownSide] = useState<"left" | "right">("right");
+  const [displayLimit, setDisplayLimit] = useState(20);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const filterBtnRef = useRef<HTMLButtonElement>(null);
+  const filterPanelRef = useRef<HTMLDivElement>(null);
+  const [fromDateInput, setFromDateInput] = useState(new Date().toISOString().split("T")[0]);
+  const [toDateInput, setToDateInput] = useState(new Date().toISOString().split("T")[0]);
+
+  const lastParamsRef = useRef<string>("");
+  const isFetchingRef = useRef<boolean>(false);
+
+  const isFiltered = useMemo(() => sentimentFilters.some((f) => f !== "ALL"), [sentimentFilters]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("stockmanch_watchlist");
+    if (saved) setWatchlist(JSON.parse(saved));
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterPanelRef.current && !filterPanelRef.current.contains(event.target as Node) && filterBtnRef.current && !filterBtnRef.current.contains(event.target as Node)) {
+        setIsFilterPanelOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (isFilterPanelOpen && filterBtnRef.current) {
+      const rect = filterBtnRef.current.getBoundingClientRect();
+      if (rect.right + 300 > window.innerWidth) setFilterDropdownSide("left");
+      else setFilterDropdownSide("right");
+    }
+  }, [isFilterPanelOpen]);
+
+  const updatePriceChange = useCallback((id: string, pct: number) => {
+    setNews((prev) => {
+      const idx = prev.findIndex((n) => n.id === id);
+      if (idx === -1 || prev[idx].priceChange === pct) return prev;
+      const next = [...prev];
+      next[idx] = { ...next[idx], priceChange: pct };
+      return next;
+    });
+    setWatchlist((prev) => {
+      const idx = prev.findIndex((n) => n.id === id);
+      if (idx === -1 || prev[idx].priceChange === pct) return prev;
+      const next = [...prev];
+      next[idx] = { ...next[idx], priceChange: pct };
+      localStorage.setItem("stockmanch_watchlist", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const fetchNews = useCallback(async (isAuto = false) => {
+    // CRITICAL: bail out immediately if not on ALL FEEDS or already fetching
+    if (activeTab !== "ALL FEEDS" || isFetchingRef.current) return;
+    
+    const paramsKey = `${fromDateInput}_${toDateInput}`;
+    // If not an auto-refresh and params haven't changed, skip to prevent double API call
+    if (!isAuto && lastParamsRef.current === paramsKey) return;
+    
+    // Lock parameters immediately to prevent concurrent identical requests
+    if (!isAuto) lastParamsRef.current = paramsKey;
+    
+    isFetchingRef.current = true;
+    setLoading(true);
+    try {
+      const toApiDate = (d: string) => {
+        const parts = d.split("-");
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+      };
+      const url = `${API_BASE_URL}/terminal?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}&source=g`;
+      const response = await fetch(url, {
+        cache: "no-store",
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`
+        }
+      });
+      const json = await response.json();
+      
+      if (response.status === 401 || json.error === 'unauthorized') {
+        document.cookie = "sm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.hash = '/login';
+        return;
+      }
+      
+      if (json.status === "success" && json.data) {
+        const allItems: StockNews[] = [];
+        Object.keys(json.data).forEach((dateKey) => {
+          const rawItems = json.data[dateKey];
+          const mappedItems: StockNews[] = rawItems.map((item: any) => {
+             const rawBody = item.data.body || "";
+             const bodyLines = rawBody.split("\n");
+             const rawSourceLine = bodyLines[bodyLines.length - 1] || "";
+             const cleanedSource = rawSourceLine.replace(/Source:\s*/i, '').trim();
+
+             return {
+              id: item.postId,
+              symbol: item.data.cta?.[0]?.meta?.nseScriptCode,
+              bseCode: item.data.cta?.[0]?.meta?.bseScriptCode,
+              companyName: item.data.cta?.[0]?.ctaText,
+              title: item.data.title || "",
+              content: rawBody.split("Source:")[0],
+              image: item.data.image || item.data.featuredImage,
+              logoUrl: item.data.cta?.[0]?.logoUrl,
+              aiAnalysis: item.summary || item.data.summary || item.machineLearningSentiments?.explanation,
+              timestamp: new Date(item.publishedAt).toLocaleString("en-IN", {
+                day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+              }),
+              rawPublishedAt: item.publishedAt,
+              priceChange: 0,
+              sentiment: item.machineLearningSentiments?.label === "negative" ? "bearish" : item.machineLearningSentiments?.label === "positive" ? "bullish" : "neutral",
+              sentimentScore: Math.round((item.machineLearningSentiments?.confidence || 0.5) * 100),
+              from: item.from,
+              source: cleanedSource,
+              logoColor: "bg-indigo-600"
+            };
+          });
+          allItems.push(...mappedItems);
+        });
+        setNews((prevNews) => allItems.map(newItem => {
+            const existingItem = prevNews.find(p => p.id === newItem.id);
+            return { ...newItem, priceChange: existingItem ? existingItem.priceChange : 0 };
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Terminal API Error:", error);
+    } finally {
+      isFetchingRef.current = false;
+      setLoading(false);
+    }
+  }, [fromDateInput, toDateInput, activeTab]);
+
+  useEffect(() => { 
+    if (activeTab === "ALL FEEDS") {
+      fetchNews(false); 
+    } else {
+      lastParamsRef.current = "";
+    }
+  }, [activeTab, fromDateInput, toDateInput, fetchNews]);
+
+  useEffect(() => {
+    let interval: number | undefined;
+    if (autoRefresh && activeTab === "ALL FEEDS") {
+      interval = window.setInterval(() => {
+        if (!isFetchingRef.current) fetchNews(true);
+      }, 15000);
+    }
+    return () => clearInterval(interval);
+  }, [autoRefresh, activeTab, fetchNews]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    if (target.scrollHeight - target.scrollTop <= target.clientHeight + 100) {
+      if (displayLimit < processedNews.length) setDisplayLimit((prev) => prev + 20);
+    }
+  };
+
+  const handleWatchlistAdd = (item: any) => {
+    const newWatchlist = [item, ...watchlist.filter((w) => w.id !== item.id)];
+    setWatchlist(newWatchlist);
+    localStorage.setItem("stockmanch_watchlist", JSON.stringify(newWatchlist));
+  };
+
+  const removeFromWatchlist = (id: string) => {
+    const next = watchlist.filter((w) => w.id !== id);
+    setWatchlist(next);
+    localStorage.setItem("stockmanch_watchlist", JSON.stringify(next));
+  };
+
+  const handleSentimentToggle = (val: string) => {
+    if (val === "ALL") { setSentimentFilters(["ALL"]); return; }
+    let next = sentimentFilters.filter((f) => f !== "ALL");
+    if (next.includes(val)) next = next.filter((f) => f !== val);
+    else next.push(val);
+    if (next.length === 0) next = ["ALL"];
+    setSentimentFilters(next);
+  };
+
+  const processedNews = useMemo(() => {
+    let list = activeTab === "WATCHLIST" ? [...watchlist] : [...news];
+    if (searchTerm) {
+      const lower = searchTerm.toLowerCase();
+      list = list.filter((n) => n.symbol?.toLowerCase().includes(lower) || n.title.toLowerCase().includes(lower) || n.companyName?.toLowerCase().includes(lower));
+    }
+    if (!sentimentFilters.includes("ALL")) list = list.filter((n) => sentimentFilters.includes(n.sentiment.toUpperCase()));
+    list = list.filter((n) => {
+      const hour = new Date(n.rawPublishedAt).getHours();
+      return hour >= timeRange.from && hour <= timeRange.to;
+    });
+    if (sortOrder === "TIME") list.sort((a, b) => new Date(b.rawPublishedAt).getTime() - new Date(a.rawPublishedAt).getTime());
+    else if (sortOrder === "SENTIMENT") list.sort((a, b) => b.sentimentScore - a.sentimentScore);
+    else if (sortOrder === "CHANGE") list.sort((a, b) => b.priceChange - a.priceChange);
+    return list;
+  }, [news, watchlist, activeTab, searchTerm, sortOrder, sentimentFilters, timeRange]);
+
+  const pagedNews = useMemo(() => processedNews.slice(0, displayLimit), [processedNews, displayLimit]);
+
+  const copyAllTitles = () => {
+    const content = processedNews.map((n) => `${n.timestamp} | ${n.symbol || n.bseCode} | ${n.title}`).join("\n");
+    navigator.clipboard.writeText(content);
+    alert(`${processedNews.length} dispatch titles copied.`);
+  };
+
+  const toggleFullScreen = () => {
+    const next = !isFullScreen;
+    setIsFullScreen(next);
+    if (onToggleFullScreen) onToggleFullScreen(next);
+  };
+
+  const gridClasses = useMemo(() => {
+    if (isSidebarCollapsed) {
+      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 pt-2";
+    }
+    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pt-2";
+  }, [isSidebarCollapsed]);
 
   return (
-    <div className="w-full flex flex-col bg-[#0b0f1a] border border-white/[0.05] rounded-2xl overflow-hidden shadow-[0_32px_120px_-20px_rgba(0,0,0,0.8)] animate-in fade-in slide-in-from-bottom-8 duration-1000">
-      
-      {/* 1. Terminal Window Bar */}
-      <div className="bg-[#161b27] border-b border-white/[0.05] px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="flex space-x-2">
-            <div className="w-3 h-3 rounded-full bg-rose-900/30 border border-rose-900/50"></div>
-            <div className="w-3 h-3 rounded-full bg-amber-900/30 border border-amber-900/50"></div>
-            <div className="w-3 h-3 rounded-full bg-emerald-900/30 border border-emerald-900/50"></div>
-          </div>
-          <div className="h-6 w-px bg-white/[0.05] mx-2"></div>
-          <div className="bg-slate-950/60 px-5 py-2 rounded-xl border border-white/[0.05] text-[11px] text-slate-600 font-mono flex items-center shadow-inner min-w-[320px]">
-            <span className="opacity-40">stockmanch.com/terminal/live-feed</span>
-          </div>
-        </div>
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-2 h-2 bg-emerald-700 rounded-full animate-pulse"></div>
-            <span className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">EXCHANGE: NSE LIVE</span>
-          </div>
-          <div className="flex items-center space-x-4 border-l border-white/[0.05] pl-6">
-             <div className="text-right">
-                <p className="text-[10px] font-black text-slate-400 leading-none uppercase tracking-tight">Trader Dashboard</p>
-                <p className="text-[9px] text-emerald-700 font-bold opacity-50 uppercase tracking-tighter">PRO MEMBER</p>
-             </div>
-             <div className="w-10 h-10 rounded-full bg-emerald-900/20 border border-emerald-900/30 flex items-center justify-center text-[11px] font-black text-emerald-700">SM</div>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Ticker Tape */}
-      <TickerTape />
-
-      {/* 3. Terminal Navigation Controls */}
-      <div className="px-8 py-8 flex flex-wrap items-center gap-6 bg-black/[0.05]">
-        <div className="flex bg-slate-900/60 rounded-xl p-1 border border-white/[0.05] shadow-inner">
-          {['ALL FEEDS', 'BSE FEEDS', 'WATCHLIST', 'ANALYSIS'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all ${activeTab === tab ? 'bg-emerald-700 text-slate-100 shadow-lg' : 'text-slate-600 hover:text-slate-300'}`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        <div className="relative flex-grow max-w-lg">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <input 
-            type="text" 
-            placeholder="FILTER TERMINAL BY SYMBOL OR CONTENT..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-950/40 border border-white/[0.05] rounded-xl pl-12 pr-6 py-3.5 text-[11px] text-slate-400 placeholder:text-slate-800 focus:outline-none focus:border-emerald-700/30 font-mono tracking-tight shadow-inner"
-          />
-        </div>
-
-        <button className="ml-auto px-8 py-3.5 bg-emerald-700 text-slate-100 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-2xl shadow-emerald-900/20 hover:bg-emerald-600 transition-all flex items-center space-x-3">
-          <div className="w-1.5 h-1.5 bg-slate-100 rounded-full animate-pulse"></div>
-          <span>TERMINAL LIVE</span>
+    <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a] overflow-x-hidden relative">
+      <div className="lg:hidden shrink-0 bg-[#0d121f] px-4 py-2 flex items-center justify-between border-b border-white/[0.05]">
+        <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Terminal Controls</span>
+        <button onClick={() => setIsControlsVisible(!isControlsVisible)} className="px-3 py-1 bg-white/[0.03] border border-white/[0.05] rounded-lg text-[9px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-600/10 transition-all flex items-center space-x-1">
+          {isControlsVisible ? (<><span>Hide</span><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 15l7-7 7 7" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /></svg></>) : (<><span>Show</span><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7 7" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /></svg></>)}
         </button>
       </div>
 
-      {/* 4. News Grid */}
-      <div className="px-8 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-          {filteredNews.map((news) => (
-            <NewsCard key={news.id} news={news} />
-          ))}
+      <div className={`${isControlsVisible ? 'flex' : 'hidden lg:flex'} px-4 md:px-5 py-3 shrink-0 bg-[#0d121f] border-b border-white/[0.05] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-y-4 gap-x-6 overflow-visible`}>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-wrap">
+          <div className="flex bg-slate-950 rounded-2xl p-1 border border-white/[0.08] shadow-inner shrink-0 self-start sm:self-auto">
+            {["ALL FEEDS", "BSE FEEDS", "WATCHLIST"].map((tab) => (
+              <button key={tab} onClick={() => { setActiveTab(tab); setIsFilterPanelOpen(false); }} className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all ${ activeTab === tab ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" : "text-slate-500 hover:text-slate-300" }`}>{tab}</button>
+            ))}
+          </div>
+
+          {activeTab === "BSE FEEDS" ? (
+             <div className="flex items-center space-x-3 flex-wrap gap-y-2 animate-in fade-in slide-in-from-left-2 duration-300">
+                <div className="flex items-center space-x-3 bg-slate-950 px-4 py-2.5 rounded-xl border border-white/[0.08]">
+                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">CATEGORY</span>
+                  <select 
+                    value={bseCategory} 
+                    onChange={(e) => setBseCategory(e.target.value)}
+                    className="bg-transparent border-none text-[10px] font-black uppercase tracking-tight text-slate-300 focus:outline-none cursor-pointer"
+                  >
+                    {bseCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="relative w-full sm:w-48 lg:w-64 shrink-0">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
+                  <input type="text" placeholder="SEARCH FILINGS..." value={bseSearchTerm} onChange={(e) => setBseSearchTerm(e.target.value)} className="w-full bg-slate-950 border border-white/[0.08] rounded-xl pl-12 pr-4 py-2.5 text-[11px] text-slate-300 focus:outline-none focus:border-emerald-500/40 transition-all font-mono placeholder:text-slate-800" />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={() => setBseAwardsOnly(!bseAwardsOnly)}
+                    className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 ${
+                      bseAwardsOnly 
+                        ? "bg-amber-500/20 border-amber-500/50 text-amber-500" 
+                        : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300"
+                    }`}
+                    title="Filter: Award/Receipt of Order"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="hidden xl:inline">Order_Receipt</span>
+                  </button>
+                  <button 
+                    onClick={() => setBseAutoRefresh(!bseAutoRefresh)} 
+                    className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 ${ 
+                      bseAutoRefresh ? "bg-emerald-600/10 border-emerald-600/50 text-emerald-500" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" 
+                    }`}
+                  >
+                    <div className={`w-1 h-1 rounded-full ${ bseAutoRefresh ? "bg-emerald-600 animate-pulse" : "bg-slate-700" }`}></div>
+                    <span>LIVE MONITOR</span>
+                  </button>
+                </div>
+             </div>
+          ) : activeTab !== "BSE FEEDS" && (
+            <div className="relative w-full sm:w-48 lg:w-72 shrink-0">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
+              <input type="text" placeholder="FILTER TERMINAL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-950 border border-white/[0.08] rounded-xl pl-12 pr-4 py-3 text-[11px] text-slate-300 focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-800" />
+            </div>
+          )}
+
+          {activeTab === "ALL FEEDS" && (
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+              <div className="flex items-center space-x-2 bg-slate-950 p-1.5 rounded-xl border border-white/[0.08]">
+                <input type="date" value={fromDateInput} onChange={(e) => setFromDateInput(e.target.value)} className="bg-slate-900 border border-white/5 rounded-lg px-3 py-1.5 text-[10px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-full sm:w-[125px] cursor-pointer" />
+                <span className="text-slate-700 text-[10px]">→</span>
+                <input type="date" value={toDateInput} onChange={(e) => setToDateInput(e.target.value)} className="bg-slate-900 border border-white/5 rounded-lg px-3 py-1.5 text-[10px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-full sm:w-[125px] cursor-pointer" />
+                <button onClick={() => fetchNews(false)} disabled={loading} className="p-2 bg-blue-600/10 text-blue-500 rounded-lg border border-blue-500/20 hover:bg-blue-600/20 transition-all flex items-center justify-center min-w-[36px]" title="Sync Feed">
+                  {loading ? (<div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>) : (<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>)}
+                </button>
+              </div>
+              <button onClick={() => setAutoRefresh(!autoRefresh)} className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 sm:w-auto w-full ${ autoRefresh ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-500" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" }`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${ autoRefresh ? "bg-emerald-500 animate-pulse" : "bg-slate-700" }`}></div>
+                <span>Live Monitor</span>
+              </button>
+            </div>
+          )}
         </div>
+
+        {activeTab !== "BSE FEEDS" && (
+          <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 relative">
+            <div className="flex items-center gap-3">
+              <button ref={filterBtnRef} onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)} className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 relative ${ isFilterPanelOpen ? "bg-blue-600 text-white border-blue-600" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" }`}>
+                {isFiltered && (<span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-[#0d121f] z-10"></span>)}
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                <span className="hidden sm:inline">Analytics</span>
+              </button>
+              <button onClick={copyAllTitles} className="p-3 bg-slate-950/40 hover:bg-slate-900 text-slate-600 hover:text-slate-300 rounded-xl border border-white/[0.08] transition-all flex items-center justify-center" title="Copy Current Dispatch"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg></button>
+              <button onClick={toggleFullScreen} className={`p-3 bg-slate-950/40 hover:bg-slate-900 rounded-xl border border-white/[0.08] transition-all flex items-center justify-center ${ isFullScreen ? "text-blue-500 border-blue-500/30" : "text-slate-600 hover:text-slate-300" }`} title={isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" /></svg></button>
+            </div>
+            {isFilterPanelOpen && (
+              <div ref={filterPanelRef} className={`absolute top-full mt-4 w-72 bg-[#161b27] border border-white/10 rounded-[2rem] shadow-[0_30px_70px_rgba(0,0,0,0.8)] p-8 z-[100] animate-in fade-in zoom-in-95 duration-200 ${ filterDropdownSide === "left" ? "right-0" : "left-0" }`}>
+                <div className="space-y-8">
+                  <div className="space-y-4">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">AI SENTIMENT FILTER</span>
+                    <div className="grid grid-cols-1 gap-3">
+                      {["ALL", "BULLISH", "BEARISH", "NEUTRAL"].map((opt) => (
+                        <label key={opt} className="flex items-center space-x-4 cursor-pointer group">
+                          <div className="relative flex items-center">
+                            <input type="checkbox" checked={sentimentFilters.includes(opt)} onChange={() => handleSentimentToggle(opt)} className="peer h-5 w-5 appearance-none border border-white/10 rounded-lg bg-slate-950 checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer" />
+                            <svg className="absolute w-3.5 h-3.5 text-white left-0.5 pointer-events-none hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4"><path d="M5 13l4 4L19 7" /></svg>
+                          </div>
+                          <span className={`text-[11px] font-black uppercase tracking-widest transition-colors ${ sentimentFilters.includes(opt) ? "text-slate-100" : "text-slate-600 group-hover:text-slate-400" }`}>{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="h-px bg-white/[0.05]"></div>
+                  <div className="space-y-4">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">SORT ENGINE</span>
+                    <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-[11px] text-slate-300 font-mono uppercase focus:outline-none focus:border-blue-500/40 transition-all"><option value="TIME">Time Descending</option><option value="SENTIMENT">AI Confidence</option><option value="CHANGE">Market Volatility</option></select>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* 5. Terminal Footer */}
-      <footer className="bg-[#111621] border-t border-white/[0.05] px-8 py-3.5 flex items-center justify-between text-[9px] font-black font-mono text-slate-700 tracking-[0.2em] uppercase">
-        <div className="flex items-center space-x-10">
-          <div className="flex items-center space-x-2">
-            <span className="text-emerald-700">CORE:</span>
-            <span>OPERATIONAL</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-emerald-700">LATENCY:</span>
-            <span>18ms</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-emerald-700">UPTIME:</span>
-            <span>99.98%</span>
-          </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-700 opacity-20"></div>
-            <span className="opacity-40 italic">STOCKMANCH TERMINAL SHOWCASE V4.2.0</span>
-          </div>
-        </div>
+      <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-grow overflow-y-auto px-2 sm:px-3 py-8 custom-scrollbar bg-black/10 overflow-x-hidden">
+        {activeTab === "BSE FEEDS" ? (
+          <BseCards 
+            onWatchlistAdd={handleWatchlistAdd} 
+            isSidebarCollapsed={isSidebarCollapsed} 
+            externalSearch={bseSearchTerm}
+            externalCategory={bseCategory}
+            externalAutoRefresh={bseAutoRefresh}
+            onCategoriesLoad={setBseCategories}
+            showAwardsOnly={bseAwardsOnly}
+          />
+        ) : loading && news.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center space-y-8"><div className="w-20 h-20 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div><p className="text-[14px] font-black uppercase tracking-[0.5em] text-slate-700 text-center">INITIALIZING TERMINAL TUNNEL...</p></div>
+        ) : processedNews.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-center opacity-30"><p className="text-xl font-black uppercase tracking-[0.4em] px-6">NO DISPATCHES FOUND IN REGION</p></div>
+        ) : (
+          <>
+            <div className={gridClasses}>
+              {pagedNews.map((newsItem) => (
+                <div key={newsItem.id} className="relative">
+                  <NewsCard news={newsItem} isWatchlist={activeTab === "WATCHLIST"} onWatchlistAdd={handleWatchlistAdd} onPriceUpdate={updatePriceChange} autoRefresh={autoRefresh} />
+                  {activeTab === "WATCHLIST" && (<button onClick={() => removeFromWatchlist(newsItem.id)} className="absolute -top-3 -right-3 w-8 h-8 bg-rose-600 text-white rounded-full flex items-center justify-center text-[12px] font-black shadow-2xl hover:scale-110 transition-all z-40 border-4 border-[#0b0f1a]">✕</button>)}
+                </div>
+              ))}
+            </div>
+            {displayLimit < processedNews.length && (<div className="py-16 flex justify-center"><div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div></div>)}
+          </>
+        )}
+      </div>
+
+      <footer className="shrink-0 bg-[#0d121f] border-t border-white/[0.05] px-6 md:px-10 py-4 flex flex-col sm:flex-row items-center justify-between text-[10px] font-black font-mono text-slate-700 tracking-[0.3em] uppercase gap-3">
+        <div className="flex items-center space-x-8 md:space-x-12"><div className="flex items-center space-x-3"><span className="text-blue-500/60 font-black">NODE:</span><span>READY</span></div><div className="flex items-center space-x-3"><span className="text-blue-500/60 font-black">STREAM:</span><span>{activeTab === "BSE FEEDS" ? "BSE TUNNEL SYNCED" : `${processedNews.length} DISPATCHES SYNCED`}</span></div></div>
+        <div className="flex items-center space-x-3"><div className="w-1.5 h-1.5 rounded-full bg-blue-500/40"></div><span className="opacity-40 italic tracking-tighter uppercase text-center">StockManch Terminal Build v5.0.1</span></div>
       </footer>
     </div>
   );
 };
 
-export default Terminal;
+export default MarketTerminal;
