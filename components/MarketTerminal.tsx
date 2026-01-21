@@ -87,10 +87,16 @@ export const NewsCard: React.FC<{
 
   const getSentimentStyles = (sentiment: string) => {
     switch (sentiment) {
-      case "bullish": return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
-      case "bearish": return "bg-rose-500/10 text-rose-500 border-rose-500/20";
-      default: return "bg-amber-500/10 text-amber-500 border-amber-500/20";
+      case "bullish": return "bg-[#0a2c14] text-[#22c55e]";
+      case "bearish": return "bg-[#2c0a0a] text-[#ff4d4d]";
+      default: return "bg-[#2c240a] text-[#d4a017]";
     }
+  };
+
+  const getPriceStyles = (pct: number) => {
+    if (pct > 0) return "bg-[#0a2c14] text-[#22c55e]";
+    if (pct < 0) return "bg-[#2c0a0a] text-[#ff4d4d]";
+    return "bg-[#1f2937] text-[#9ca3af]";
   };
 
   const hasPriceData = typeof news.priceChange === 'number';
@@ -123,54 +129,59 @@ export const NewsCard: React.FC<{
       )}
 
       <div className="p-4 sm:p-5 flex flex-col h-full relative z-10">
-        <div className="flex items-start justify-between mb-5 gap-2">
-          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-            <div className={`w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-lg flex items-center justify-center text-slate-400 text-[10px] font-black shadow-inner overflow-hidden border border-white/[0.08]`}>
+        <div className="flex items-start justify-between mb-5 gap-4">
+          <div className="flex items-center space-x-3 min-w-0">
+            <div className={`w-9 h-9 shrink-0 flex items-center justify-center overflow-hidden`}>
               {news.logoUrl ? (
-                <img src={news.logoUrl} alt={news.symbol} className="w-full h-full object-contain p-1 bg-white/[0.03]" />
+                <img src={news.logoUrl} alt={news.symbol} className="w-full h-full object-contain" />
               ) : (
-                news.symbol?.substring(0, 2) || "SM"
+                <div className="w-full h-full rounded-md bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-500">
+                  {news.symbol?.substring(0, 2) || "SM"}
+                </div>
               )}
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-x-1.5">
-                <h3 className="text-[10px] sm:text-[11px] font-extrabold text-blue-400/80 tracking-tight uppercase leading-none truncate max-w-[140px]">
-                  {news.companyName}
-                </h3>
-                <span className={`text-[8px] sm:text-[9px] font-mono font-bold flex items-center ${
-                    hasPriceData && news.priceChange !== 0 ? news.priceChange >= 0 ? "text-emerald-500/80" : "text-rose-500/80" : "text-slate-600"
-                  }`}>
-                  {hasPriceData && news.priceChange !== 0 ? (news.priceChange >= 0 ? "↑" : "↓") : "•"}{" "}
-                  {hasPriceData ? Math.abs(news.priceChange).toFixed(2) : "0.00"}%
-                </span>
-              </div>
-              <p className="text-[8px] text-slate-500/80 font-mono font-bold uppercase tracking-widest truncate max-w-[140px] mt-1">
-                {news.symbol || (news as any).bseCode}
+            
+            <div className="min-w-0 flex flex-col justify-center">
+              <h3 className="text-[15px] font-semibold text-[#60a5fa] leading-tight truncate">
+                {news.companyName}
+              </h3>
+              <p className="text-[12px] text-[#9ca3af] font-medium leading-tight mt-0.5 whitespace-nowrap">
+                {news.timestamp}
               </p>
             </div>
           </div>
-          <div className="text-right shrink-0">
-            <p className="text-[8px] text-slate-400 font-mono font-bold uppercase tracking-tighter leading-none mb-1">
-              {news.timestamp.split(",")[1]?.trim() || news.timestamp.split(' ').slice(2).join(' ')}
-            </p>
-            <p className="text-[7px] text-slate-600 font-mono uppercase tracking-tighter">
-              {news.timestamp.split(",")[0]?.trim() || news.timestamp.split(' ').slice(0, 2).join(' ')}
-            </p>
+
+          <div className="flex flex-col items-end shrink-0 pt-1">
+             <div className="flex items-center gap-1.5 mb-1">
+                {/* Percentage redesigned as a pill */}
+                <div className={`px-2 py-0.5 rounded-lg text-[10px] font-bold font-mono tracking-tight transition-colors ${getPriceStyles(news.priceChange)}`}>
+                  {hasPriceData ? (news.priceChange >= 0 ? "+" : "") : ""}{hasPriceData ? news.priceChange.toFixed(2) : "0.00"}%
+                </div>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); fetchLocalPercent(true); }} 
+                  className="p-1 bg-white/[0.03] hover:bg-blue-500/10 text-[#9ca3af] hover:text-blue-400 rounded-md border border-white/[0.08] transition-all"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </button>
+             </div>
+             <span className="text-[8px] text-[#9ca3af] font-mono font-bold uppercase tracking-widest">{news.symbol}</span>
           </div>
         </div>
 
-        <h4 className={`text-[13px] sm:text-[14px] font-medium text-slate-400/90 leading-[1.3] mb-3 group-hover:text-blue-300 transition-colors tracking-tight uppercase ${isExpanded ? '' : 'line-clamp-2'}`}>
+        <h4 className={`text-[13px] sm:text-[14px] font-medium text-[#d1d5db] leading-[1.3] mb-3 group-hover:text-blue-300 transition-colors tracking-tight uppercase ${isExpanded ? '' : 'line-clamp-2'}`}>
           {news.title}
         </h4>
 
         <div className="flex-grow relative min-w-0">
-          <p className={`text-[11px] text-slate-500 leading-relaxed mb-4 font-medium border-l-2 border-slate-800/50 pl-3 transition-all duration-300 ${isExpanded ? 'line-clamp-none bg-white/[0.02] py-2' : 'line-clamp-3'}`}>
+          <p className={`text-[11px] text-[#9ca3af] leading-relaxed mb-4 font-medium border-l-2 border-slate-800/50 pl-3 transition-all duration-300 ${isExpanded ? 'line-clamp-none bg-white/[0.02] py-2' : 'line-clamp-3'}`}>
             {news.content}
           </p>
           {news.content.length > 120 && (
             <button 
               onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
-              className="flex items-center space-x-1 text-[9px] font-black text-slate-600 hover:text-blue-400 uppercase tracking-widest mb-4 transition-colors"
+              className="flex items-center space-x-1 text-[9px] font-black text-[#9ca3af] hover:text-blue-400 uppercase tracking-widest mb-4 transition-colors"
             >
               <span>{isExpanded ? 'Read Less' : 'Read More'}</span>
               <svg className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -184,29 +195,16 @@ export const NewsCard: React.FC<{
           {news.aiAnalysis && (
             <div className="mb-4 p-3 bg-white/[0.015] rounded-xl border border-white/[0.04]">
               <span className="text-[8px] font-black text-emerald-600/80 uppercase tracking-widest block mb-1.5">Analysis Node</span>
-              <p className="text-[10px] text-slate-500 leading-relaxed line-clamp-2 font-medium italic">{news.aiAnalysis}</p>
+              <p className="text-[10px] text-[#9ca3af] leading-relaxed line-clamp-2 font-medium italic">{news.aiAnalysis}</p>
             </div>
           )}
 
           <div className="flex items-center justify-between gap-2 mb-4">
             <div className="flex items-center gap-2">
-              <div className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest inline-flex items-center ${getSentimentStyles(news.sentiment)}`}>
-                <div className={`w-1 h-1 rounded-full mr-1.5 ${news.sentiment === "bullish" ? "bg-emerald-500" : news.sentiment === "bearish" ? "bg-rose-500" : "bg-amber-500"} animate-pulse`}></div>
-                {news.sentiment}
-              </div>
-              <div className="bg-white/[0.02] border border-white/[0.05] px-2 py-1 rounded-lg text-[8px] font-mono text-slate-600 uppercase tracking-tight whitespace-nowrap">
-                Conf: <span className="text-slate-400 font-bold">{news.sentimentScore}%</span>
-              </div>
+              <span className="text-[10px] text-[#9ca3af] font-bold uppercase tracking-[0.05em] block whitespace-nowrap overflow-hidden text-ellipsis max-w-[140px]">
+                Source: <span className="text-slate-300">{news.source || 'BSE'}</span>
+              </span>
             </div>
-            <button 
-              onClick={(e) => { e.stopPropagation(); fetchLocalPercent(true); }} 
-              className="p-1.5 bg-white/[0.03] hover:bg-blue-500/10 text-slate-600 hover:text-blue-500 rounded-lg border border-white/[0.08] transition-all" 
-              title="Sync live pricing"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
           </div>
         </div>
 
@@ -214,7 +212,7 @@ export const NewsCard: React.FC<{
           <div className="flex items-center gap-2 relative shrink-0" ref={dropdownRef}>
             <button
               onClick={(e) => { e.stopPropagation(); setShowWatchlistOpts(!showWatchlistOpts); }}
-              className="px-3 py-1.5 bg-white/[0.03] hover:bg-emerald-500/10 text-slate-600 hover:text-emerald-500 border border-white/[0.08] rounded-lg text-[8px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
+              className="px-3 py-1.5 bg-white/[0.03] hover:bg-emerald-500/10 text-[#9ca3af] hover:text-emerald-500 border border-white/[0.08] rounded-lg text-[8px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
             >
               + WATCHLIST
             </button>
@@ -235,10 +233,9 @@ export const NewsCard: React.FC<{
               </div>
             )}
           </div>
-          <div className="flex items-center min-w-0">
-            <span className="text-[8px] text-slate-700 font-black uppercase tracking-[0.1em] block text-right whitespace-nowrap overflow-hidden text-ellipsis">
-              {news.source || 'SM DISPATCH'}
-            </span>
+          
+          <div className={`px-2.5 py-1.5 rounded-lg text-[10px] font-normal uppercase tracking-wide inline-flex items-center shrink-0 ${getSentimentStyles(news.sentiment)}`}>
+            AI: {news.sentiment} ({news.sentimentScore}%)
           </div>
         </div>
       </div>
@@ -321,14 +318,11 @@ const MarketTerminal: React.FC<{
   }, []);
 
   const fetchNews = useCallback(async (isAuto = false) => {
-    // CRITICAL: bail out immediately if not on ALL FEEDS or already fetching
     if (activeTab !== "ALL FEEDS" || isFetchingRef.current) return;
     
     const paramsKey = `${fromDateInput}_${toDateInput}`;
-    // If not an auto-refresh and params haven't changed, skip to prevent double API call
     if (!isAuto && lastParamsRef.current === paramsKey) return;
     
-    // Lock parameters immediately to prevent concurrent identical requests
     if (!isAuto) lastParamsRef.current = paramsKey;
     
     isFetchingRef.current = true;
@@ -572,13 +566,8 @@ const MarketTerminal: React.FC<{
         {activeTab !== "BSE FEEDS" && (
           <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 relative">
             <div className="flex items-center gap-3">
-              <button ref={filterBtnRef} onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)} className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 relative ${ isFilterPanelOpen ? "bg-blue-600 text-white border-blue-600" : "bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300" }`}>
-                {isFiltered && (<span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-[#0d121f] z-10"></span>)}
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
-                <span className="hidden sm:inline">Analytics</span>
-              </button>
-              <button onClick={copyAllTitles} className="p-3 bg-slate-950/40 hover:bg-slate-900 text-slate-600 hover:text-slate-300 rounded-xl border border-white/[0.08] transition-all flex items-center justify-center" title="Copy Current Dispatch"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg></button>
-              <button onClick={toggleFullScreen} className={`p-3 bg-slate-950/40 hover:bg-slate-900 rounded-xl border border-white/[0.08] transition-all flex items-center justify-center ${ isFullScreen ? "text-blue-500 border-blue-500/30" : "text-slate-600 hover:text-slate-300" }`} title={isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" /></svg></button>
+              <button onClick={copyAllTitles} className="p-3 bg-slate-950/40 hover:bg-slate-900 text-slate-400 hover:text-white rounded-xl border border-white/[0.08] transition-all flex items-center justify-center" title="Copy Current Dispatch"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg></button>
+              <button onClick={toggleFullScreen} className={`p-3 bg-slate-950/40 hover:bg-slate-900 rounded-xl border border-white/[0.08] transition-all flex items-center justify-center ${ isFullScreen ? "text-blue-500 border-blue-500/30" : "text-slate-400 hover:text-white" }`} title={isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" /></svg></button>
             </div>
             {isFilterPanelOpen && (
               <div ref={filterPanelRef} className={`absolute top-full mt-4 w-72 bg-[#161b27] border border-white/10 rounded-[2rem] shadow-[0_30px_70px_rgba(0,0,0,0.8)] p-8 z-[100] animate-in fade-in zoom-in-95 duration-200 ${ filterDropdownSide === "left" ? "right-0" : "left-0" }`}>
@@ -623,7 +612,7 @@ const MarketTerminal: React.FC<{
         ) : loading && news.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center space-y-8"><div className="w-20 h-20 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div><p className="text-[14px] font-black uppercase tracking-[0.5em] text-slate-700 text-center">INITIALIZING TERMINAL TUNNEL...</p></div>
         ) : processedNews.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center opacity-30"><p className="text-xl font-black uppercase tracking-[0.4em] px-6">NO DISPATCHES FOUND IN REGION</p></div>
+          <div className="h-full flex flex-col items-center justify-center text-center opacity-30"><p className="text-xl font-black uppercase tracking-[0.4em] px-6">NO DISPATCHFOUND IN REGION</p></div>
         ) : (
           <>
             <div className={gridClasses}>
