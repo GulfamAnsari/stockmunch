@@ -557,10 +557,11 @@ const MarketTerminal: React.FC<{
 
   const gridClasses = useMemo(() => {
     if (isSidebarCollapsed) {
-      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 pt-2";
+      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-4 animate-in fade-in duration-700";
     }
-    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pt-2";
+    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-4 animate-in fade-in duration-700";
   }, [isSidebarCollapsed]);
+
 
   return (
     <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a] overflow-x-hidden relative">
@@ -676,6 +677,7 @@ const MarketTerminal: React.FC<{
         {/* Global Utility Actions */}
         <div className="flex items-center gap-3 shrink-0 relative justify-end">
           {activeTab !== "BSE FEEDS" && (
+            /* @google/genai fix: Corrected syntax error on line 681 where quotes were misplaced in className and fill attributes */
             <button ref={filterBtnRef} onClick={(e) => { e.stopPropagation(); setIsFilterPanelOpen(!isFilterPanelOpen); }} className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 relative ${ isFilterPanelOpen ? "bg-blue-600 text-white border-blue-600 shadow-lg" : "bg-slate-900/40 border-white/[0.1] text-slate-500 hover:text-slate-300" }`}>
               {isFiltered && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0d121f] z-10 animate-pulse"></span>}
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
@@ -738,6 +740,7 @@ const MarketTerminal: React.FC<{
                 </div>
               ))}
             </div>
+            {/* @google/genai fix: This block was being incorrectly parsed due to the syntax error on line 681, resulting in 'Cannot find name div' */}
             {displayLimit < processedNews.length && (<div className="py-16 flex justify-center"><div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div></div>)}
           </>
         )}

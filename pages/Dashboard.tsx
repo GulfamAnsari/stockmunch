@@ -635,12 +635,21 @@ const Dashboard: React.FC = () => {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden">
-      <div className={`p-8 border-b border-white/[0.03] bg-slate-950/20 ${isSidebarCollapsed ? 'items-center' : ''} flex flex-col`}>
-        <div className="flex items-center space-x-3 mb-2">
-          <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-700 shadow-xl' : 'bg-rose-700 shadow-xl'} transition-all`}></div>
+      <div className={`p-6 border-b border-white/[0.03] bg-slate-950/20 ${isSidebarCollapsed ? 'items-center' : ''} flex flex-col`}>
+        <div className="flex items-center justify-between w-full mb-4">
+          <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-700 shadow-xl' : 'bg-rose-700 shadow-xl'} transition-all shrink-0`}></div>
+          <button 
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="p-1.5 bg-white/[0.03] border border-white/[0.05] rounded-lg text-slate-500 hover:text-white transition-all hidden lg:block"
+            title={isSidebarCollapsed ? "Expand Terminal" : "Collapse Terminal"}
+          >
+            <svg className={`w-4 h-4 transition-transform duration-500 ${isSidebarCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            </svg>
+          </button>
         </div>
         {!isSidebarCollapsed && (
-          <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
+          <div className="space-y-1 animate-in fade-in slide-in-from-left-2 w-full">
             <h2 className="text-slate-400 font-black uppercase text-[10px] tracking-[0.2em]">Terminal Node</h2>
             <p className={`text-[8px] font-mono uppercase ${isOnline ? 'text-emerald-700 font-black' : 'text-rose-700 font-bold'}`}>{isOnline ? 'Operational' : 'Offline'}</p>
           </div>
