@@ -376,34 +376,10 @@ const SettingsSection: React.FC<{
   };
 
   const settingsList = [
-    { 
-      key: 'telegram_push', 
-      label: 'Telegram Push Node', 
-      desc: 'Instant stock alerts via verified Telegram protocol.',
-      icon: 'M13 10V3L4 14h7v7l9-11h-7z',
-      color: 'sky'
-    },
-    { 
-      key: 'daily_email', 
-      label: 'Daily Market Brief', 
-      desc: 'Curation of critical news delivered to your hub.',
-      icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z',
-      color: 'indigo'
-    },
-    { 
-      key: 'ai_insight', 
-      label: 'AI Impact Engine', 
-      desc: 'Contextual analysis powered by Gemini 3 Flash.',
-      icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
-      color: 'emerald'
-    },
-    { 
-      key: 'terminal_audio', 
-      label: 'Audio Notification', 
-      desc: 'High-frequency sound alerts for prioritized news.',
-      icon: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z',
-      color: 'rose'
-    }
+    { key: 'telegram_push', label: 'Telegram Push Node', desc: 'Instant stock alerts via verified Telegram protocol.', icon: 'M13 10V3L4 14h7v7l9-11h-7z', color: 'sky' },
+    { key: 'daily_email', label: 'Daily Market Brief', desc: 'Curation of critical news delivered to your hub.', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z', color: 'indigo' },
+    { key: 'ai_insight', label: 'AI Impact Engine', desc: 'Contextual analysis powered by Gemini 3 Flash.', icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z', color: 'emerald' },
+    { key: 'terminal_audio', label: 'Audio Notification', desc: 'High-frequency sound alerts for prioritized news.', icon: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z', color: 'rose' }
   ];
 
   return (
@@ -419,29 +395,16 @@ const SettingsSection: React.FC<{
              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Preferences Synced</span>
           </div>
         </header>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
           {settingsList.map((item) => (
-            <div 
-              key={item.key} 
-              className={`bg-[#111621] border transition-all duration-300 rounded-[2.5rem] p-8 md:p-10 group relative overflow-hidden flex flex-col justify-between h-full ${
-                activeSaveKey === item.key ? 'border-emerald-600 shadow-[0_0_25px_rgba(16,185,129,0.2)] scale-[1.01]' : 'border-white/[0.03] hover:border-white/[0.05]'
-              }`}
-            >
+            <div key={item.key} className={`bg-[#111621] border transition-all duration-300 rounded-[2.5rem] p-8 md:p-10 group relative overflow-hidden flex flex-col justify-between h-full ${ activeSaveKey === item.key ? 'border-emerald-600 shadow-xl scale-[1.01]' : 'border-white/[0.03] hover:border-white/[0.05]' }`}>
               <div className="relative z-10">
                 <div className="flex items-start justify-between mb-8">
-                  <div className={`w-14 h-14 rounded-2xl bg-slate-950 border border-white/5 flex items-center justify-center text-${item.color}-500/80 group-hover:scale-105 transition-transform`}>
-                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
-                    </svg>
+                  <div className={`w-14 h-14 rounded-2xl bg-slate-950 border border-white/5 flex items-center justify-center text-${item.color}-500/80`}>
+                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} /></svg>
                   </div>
-                  <Toggle 
-                    enabled={!!data[item.key as keyof SettingsData]} 
-                    onChange={(val) => handleToggle(item.key as keyof SettingsData, val)}
-                    loading={activeSaveKey === item.key}
-                  />
+                  <Toggle enabled={!!data[item.key as keyof SettingsData]} onChange={(val) => handleToggle(item.key as keyof SettingsData, val)} loading={activeSaveKey === item.key} />
                 </div>
-                
                 <div>
                   <h4 className="text-slate-100 font-black uppercase tracking-tight text-lg mb-2">{item.label}</h4>
                   <p className="text-slate-500 text-[13px] font-medium leading-relaxed max-w-[240px]">{item.desc}</p>
@@ -476,15 +439,12 @@ const AlertHistorySection: React.FC<{ data: AlertData[]; loading: boolean }> = (
             <p className="text-blue-500/60 text-sm mt-3 font-black uppercase tracking-widest">Historical notification telemetry node.</p>
           </div>
         </header>
-
         {data.length === 0 ? (
-          <div className="text-center py-20 opacity-30 text-slate-600">
-             <p className="font-black uppercase tracking-[0.4em] text-sm">Vault Empty</p>
-          </div>
+          <div className="text-center py-20 opacity-30 text-slate-600"><p className="font-black uppercase tracking-[0.4em] text-sm">Vault Empty</p></div>
         ) : (
           <div className="space-y-4">
             {data.map((alert, idx) => (
-              <div key={idx} className="bg-[#111621] border border-white/[0.03] rounded-3xl p-6 md:p-8 hover:bg-slate-900/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group">
+              <div key={idx} className="bg-[#111621] border border-white/[0.03] rounded-3xl p-6 md:p-8 hover:bg-slate-900/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-start gap-6">
                   <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-center text-blue-500 flex-shrink-0">
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.89.03-.25.38-.51 1.05-.78 4.12-1.79 6.87-2.97 8.24-3.54 3.92-1.63 4.73-1.91 5.26-1.92.12 0 .38.03.55.17.14.12.18.28.2.44.02.16.02.32 0 .44z"/></svg>
@@ -494,11 +454,8 @@ const AlertHistorySection: React.FC<{ data: AlertData[]; loading: boolean }> = (
                     <p className="text-slate-300 text-sm font-medium leading-relaxed max-w-2xl">{alert.message}</p>
                   </div>
                 </div>
-
                 <div className="flex md:flex-col items-center md:items-end justify-between gap-2 shrink-0">
-                  <div className="px-3 py-1 rounded-lg border border-emerald-600/20 bg-emerald-600/5 text-emerald-500 text-[9px] font-black uppercase tracking-widest">
-                    {alert.delivery_status}
-                  </div>
+                  <div className="px-3 py-1 rounded-lg border border-emerald-600/20 bg-emerald-600/5 text-emerald-500 text-[9px] font-black uppercase tracking-widest">{alert.delivery_status}</div>
                   <div className="text-right">
                     <p className="text-slate-100 font-mono text-[10px] font-bold">{new Date(alert.delivered_at || alert.created_at).toLocaleTimeString('en-IN')}</p>
                     <p className="text-slate-600 font-mono text-[9px] font-black uppercase">{new Date(alert.delivered_at || alert.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</p>
@@ -532,29 +489,24 @@ const Dashboard: React.FC = () => {
 
   const handleLogout = () => {
     document.cookie = "sm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    localStorage.removeItem("stockmanch_settings");
     navigate('/login');
   };
 
   const fetchCoreData = async () => {
     if (coreSyncStarted.current) return;
     coreSyncStarted.current = true;
-    
     setLoadingCore(true);
     try {
       const token = getAuthToken();
       if (!token) return navigate('/login');
       const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-
       const subResp = await fetch(`${API_BASE_URL}/control-center`, { method: 'GET', cache: "no-store", headers });
       const subJson = await subResp.json();
       if (subResp.status === 401 || subJson.error === 'unauthorized') return handleLogout();
-      
       const subData = subJson.subscription || (subJson.data && subJson.data.subscription);
       if (subData) setSubscriptionData(subData);
-
-      const invites = subJson.telegram_invites || [];
-      setInviteData(invites);
-
+      setInviteData(subJson.telegram_invites || []);
       const profResp = await fetch(`${API_BASE_URL}/profile`, { method: 'GET', cache: "no-store", headers });
       const profJson = await profResp.json();
       if (profResp.status === 401 || profJson.error === 'unauthorized') return handleLogout();
@@ -568,16 +520,31 @@ const Dashboard: React.FC = () => {
   };
 
   const fetchSettingsData = async () => {
+    const cached = localStorage.getItem("stockmanch_settings");
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed.settings) {
+          setSettingsData({
+            telegram_push: !!Number(parsed.settings.telegram_push),
+            daily_email: !!Number(parsed.settings.daily_email),
+            ai_insight: !!Number(parsed.settings.ai_insight),
+            terminal_audio: !!Number(parsed.settings.terminal_audio),
+          });
+          return;
+        }
+      } catch (e) {}
+    }
+
     setLoadingSettings(true);
     try {
       const token = getAuthToken();
       if (!token) return;
-      const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-
-      const setResp = await fetch(`${API_BASE_URL}/settings`, { method: 'GET', cache: "no-store", headers });
+      const setResp = await fetch(`${API_BASE_URL}/settings`, { method: 'GET', cache: "no-store", headers: { 'Authorization': `Bearer ${token}` } });
       const setJson = await setResp.json();
       if (setResp.status === 401 || setJson.error === 'unauthorized') return handleLogout();
       if (setJson.settings) {
+        localStorage.setItem("stockmanch_settings", JSON.stringify(setJson));
         setSettingsData({
           telegram_push: !!Number(setJson.settings.telegram_push),
           daily_email: !!Number(setJson.settings.daily_email),
@@ -597,9 +564,7 @@ const Dashboard: React.FC = () => {
     try {
       const token = getAuthToken();
       if (!token) return;
-      const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-
-      const alertResp = await fetch(`${API_BASE_URL}/alerts`, { method: 'GET', cache: "no-store", headers });
+      const alertResp = await fetch(`${API_BASE_URL}/alerts`, { method: 'GET', cache: "no-store", headers: { 'Authorization': `Bearer ${token}` } });
       const alertJson = await alertResp.json();
       if (alertResp.status === 401 || alertJson.error === 'unauthorized') return handleLogout();
       const finalAlerts = alertJson.alerts || alertJson.data || alertJson;
@@ -614,7 +579,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     document.title = "Terminal Dashboard | StockManch";
     fetchCoreData();
-
+    fetchSettingsData(); // Always check/load settings on mount
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
     window.addEventListener('online', handleOnline);
@@ -626,11 +591,8 @@ const Dashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (activeSection === 'settings') {
-      fetchSettingsData();
-    } else if (activeSection === 'notifications') {
-      fetchAlertsData();
-    }
+    if (activeSection === 'settings') fetchSettingsData();
+    else if (activeSection === 'notifications') fetchAlertsData();
   }, [activeSection]);
 
   const handleUpdateSettings = async (updated: SettingsData) => {
@@ -644,9 +606,20 @@ const Dashboard: React.FC = () => {
       body.append('daily_email', updated.daily_email ? '1' : '0');
       body.append('ai_insight', updated.ai_insight ? '1' : '0');
       body.append('terminal_audio', updated.terminal_audio ? '1' : '0');
+      
       const response = await fetch(`${API_BASE_URL}/settings`, { method: 'POST', cache: "no-store", headers: { 'Authorization': `Bearer ${token}` }, body });
       const result = await response.json();
       if (!response.ok || result.status === 'error') throw new Error("Server Update Failed");
+      
+      // Sync Cache
+      localStorage.setItem("stockmanch_settings", JSON.stringify({
+        settings: {
+          telegram_push: updated.telegram_push ? 1 : 0,
+          daily_email: updated.daily_email ? 1 : 0,
+          ai_insight: updated.ai_insight ? 1 : 0,
+          terminal_audio: updated.terminal_audio ? 1 : 0
+        }
+      }));
     } catch (e) {
       setSettingsData(originalState);
     }
@@ -657,31 +630,19 @@ const Dashboard: React.FC = () => {
     { id: 'terminal', label: 'Market Terminal', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
     { id: 'notifications', label: 'Alert History', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
     { id: 'account', label: 'My Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-    { id: 'billing', label: 'Billing Node', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', disabled: true },
     { id: 'settings', label: 'App Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
   ];
-
-  const sectionTitles = {
-    overview: 'Overview',
-    terminal: 'Market Terminal',
-    notifications: 'Recent Alerts',
-    account: 'My Profile',
-    settings: 'App Settings',
-    billing: 'Billing Node (Disabled)'
-  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden">
       <div className={`p-8 border-b border-white/[0.03] bg-slate-950/20 ${isSidebarCollapsed ? 'items-center' : ''} flex flex-col`}>
         <div className="flex items-center space-x-3 mb-2">
-          <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-700 shadow-[0_0_10px_rgba(16,185,129,0.2)]' : 'bg-rose-700 shadow-[0_0_10px_rgba(244,63,94,0.2)]'} transition-all duration-300`}></div>
+          <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-700 shadow-xl' : 'bg-rose-700 shadow-xl'} transition-all`}></div>
         </div>
         {!isSidebarCollapsed && (
-          <div className="space-y-1 animate-in fade-in slide-in-from-left-2 duration-300">
+          <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
             <h2 className="text-slate-400 font-black uppercase text-[10px] tracking-[0.2em]">Terminal Node</h2>
-            <p className={`text-[8px] font-mono uppercase ${isOnline ? 'text-emerald-700 font-black' : 'text-rose-700 font-bold'}`}>
-              {isOnline ? 'Operational' : 'Offline'}
-            </p>
+            <p className={`text-[8px] font-mono uppercase ${isOnline ? 'text-emerald-700 font-black' : 'text-rose-700 font-bold'}`}>{isOnline ? 'Operational' : 'Offline'}</p>
           </div>
         )}
       </div>
@@ -689,30 +650,18 @@ const Dashboard: React.FC = () => {
         {menuItems.map((item) => (
           <button 
             key={item.id} 
-            disabled={item.disabled}
-            onClick={() => { 
-              setActiveSection(item.id as any); 
-              setIsMobileSidebarOpen(false); 
-            }} 
-            className={`w-full flex items-center space-x-4 p-4 rounded-2xl transition-all group ${
-              activeSection === item.id ? 'bg-emerald-700 text-slate-100 shadow-xl shadow-emerald-900/10' : 'text-slate-600 hover:text-slate-300 hover:bg-white/[0.02]'
-            } ${item.disabled ? 'opacity-30 cursor-not-allowed grayscale' : ''}`} 
-            title={isSidebarCollapsed ? item.label : ''}
+            onClick={() => { setActiveSection(item.id as any); setIsMobileSidebarOpen(false); }} 
+            className={`w-full flex items-center space-x-4 p-4 rounded-2xl transition-all group ${ activeSection === item.id ? 'bg-emerald-700 text-slate-100 shadow-xl' : 'text-slate-600 hover:text-slate-300 hover:bg-white/[0.02]' }`}
           >
-            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-            </svg>
+            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
             <span className={`${isSidebarCollapsed ? 'hidden' : 'block'} uppercase tracking-[0.15em] text-[10px] font-black truncate`}>{item.label}</span>
           </button>
         ))}
       </nav>
       <div className="p-8 space-y-4 border-t border-white/[0.03] bg-slate-950/20">
-        <button onClick={handleLogout} className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center' : 'space-x-4'} p-3 rounded-xl text-rose-700 hover:bg-rose-700 hover:text-slate-100 transition-all border border-rose-900/20 shadow-lg`} title="Logout Protocol">
-          <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-          {!isSidebarCollapsed && <span className="uppercase tracking-[0.15em] text-[10px] font-black">Terminate Session</span>}
-        </button>
-        <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="flex w-full items-center justify-center p-2 rounded-xl text-slate-800 hover:text-slate-500 transition-all bg-white/[0.01] border border-white/[0.03]">
-          <svg className={`w-5 h-5 transition-transform duration-500 ${isSidebarCollapsed ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+        <button onClick={handleLogout} className="w-full flex items-center justify-center lg:justify-start space-x-4 p-3 rounded-xl text-rose-700 hover:bg-rose-700 hover:text-slate-100 transition-all border border-rose-900/20">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          {!isSidebarCollapsed && <span className="uppercase tracking-[0.15em] text-[10px] font-black">Terminate</span>}
         </button>
       </div>
     </div>
@@ -722,18 +671,18 @@ const Dashboard: React.FC = () => {
     <div className="h-screen bg-[#0b0f1a] flex flex-col text-slate-500 overflow-hidden relative">
       {isMobileSidebarOpen && (
         <div className="fixed inset-0 z-[200] lg:hidden bg-black/80 backdrop-blur-md" onClick={() => setIsMobileSidebarOpen(false)}>
-          <div className="w-72 h-full bg-[#0d121f] shadow-2xl animate-in slide-in-from-left duration-300" onClick={e => e.stopPropagation()}><SidebarContent /></div>
+          <div className="w-72 h-full bg-[#0d121f]" onClick={e => e.stopPropagation()}><SidebarContent /></div>
         </div>
       )}
 
       {!isFullScreenMode && (
         <header className="w-full bg-[#111621] px-6 md:px-10 py-5 flex items-center justify-between shrink-0 border-b border-white/[0.05] z-[50]">
           <div className="flex items-center space-x-3 md:space-x-8">
-            <button onClick={(e) => { e.stopPropagation(); setIsMobileSidebarOpen(true); }} className="lg:hidden p-3 bg-white/[0.02] rounded-xl text-slate-600 hover:text-slate-300 hover:bg-white/[0.05] transition-all border border-white/[0.05]" aria-label="Toggle Menu"><svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg></button>
+            <button onClick={() => setIsMobileSidebarOpen(true)} className="lg:hidden p-3 bg-white/[0.02] rounded-xl border border-white/[0.05]"><svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg></button>
             <div className="flex items-center space-x-6">
               <Logo className="h-7 w-auto hidden sm:block opacity-80" />
               <div className="h-6 w-px bg-white/[0.05] hidden md:block"></div>
-              <h2 className="text-white font-black uppercase tracking-[0.2em] text-xs hidden md:block">{sectionTitles[activeSection as keyof typeof sectionTitles]}</h2>
+              <h2 className="text-white font-black uppercase tracking-[0.2em] text-xs hidden md:block">{activeSection}</h2>
             </div>
           </div>
           <div className="flex items-center space-x-4 md:space-x-6">
@@ -741,30 +690,21 @@ const Dashboard: React.FC = () => {
               <span className="text-[9px] font-black text-blue-500/60 uppercase tracking-widest">{subscriptionData?.plan_code || '---'}</span>
               <span className="text-[10px] text-white font-black uppercase tracking-tight">{profileData?.name || 'SYNCING...'}</span>
             </div>
-            <div 
-              onClick={() => setActiveSection('account')}
-              className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-slate-900/80 border border-white/[0.05] flex items-center justify-center text-emerald-600 hover:border-emerald-700 transition-all cursor-pointer shadow-xl overflow-hidden"
-            >
-              {profileData?.logo ? (
-                <img src={profileData.logo} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-sm font-black uppercase">{profileData?.name?.substring(0, 1) || 'S'}</span>
-              )}
+            <div onClick={() => setActiveSection('account')} className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-slate-900/80 border border-white/[0.05] flex items-center justify-center text-emerald-600 hover:border-emerald-700 transition-all cursor-pointer overflow-hidden shadow-xl">
+              {profileData?.logo ? <img src={profileData.logo} className="w-full h-full object-cover" /> : <span className="text-sm font-black uppercase">{profileData?.name?.substring(0, 1) || 'S'}</span>}
             </div>
           </div>
         </header>
       )}
 
       <div className="flex-grow flex overflow-hidden relative">
-        {!isFullScreenMode && <aside className={`hidden lg:flex ${isSidebarCollapsed ? 'w-24' : 'w-72'} bg-[#0d121f] border-r border-white/[0.03] flex-col shrink-0 z-10 transition-all duration-500`}><SidebarContent /></aside>}
+        {!isFullScreenMode && <aside className={`hidden lg:flex ${isSidebarCollapsed ? 'w-24' : 'w-72'} bg-[#0d121f] border-r border-white/[0.03] flex-col shrink-0 transition-all duration-500`}><SidebarContent /></aside>}
         <main className="flex-grow flex flex-col min-w-0 bg-[#0b0f1a] relative overflow-hidden">
-          <div className="flex-grow flex flex-col overflow-hidden">
             {activeSection === 'terminal' && <MarketTerminal onToggleFullScreen={setIsFullScreenMode} isSidebarCollapsed={isSidebarCollapsed} />}
             {activeSection === 'overview' && <OverviewSection data={subscriptionData} invites={inviteData} loading={loadingCore} onNavigate={setActiveSection} />}
             {activeSection === 'account' && <ProfileSection data={profileData} loading={loadingCore} />}
             {activeSection === 'notifications' && <AlertHistorySection data={alertData} loading={loadingAlerts} />}
             {activeSection === 'settings' && <SettingsSection data={settingsData} loading={loadingSettings} onUpdate={handleUpdateSettings} />}
-          </div>
         </main>
       </div>
     </div>
