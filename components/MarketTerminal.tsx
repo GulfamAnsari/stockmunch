@@ -16,6 +16,32 @@ const getAuthToken = () => {
 
 const percentageMap = new Map();
 
+// Helper to play a clean, professional notification tone
+const playAlertSound = () => {
+  try {
+    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.type = 'sine';
+    // Frequency 880Hz (A5) for a clear, high-pitched "ding"
+    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    // Fade out to avoid clicks
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.5);
+  } catch (e) {
+    console.warn("Audio alert failed to play (browser may require user gesture first).", e);
+  }
+};
+
 export const NewsCard: React.FC<{
   news: StockNews;
   isWatchlist?: boolean;
@@ -87,15 +113,15 @@ export const NewsCard: React.FC<{
 
   const getSentimentStyles = (sentiment: string) => {
     switch (sentiment) {
-      case "bullish": return "bg-[#0a2c14] text-[#22c55e]";
-      case "bearish": return "bg-[#2c0a0a] text-[#ff4d4d]";
-      default: return "bg-[#2c240a] text-[#d4a017]";
+      case "bullish": return "bg-[#062010] text-[#4ade80]";
+      case "bearish": return "bg-[#2d1212] text-[#fca5a5]";
+      default: return "bg-[#1c190a] text-[#fbbf24]";
     }
   };
 
   const getPriceStyles = (pct: number) => {
-    if (pct > 0) return "bg-[#0a2c14] text-[#22c55e]";
-    if (pct < 0) return "bg-[#2c0a0a] text-[#ff4d4d]";
+    if (pct > 0) return "bg-[#062010] text-[#4ade80]";
+    if (pct < 0) return "bg-[#2d1212] text-[#fca5a5]";
     return "bg-[#1f2937] text-[#9ca3af]";
   };
 
@@ -145,7 +171,7 @@ export const NewsCard: React.FC<{
               <h3 className="text-[15px] font-semibold text-[#60a5fa] leading-tight truncate">
                 {news.companyName}
               </h3>
-              <p className="text-[12px] text-[#9ca3af] font-medium leading-tight mt-0.5 whitespace-nowrap">
+              <p className="text-[12px] text-[#9ca3af] font-normal leading-tight mt-0.5 whitespace-nowrap">
                 {news.timestamp}
               </p>
             </div>
@@ -153,8 +179,7 @@ export const NewsCard: React.FC<{
 
           <div className="flex flex-col items-end shrink-0 pt-1">
              <div className="flex items-center gap-1.5 mb-1">
-                {/* Percentage redesigned as a pill */}
-                <div className={`px-2 py-0.5 rounded-lg text-[10px] font-bold font-mono tracking-tight transition-colors ${getPriceStyles(news.priceChange)}`}>
+                <div className={`px-2 py-0.5 rounded-lg text-[10px] font-normal font-mono tracking-tight transition-colors ${getPriceStyles(news.priceChange)}`}>
                   {hasPriceData ? (news.priceChange >= 0 ? "+" : "") : ""}{hasPriceData ? news.priceChange.toFixed(2) : "0.00"}%
                 </div>
                 <button 
@@ -166,7 +191,7 @@ export const NewsCard: React.FC<{
                   </svg>
                 </button>
              </div>
-             <span className="text-[8px] text-[#9ca3af] font-mono font-bold uppercase tracking-widest">{news.symbol}</span>
+             <span className="text-[8px] text-[#9ca3af] font-mono font-normal uppercase tracking-widest">{news.symbol}</span>
           </div>
         </div>
 
@@ -201,8 +226,8 @@ export const NewsCard: React.FC<{
 
           <div className="flex items-center justify-between gap-2 mb-4">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-[#9ca3af] font-bold uppercase tracking-[0.05em] block whitespace-nowrap overflow-hidden text-ellipsis max-w-[140px]">
-                Source: <span className="text-slate-300">{news.source || 'BSE'}</span>
+              <span className="text-[10px] text-[#9ca3af] font-normal uppercase tracking-[0.05em] block whitespace-nowrap overflow-hidden text-ellipsis max-w-[140px]">
+                Source: <span className="text-slate-300 font-normal">{news.source || 'BSE'}</span>
               </span>
             </div>
           </div>
@@ -275,8 +300,36 @@ const MarketTerminal: React.FC<{
 
   const lastParamsRef = useRef<string>("");
   const isFetchingRef = useRef<boolean>(false);
+  
+  // Track the ID of the most recent alert to detect new arrivals
+  const lastAlertIdRef = useRef<string | null>(null);
 
   const isFiltered = useMemo(() => sentimentFilters.some((f) => f !== "ALL"), [sentimentFilters]);
+
+  // Audio alert monitor
+  useEffect(() => {
+    if (news.length > 0) {
+      const topId = news[0].id;
+      
+      // If we already had news and the top one changed, it's a new arrival
+      if (lastAlertIdRef.current && lastAlertIdRef.current !== topId) {
+        // Check localStorage settings for terminal_audio toggle
+        try {
+          const stored = localStorage.getItem("stockmanch_settings");
+          if (stored) {
+            const settingsObj = JSON.parse(stored);
+            if (settingsObj?.settings?.terminal_audio === 1) {
+              playAlertSound();
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to check audio settings in localstorage", e);
+        }
+      }
+      
+      lastAlertIdRef.current = topId;
+    }
+  }, [news]);
 
   useEffect(() => {
     const saved = localStorage.getItem("stockmanch_watchlist");
