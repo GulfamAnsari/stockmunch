@@ -97,10 +97,12 @@ const OverviewSection: React.FC<{
   }
 
   const handleInviteInteraction = async (inviteLink: string) => {
-    window.open(inviteLink, '_blank');
-    setInviteUsedLocal(true);
+    if (activeInvite?.used || inviteUsedLocal) return;
+
     try {
       const token = getAuthToken();
+      window.open(inviteLink, '_blank');
+      setInviteUsedLocal(true);
       await fetch(`${API_BASE_URL}/mark-invite-used`, {
         method: 'GET',
         cache: "no-store",
@@ -236,6 +238,34 @@ const OverviewSection: React.FC<{
             </div>
           </div>
         )}
+
+        <div className="bg-[#161b27] border border-white/[0.03] rounded-[2.5rem] p-10 shadow-2xl">
+          <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] mb-8 flex items-center">
+            <span className="w-2.5 h-2.5 bg-amber-500 rounded-full mr-4 animate-pulse shadow-[0_0_15px_rgba(245,158,11,0.3)]"></span>
+            System Integrity Log
+          </h3>
+          <div className="space-y-4">
+            {[
+              { msg: 'Access token validated via secure node', time: 'Just now', status: 'SUCCESS' },
+              { msg: `Subscription synchronized: ${data?.plan_code || 'PRO'}`, time: '5m ago', status: 'SYNC' },
+              { msg: 'Global market feed connection stable', time: '12m ago', status: 'INFO' }
+            ].map((act, i) => (
+              <div key={i} className="flex items-center justify-between p-4 bg-slate-950/40 rounded-2xl border border-white/[0.03]">
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-bold text-slate-100">{act.msg}</span>
+                  <span className="text-[8px] text-slate-500 uppercase font-mono mt-1">{act.time}</span>
+                </div>
+                <span className={`text-[8px] font-black px-2 py-1 rounded border ${
+                  act.status === 'SUCCESS' ? 'border-emerald-600/30 text-emerald-500 bg-emerald-600/5' :
+                  act.status === 'SYNC' ? 'border-sky-600/30 text-sky-600 bg-sky-600/5' :
+                  'border-white/10 text-slate-500'
+                } tracking-tighter`}>
+                  {act.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -488,7 +518,6 @@ const Dashboard: React.FC = () => {
   const coreSyncStarted = useRef(false);
   const [activeSection, setActiveSection] = useState<'overview' | 'terminal' | 'account' | 'notifications' | 'settings'>('overview');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isFullScreenMode, setIsFullScreenMode] = useState(false);
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
@@ -689,58 +718,6 @@ const Dashboard: React.FC = () => {
     </div>
   );
 
-  const RightSidebarContent = () => (
-    <div className="flex flex-col h-full overflow-y-auto custom-scrollbar p-6 space-y-8">
-      <div className="space-y-6">
-        <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.03] pb-4">Real-Time Insights</h3>
-        
-        <div className="bg-slate-900/40 border border-white/[0.03] rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[9px] font-black text-slate-600 uppercase">NSE Volume</span>
-            <span className="text-[9px] font-mono text-emerald-500">+12.4%</span>
-          </div>
-          <div className="h-1 bg-slate-950 rounded-full overflow-hidden">
-             <div className="h-full bg-emerald-600 w-[65%]" />
-          </div>
-        </div>
-
-        <div className="bg-slate-900/40 border border-white/[0.03] rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[9px] font-black text-slate-600 uppercase">Market Breath</span>
-            <span className="text-[9px] font-mono text-blue-500">Neutral</span>
-          </div>
-          <div className="h-1 bg-slate-950 rounded-full overflow-hidden">
-             <div className="h-full bg-blue-600 w-[48%]" />
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.03] pb-4">AI Terminal Logs</h3>
-        <div className="space-y-3">
-          {[
-            { tag: 'SYS', msg: 'Neural engine sync complete', time: '14:20' },
-            { tag: 'DATA', msg: 'BSE corporate data tunnel stable', time: '14:18' },
-            { tag: 'AI', msg: 'Bullish pattern detected in IT', time: '14:15' }
-          ].map((log, i) => (
-            <div key={i} className="flex gap-3 text-[10px]">
-              <span className="font-mono text-slate-700">{log.time}</span>
-              <span className="font-black text-emerald-600/60">[{log.tag}]</span>
-              <p className="text-slate-500 font-medium leading-tight">{log.msg}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="pt-8 mt-auto">
-         <div className="p-6 bg-emerald-600/5 border border-emerald-600/10 rounded-2xl text-center">
-            <p className="text-[9px] font-black text-emerald-600 uppercase mb-2">Active Protocol</p>
-            <p className="text-slate-400 text-[10px] font-medium leading-relaxed">Secure data link established via Node-MUM-01.</p>
-         </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="h-screen bg-[#0b0f1a] flex flex-col text-slate-500 overflow-hidden relative">
       {isMobileSidebarOpen && (
@@ -759,77 +736,36 @@ const Dashboard: React.FC = () => {
               <h2 className="text-white font-black uppercase tracking-[0.2em] text-xs hidden md:block">{sectionTitles[activeSection as keyof typeof sectionTitles]}</h2>
             </div>
           </div>
-          <div className="flex items-center space-x-4 md:space-x-8">
-            <div className="hidden lg:flex items-center bg-slate-900/40 rounded-xl px-4 py-2 border border-white/[0.05]">
-               <div className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse mr-3 shadow-[0_0_10px_rgba(16,185,129,0.3)]"></div>
-               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">LIVE DATA TUNNEL</span>
+          <div className="flex items-center space-x-4 md:space-x-6">
+            <div className="flex flex-col items-end">
+              <span className="text-[9px] font-black text-blue-500/60 uppercase tracking-widest">{subscriptionData?.plan_code || '---'}</span>
+              <span className="text-[10px] text-white font-black uppercase tracking-tight">{profileData?.name || 'SYNCING...'}</span>
             </div>
-            <div className="flex items-center space-x-4 md:space-x-6">
-              <div className="flex flex-col items-end">
-                <span className="text-[9px] font-black text-blue-500/60 uppercase tracking-widest">{subscriptionData?.plan_code || '---'}</span>
-                <span className="text-[10px] text-white font-black uppercase tracking-tight">{profileData?.name || 'SYNCING...'}</span>
-              </div>
-              <div 
-                onClick={() => setActiveSection('account')}
-                className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-slate-900/80 border border-white/[0.05] flex items-center justify-center text-emerald-600 hover:border-emerald-700 transition-all cursor-pointer shadow-xl overflow-hidden"
-              >
-                {profileData?.logo ? (
-                  <img src={profileData.logo} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-sm font-black uppercase">{profileData?.name?.substring(0, 1) || 'S'}</span>
-                )}
-              </div>
+            <div 
+              onClick={() => setActiveSection('account')}
+              className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-slate-900/80 border border-white/[0.05] flex items-center justify-center text-emerald-600 hover:border-emerald-700 transition-all cursor-pointer shadow-xl overflow-hidden"
+            >
+              {profileData?.logo ? (
+                <img src={profileData.logo} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-sm font-black uppercase">{profileData?.name?.substring(0, 1) || 'S'}</span>
+              )}
             </div>
           </div>
         </header>
       )}
 
       <div className="flex-grow flex overflow-hidden relative">
-        {!isFullScreenMode && (
-          <aside className={`hidden lg:flex ${isSidebarCollapsed ? 'w-24' : 'w-72'} bg-[#0d121f] border-r border-white/[0.03] flex-col shrink-0 z-10 transition-all duration-500`}>
-            <SidebarContent />
-          </aside>
-        )}
-        
+        {!isFullScreenMode && <aside className={`hidden lg:flex ${isSidebarCollapsed ? 'w-24' : 'w-72'} bg-[#0d121f] border-r border-white/[0.03] flex-col shrink-0 z-10 transition-all duration-500`}><SidebarContent /></aside>}
         <main className="flex-grow flex flex-col min-w-0 bg-[#0b0f1a] relative overflow-hidden">
           <div className="flex-grow flex flex-col overflow-hidden">
-            {activeSection === 'terminal' && (
-              <MarketTerminal 
-                onToggleFullScreen={setIsFullScreenMode} 
-                isSidebarCollapsed={isSidebarCollapsed} 
-                isRightSidebarCollapsed={isRightSidebarCollapsed}
-              />
-            )}
+            {activeSection === 'terminal' && <MarketTerminal onToggleFullScreen={setIsFullScreenMode} isSidebarCollapsed={isSidebarCollapsed} />}
             {activeSection === 'overview' && <OverviewSection data={subscriptionData} invites={inviteData} loading={loadingCore} onNavigate={setActiveSection} />}
             {activeSection === 'account' && <ProfileSection data={profileData} loading={loadingCore} />}
             {activeSection === 'notifications' && <AlertHistorySection data={alertData} loading={loadingAlerts} />}
             {activeSection === 'settings' && <SettingsSection data={settingsData} loading={loadingSettings} onUpdate={handleUpdateSettings} />}
           </div>
         </main>
-
-        {!isFullScreenMode && (
-          <aside className={`hidden xl:flex ${isRightSidebarCollapsed ? 'w-12' : 'w-80'} bg-[#0d121f] border-l border-white/[0.03] flex-col shrink-0 z-10 transition-all duration-500 relative group/aside`}>
-            <button 
-              onClick={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
-              className="absolute left-[-18px] top-1/2 -translate-y-1/2 w-9 h-9 bg-[#111621] border border-white/[0.05] rounded-full flex items-center justify-center text-slate-600 hover:text-white transition-all shadow-xl z-20 group-hover/aside:border-emerald-600/30"
-            >
-              <svg className={`w-4 h-4 transition-transform duration-500 ${isRightSidebarCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-            {!isRightSidebarCollapsed && <RightSidebarContent />}
-            {isRightSidebarCollapsed && (
-              <div className="flex-grow flex flex-col items-center py-10 space-y-12">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                <div className="flex flex-col space-y-6 opacity-20 hover:opacity-100 transition-opacity">
-                   <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z" strokeWidth={2} /></svg>
-                   <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" strokeWidth={2} /></svg>
-                   <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeWidth={2} /></svg>
-                </div>
-              </div>
-            )}
-          </aside>
-        )}
       </div>
     </div>
   );
