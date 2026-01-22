@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Hero from '../components/Hero';
-import Terminal from '../components/Terminal';
 import AlertShowcase from '../components/AlertShowcase';
 import PricingCard from '../components/PricingCard';
 import { FAQ_DATA } from '../constants';
@@ -183,8 +182,41 @@ const Home: React.FC<HomeProps> = ({
                </h2>
                <p className="text-slate-400 text-sm font-medium mb-8">Institutional-grade data aggregation at your fingertips. High-fidelity real-time preview.</p>
             </div>
-            <div className="transition-all duration-700">
-               <Terminal />
+            
+            {/* Professional Terminal Screenshot Mockup */}
+            <div className="relative group max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000">
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded-[2rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+              <div className="relative bg-[#111621] rounded-[2.5rem] border border-white/10 overflow-hidden shadow-[0_32px_80px_-16px_rgba(0,0,0,0.6)]">
+                {/* Browser Window Header */}
+                <div className="bg-[#161b27] border-b border-white/5 px-8 py-5 flex items-center space-x-3">
+                  <div className="flex space-x-2">
+                    <div className="w-3 h-3 rounded-full bg-rose-500/40 border border-rose-500/50"></div>
+                    <div className="w-3 h-3 rounded-full bg-amber-500/40 border border-amber-500/50"></div>
+                    <div className="w-3 h-3 rounded-full bg-emerald-500/40 border border-emerald-500/50"></div>
+                  </div>
+                  <div className="h-6 w-px bg-white/5 mx-4"></div>
+                  <div className="flex-grow bg-slate-950/50 rounded-xl px-6 py-2 text-[10px] text-slate-500 font-mono flex items-center space-x-2 border border-white/5">
+                    <svg className="w-3.5 h-3.5 text-emerald-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2-2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span className="tracking-tight">https://stockmanch.com/terminal/v5-stable</span>
+                  </div>
+                </div>
+                {/* Mockup Terminal Interface Image */}
+                <div className="aspect-[16/9] relative bg-slate-950 overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1611974717483-9b4450257008?q=80&w=2070&auto=format&fit=crop" 
+                    alt="Market Terminal Interface" 
+                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md px-10 py-5 rounded-2xl shadow-2xl">
+                      <span className="text-emerald-500 font-black uppercase tracking-[0.4em] text-xs">Live Terminal Preview</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
          </div>
       </section>
