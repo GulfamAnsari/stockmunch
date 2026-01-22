@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 const RegulatoryPolicy: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Regulatory Policy | StockMunch";
+    document.title = "Regulatory Policy | StockMunch Compliance & Disclosure";
+    document.querySelector('meta[name="description"]')?.setAttribute("content", "StockMunch's regulatory policy and compliance framework. Learn how we adhere to SEBI guidelines while providing stock news aggregation and AI analysis.");
   }, []);
 
   return (

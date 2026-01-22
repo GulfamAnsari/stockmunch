@@ -31,7 +31,8 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Login | StockMunch";
+    document.title = "Login to Terminal | StockMunch Secure Access";
+    document.querySelector('meta[name="description"]')?.setAttribute("content", "Sign in to your StockMunch dashboard to manage alerts, view real-time market dispatches, and configure your terminal settings.");
   }, []);
 
   useEffect(() => {
@@ -300,7 +301,7 @@ const Login: React.FC = () => {
                   placeholder="••••••••" 
                   value={formData.password} 
                   onChange={(e) => setFormData({...formData, password: e.target.value})} 
-                  className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length < 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/5 focus:border-emerald-500'}`} 
+                  className={`w-full bg-slate-950/50 border rounded-2xl px-6 py-5 text-white focus:outline-none transition-all placeholder:text-slate-800/40 ${error && formData.password.length < 6 ? 'border-rose-500 bg-rose-500/10' : 'border-white/10 focus:border-emerald-500'}`} 
                 />
               </div>
             )}

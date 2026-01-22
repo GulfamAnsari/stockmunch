@@ -10,7 +10,8 @@ const ContactUs: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Contact Us | StockMunch";
+    document.title = "Contact Support | StockMunch Help & Inquiry Hub";
+    document.querySelector('meta[name="description"]')?.setAttribute("content", "Get in touch with the StockMunch support team. We're here to help with your stock alert subscription, terminal technicalities, and market data inquiries.");
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,7 +87,7 @@ const ContactUs: React.FC = () => {
 
               <div className="space-y-6">
                 <div className="flex items-center space-x-6 group">
-                  <div className="w-14 h-14 rounded-2xl bg-[#161b27] border border-white/5 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20 transition-all">
+                  <div className="w-14 h-14 rounded-2xl bg-[#161b27] border border-white/5 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-600/10 group-hover:border-emerald-600/20 transition-all">
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z" />
                     </svg>

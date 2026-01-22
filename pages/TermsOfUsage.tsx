@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 const TermsOfUsage: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Terms of Usage | StockMunch";
+    document.title = "Terms of Usage | StockMunch Platform Agreement";
+    document.querySelector('meta[name="description"]')?.setAttribute("content", "Read the StockMunch Terms of Usage. Understand our service nature, subscription billing, and user responsibilities while accessing our stock alert engine.");
   }, []);
 
   return (

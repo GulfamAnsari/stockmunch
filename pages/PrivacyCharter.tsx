@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 const PrivacyCharter: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Privacy Charter | StockMunch";
+    document.title = "Privacy Charter | StockMunch Data Security Policy";
+    document.querySelector('meta[name="description"]')?.setAttribute("content", "Review StockMunch's commitment to user privacy and data protection. We outline how we collect, use, and secure your trading telemetry.");
   }, []);
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero';
 import AlertShowcase from '../components/AlertShowcase';
 import PricingCard from '../components/PricingCard';
@@ -73,6 +73,11 @@ const Home: React.FC<HomeProps> = ({
   handleStartJourney,
   pricingPlans 
 }) => {
+  useEffect(() => {
+    document.title = "StockMunch | Real-Time Stock Alerts & AI Market Terminal";
+    document.querySelector('meta[name="description"]')?.setAttribute("content", "Get lightning-fast stock market news alerts via Telegram. StockMunch delivers institutional-grade analytics, BSE/NSE filings, and real-time news aggregation for Indian traders.");
+  }, []);
+
   return (
     <>
       <Hero 

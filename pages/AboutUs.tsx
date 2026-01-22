@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 const AboutUs: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "About Us | StockMunch";
+    document.title = "Our Mission | StockMunch - Leveling the Trading Field";
+    document.querySelector('meta[name="description"]')?.setAttribute("content", "Learn about StockMunch's mission to democratize institutional-grade market data for retail traders. Discover our story and commitment to millisecond-level data dispatch.");
   }, []);
 
   return (

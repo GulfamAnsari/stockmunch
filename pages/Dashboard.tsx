@@ -577,7 +577,8 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    document.title = "Terminal Dashboard | StockMunch";
+    document.title = "Terminal Dashboard | StockMunch Live Analytics Hub";
+    document.querySelector('meta[name="description"]')?.setAttribute("content", "Professional dashboard for real-time market dispatches, AI sentiment analysis, and alert history. Secure node access.");
     fetchCoreData();
     fetchSettingsData(); // Always check/load settings on mount
     const handleOnline = () => setIsOnline(true);
