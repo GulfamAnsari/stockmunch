@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Hero from '../components/Hero';
 import AlertShowcase from '../components/AlertShowcase';
 import PricingCard from '../components/PricingCard';
-import { FAQ_DATA } from '../constants';
+import { FAQ_DATA, MOCK_NEWS } from '../constants';
 
 const FAQItem: React.FC<{ question: string, answer: string }> = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,6 +36,33 @@ interface HomeProps {
   handleStartJourney: (id: string) => void;
   pricingPlans: any[];
 }
+
+const TerminalMockupCard: React.FC<{ news: any }> = ({ news }) => (
+  <div className="bg-[#111621] border border-white/[0.06] rounded-2xl p-5 flex flex-col h-full opacity-90 hover:opacity-100 transition-opacity">
+    <div className="flex items-start justify-between mb-4">
+      <div className="flex items-center space-x-3">
+        <div className={`w-9 h-9 rounded-xl bg-slate-900 border border-white/[0.05] flex items-center justify-center text-[10px] font-black text-slate-700`}>
+          {news.symbol.substring(0, 2)}
+        </div>
+        <div className="min-w-0">
+          <h3 className="text-[12px] font-semibold text-[#60a5fa] truncate">{news.companyName}</h3>
+          <p className="text-[10px] text-slate-500">{news.timestamp}</p>
+        </div>
+      </div>
+      <div className={`px-2 py-0.5 rounded-lg text-[9px] font-mono ${news.priceChange >= 0 ? 'bg-[#062010] text-[#4ade80]' : 'bg-[#2d1212] text-[#fca5a5]'}`}>
+        {news.priceChange >= 0 ? '+' : ''}{news.priceChange}%
+      </div>
+    </div>
+    <h4 className="text-[13px] font-medium text-slate-200 mb-3 line-clamp-2 uppercase tracking-tight">{news.title}</h4>
+    <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-3 mb-4">{news.content}</p>
+    <div className="mt-auto pt-4 border-t border-white/[0.05] flex justify-between items-center">
+      <div className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${news.sentiment === 'bullish' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+        AI: {news.sentiment}
+      </div>
+      <span className="text-[9px] text-slate-700 font-black">{news.source}</span>
+    </div>
+  </div>
+);
 
 const Home: React.FC<HomeProps> = ({ 
   onOpenPricing, 
@@ -183,10 +210,10 @@ const Home: React.FC<HomeProps> = ({
                <p className="text-slate-400 text-sm font-medium mb-8">Institutional-grade data aggregation at your fingertips. High-fidelity real-time preview.</p>
             </div>
             
-            {/* Professional Terminal Screenshot Mockup */}
-            <div className="relative group max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            {/* Professional Terminal UI Mockup with Dummy Data */}
+            <div className="relative group max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000">
               <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded-[2rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-              <div className="relative bg-[#111621] rounded-[2.5rem] border border-white/10 overflow-hidden shadow-[0_32px_80px_-16px_rgba(0,0,0,0.6)]">
+              <div className="relative bg-[#0b0f1a] rounded-[2.5rem] border border-white/10 overflow-hidden shadow-[0_32px_80px_-16px_rgba(0,0,0,0.6)]">
                 {/* Browser Window Header */}
                 <div className="bg-[#161b27] border-b border-white/5 px-8 py-5 flex items-center space-x-3">
                   <div className="flex space-x-2">
@@ -199,22 +226,57 @@ const Home: React.FC<HomeProps> = ({
                     <svg className="w-3.5 h-3.5 text-emerald-500/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2-2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
-                    <span className="tracking-tight">https://stockmanch.com/terminal/v5-stable</span>
+                    <span className="tracking-tight">https://stockmanch.com/terminal/v5-preview</span>
                   </div>
                 </div>
-                {/* Mockup Terminal Interface Image */}
-                <div className="aspect-[16/9] relative bg-slate-950 overflow-hidden">
-                  <img 
-                    src="https://images.unsplash.com/photo-1611974717483-9b4450257008?q=80&w=2070&auto=format&fit=crop" 
-                    alt="Market Terminal Interface" 
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md px-10 py-5 rounded-2xl shadow-2xl">
-                      <span className="text-emerald-500 font-black uppercase tracking-[0.4em] text-xs">Live Terminal Preview</span>
+
+                {/* Mock Terminal Body */}
+                <div className="bg-[#0b0f1a] min-h-[600px] flex flex-col pointer-events-none select-none">
+                  {/* Mock Navbar */}
+                  <div className="px-8 py-4 border-b border-white/[0.05] flex items-center justify-between bg-[#0d121f]">
+                    <div className="flex bg-slate-950 rounded-xl p-1 border border-white/[0.1]">
+                      <div className="px-4 py-1.5 bg-blue-600 text-white text-[10px] font-black uppercase rounded-lg">All Feeds</div>
+                      <div className="px-4 py-1.5 text-slate-500 text-[10px] font-black uppercase">BSE Feeds</div>
+                      <div className="px-4 py-1.5 text-slate-500 text-[10px] font-black uppercase">Watchlist</div>
+                    </div>
+                    <div className="w-64 h-8 bg-slate-950/50 border border-white/[0.08] rounded-xl flex items-center px-4">
+                      <div className="w-3 h-3 bg-slate-800 rounded-full mr-3"></div>
+                      <div className="w-24 h-2 bg-slate-800 rounded"></div>
                     </div>
                   </div>
+
+                  {/* Mock Ticker */}
+                  <div className="w-full bg-[#0b0f1a] border-b border-white/5 py-3 px-8 flex overflow-hidden whitespace-nowrap">
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                      <div key={i} className="flex items-center space-x-4 mr-10">
+                        <span className="text-[10px] font-black text-white">RELIANCE</span>
+                        <span className="text-[10px] text-emerald-500">+1.24%</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Mock News Grid */}
+                  <div className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {MOCK_NEWS.slice(0, 8).map((news) => (
+                      <TerminalMockupCard key={news.id} news={news} />
+                    ))}
+                  </div>
+
+                  {/* Mock Footer */}
+                  <div className="mt-auto border-t border-white/[0.05] px-8 py-3 flex justify-between items-center bg-[#0d121f]">
+                    <div className="flex items-center space-x-4">
+                      <span className="text-[8px] font-black text-blue-500/40 uppercase">Node: Ready</span>
+                      <span className="text-[8px] font-black text-blue-500/40 uppercase">Stream: Synced</span>
+                    </div>
+                    <span className="text-[8px] text-slate-700 font-mono">StockManch v5.0.1 Stable Preview</span>
+                  </div>
+                </div>
+
+                {/* Interactive Badge Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                   <div className="bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md px-10 py-5 rounded-2xl shadow-2xl scale-110">
+                      <span className="text-emerald-500 font-black uppercase tracking-[0.4em] text-xs">Live Terminal Preview</span>
+                   </div>
                 </div>
               </div>
             </div>
