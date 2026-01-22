@@ -31,8 +31,11 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Login to Terminal | StockMunch Secure Access";
-    document.querySelector('meta[name="description"]')?.setAttribute("content", "Sign in to your StockMunch dashboard to manage alerts, view real-time market dispatches, and configure your terminal settings.");
+    document.title = "Terminal Login | Secure Access to StockMunch";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute("content", "Sign in to your StockMunch terminal to monitor real-time stock market news, manage your watchlist, and configure Telegram alerts.");
+    }
   }, []);
 
   useEffect(() => {

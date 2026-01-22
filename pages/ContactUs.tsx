@@ -10,8 +10,11 @@ const ContactUs: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Contact Support | StockMunch Help & Inquiry Hub";
-    document.querySelector('meta[name="description"]')?.setAttribute("content", "Get in touch with the StockMunch support team. We're here to help with your stock alert subscription, terminal technicalities, and market data inquiries.");
+    document.title = "Contact StockMunch | Support and Inquiries Hub";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute("content", "Need help with your StockMunch subscription or terminal access? Contact our support node for assistance with real-time stock alerts and data feeds.");
+    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

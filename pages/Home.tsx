@@ -74,8 +74,11 @@ const Home: React.FC<HomeProps> = ({
   pricingPlans 
 }) => {
   useEffect(() => {
-    document.title = "StockMunch | Real-Time Stock Alerts & AI Market Terminal";
-    document.querySelector('meta[name="description"]')?.setAttribute("content", "Get lightning-fast stock market news alerts via Telegram. StockMunch delivers institutional-grade analytics, BSE/NSE filings, and real-time news aggregation for Indian traders.");
+    document.title = "StockMunch | Real-Time Stock Market Alerts & NSE News Terminal";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute("content", "India's fastest stock market news alerts engine. Receive instant Telegram notifications for corporate filings, BSE regulatory updates, and AI-driven market analysis.");
+    }
   }, []);
 
   return (

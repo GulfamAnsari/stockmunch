@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-IN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,24 +7,53 @@
   
   <!-- Primary Meta Tags -->
   <meta name="title" content="StockMunch | Real-Time Stock Market Alerts & News Dashboard">
-  <meta name="description" content="Get institutional-grade stock market news alerts via Telegram. StockMunch provides on-time alerts, historical news archives, and a professional terminal for serious traders in the Indian market.">
+  <meta name="description" content="Get institutional-grade stock market news alerts via Telegram. StockMunch provides real-time NSE/BSE alerts, historical news archives, and an advanced terminal for Indian traders.">
   <meta name="keywords" content="stock market alerts, telegram stock news, real-time market dashboard, NSE BSE alerts, historical stock news, Indian stock market terminal, StockMunch, AI stock analysis">
   <meta name="author" content="StockMunch">
+  <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://stockmunch.com/">
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://stockmunch.com/">
   <meta property="og:title" content="StockMunch | Real-Time Stock Market Alerts">
-  <meta property="og:description" content="Lightning-fast stock alerts and institutional-grade terminal access for retail traders.">
+  <meta property="og:description" content="Lightning-fast stock alerts and institutional-grade terminal access for retail traders. Get BSE and NSE corporate filings delivered in milliseconds.">
   <meta property="og:image" content="https://stockmunch.com/images/logo.png">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://stockmunch.com/">
   <meta property="twitter:title" content="StockMunch | Real-Time Stock Market Alerts">
-  <meta property="twitter:description" content="Lightning-fast stock alerts and institutional-grade terminal access for retail traders.">
+  <meta property="twitter:description" content="Lightning-fast stock alerts and institutional-grade terminal access for retail traders. Get BSE and NSE corporate filings delivered in milliseconds.">
   <meta property="twitter:image" content="https://stockmunch.com/images/logo.png">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "StockMunch",
+    "url": "https://stockmunch.com",
+    "logo": "https://stockmunch.com/images/logo.png",
+    "description": "India's definitive real-time stock alert engine and terminal dashboard.",
+    "sameAs": [
+      "https://twitter.com/stockmunch",
+      "https://youtube.com/stockmunch"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "url": "https://stockmunch.com/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://stockmunch.com/?s={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,7 +81,7 @@
       background: #1fa84f;
       border-radius: 10px;
     }
-    /* Date Input Webkit Styles - Moved from MarketTerminal to fix syntax errors */
+    /* Date Input Webkit Styles */
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(1) brightness(100) contrast(100);
       cursor: pointer;
@@ -89,6 +118,12 @@
   </script>
 </head>
 <body>
+  <noscript>
+    <div style="padding: 20px; text-align: center; background: #0b0f1a; color: white;">
+      <h1>StockMunch Terminal</h1>
+      <p>Please enable JavaScript to access the real-time stock alert dashboard. StockMunch delivers millisecond-speed news directly from Indian stock exchanges.</p>
+    </div>
+  </noscript>
   <div id="root"></div>
 </body>
 </html>
