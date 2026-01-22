@@ -307,7 +307,8 @@ export const NewsCard: React.FC<{
 const MarketTerminal: React.FC<{ 
   onToggleFullScreen?: (state: boolean) => void;
   isSidebarCollapsed?: boolean;
-}> = ({ onToggleFullScreen, isSidebarCollapsed }) => {
+  userId?: string | number;
+}> = ({ onToggleFullScreen, isSidebarCollapsed, userId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [bseSearchTerm, setBseSearchTerm] = useState("");
   const [bseCategory, setBseCategory] = useState("ALL");
@@ -359,10 +360,41 @@ const MarketTerminal: React.FC<{
     }
   }, [news]);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("stockmanch_watchlist");
-    if (saved) setWatchlist(JSON.parse(saved));
+  // Watchlist Persistence API
+  const fetchWatchlist = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const resp = await fetch(`${API_BASE_URL}/localstorage?user_id=${userId}`, { cache: 'no-store' });
+      const json = await resp.json();
+      if (json.status === 'success') {
+        setWatchlist(json.data.watchlist);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch watchlist from node", e);
+    }
+  }, [userId]);
 
+  const saveWatchlistToNode = useCallback(async (list: any[]) => {
+    if (!userId) return;
+    try {
+      await fetch(`${API_BASE_URL}/localstorage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          watchlist: list
+        })
+      });
+    } catch (e) {
+      console.warn("Failed to sync watchlist to node", e);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    fetchWatchlist();
+  }, [fetchWatchlist]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (filterPanelRef.current && !filterPanelRef.current.contains(event.target as Node) && filterBtnRef.current && !filterBtnRef.current.contains(event.target as Node)) {
         setIsFilterPanelOpen(false);
@@ -393,10 +425,10 @@ const MarketTerminal: React.FC<{
       if (idx === -1 || prev[idx].priceChange === pct) return prev;
       const next = [...prev];
       next[idx] = { ...next[idx], priceChange: pct };
-      localStorage.setItem("stockmanch_watchlist", JSON.stringify(next));
+      saveWatchlistToNode(next);
       return next;
     });
-  }, []);
+  }, [saveWatchlistToNode]);
 
   const fetchNews = useCallback(async (isAuto = false) => {
     if (activeTab !== "ALL FEEDS" || isFetchingRef.current) return;
@@ -502,13 +534,13 @@ const MarketTerminal: React.FC<{
   const handleWatchlistAdd = (item: any) => {
     const newWatchlist = [item, ...watchlist.filter((w) => w.id !== item.id)];
     setWatchlist(newWatchlist);
-    localStorage.setItem("stockmanch_watchlist", JSON.stringify(newWatchlist));
+    saveWatchlistToNode(newWatchlist);
   };
 
   const removeFromWatchlist = (id: string) => {
     const next = watchlist.filter((w) => w.id !== id);
     setWatchlist(next);
-    localStorage.setItem("stockmanch_watchlist", JSON.stringify(next));
+    saveWatchlistToNode(next);
   };
 
   const handleSentimentToggle = (val: string) => {
@@ -557,11 +589,10 @@ const MarketTerminal: React.FC<{
 
   const gridClasses = useMemo(() => {
     if (isSidebarCollapsed) {
-      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-4 animate-in fade-in duration-700";
+      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-2";
     }
-    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-4 animate-in fade-in duration-700";
+    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-2";
   }, [isSidebarCollapsed]);
-
 
   return (
     <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a] overflow-x-hidden relative">
@@ -677,7 +708,6 @@ const MarketTerminal: React.FC<{
         {/* Global Utility Actions */}
         <div className="flex items-center gap-3 shrink-0 relative justify-end">
           {activeTab !== "BSE FEEDS" && (
-            /* @google/genai fix: Corrected syntax error on line 681 where quotes were misplaced in className and fill attributes */
             <button ref={filterBtnRef} onClick={(e) => { e.stopPropagation(); setIsFilterPanelOpen(!isFilterPanelOpen); }} className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 relative ${ isFilterPanelOpen ? "bg-blue-600 text-white border-blue-600 shadow-lg" : "bg-slate-900/40 border-white/[0.1] text-slate-500 hover:text-slate-300" }`}>
               {isFiltered && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0d121f] z-10 animate-pulse"></span>}
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
@@ -740,7 +770,6 @@ const MarketTerminal: React.FC<{
                 </div>
               ))}
             </div>
-            {/* @google/genai fix: This block was being incorrectly parsed due to the syntax error on line 681, resulting in 'Cannot find name div' */}
             {displayLimit < processedNews.length && (<div className="py-16 flex justify-center"><div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div></div>)}
           </>
         )}
