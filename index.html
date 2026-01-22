@@ -13,12 +13,19 @@
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://stockmunch.com/">
 
+  <!-- Geo-Targeting for India -->
+  <meta name="geo.region" content="IN" />
+  <meta name="geo.placename" content="Mumbai" />
+  <meta name="geo.position" content="19.0760;72.8777" />
+  <meta name="ICBM" content="19.0760, 72.8777" />
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://stockmunch.com/">
   <meta property="og:title" content="StockMunch | Real-Time Stock Market Alerts">
   <meta property="og:description" content="Lightning-fast stock alerts and institutional-grade terminal access for retail traders. Get BSE and NSE corporate filings delivered in milliseconds.">
   <meta property="og:image" content="https://stockmunch.com/images/logo.png">
+  <meta property="og:site_name" content="StockMunch">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
@@ -27,7 +34,7 @@
   <meta property="twitter:description" content="Lightning-fast stock alerts and institutional-grade terminal access for retail traders. Get BSE and NSE corporate filings delivered in milliseconds.">
   <meta property="twitter:image" content="https://stockmunch.com/images/logo.png">
 
-  <!-- Structured Data (JSON-LD) -->
+  <!-- Structured Data (JSON-LD) - More Detailed -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -36,6 +43,11 @@
     "url": "https://stockmunch.com",
     "logo": "https://stockmunch.com/images/logo.png",
     "description": "India's definitive real-time stock alert engine and terminal dashboard.",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "support@stockmunch.com",
+      "contactType": "customer service"
+    },
     "sameAs": [
       "https://twitter.com/stockmunch",
       "https://youtube.com/stockmunch"
@@ -119,9 +131,16 @@
 </head>
 <body>
   <noscript>
-    <div style="padding: 20px; text-align: center; background: #0b0f1a; color: white;">
-      <h1>StockMunch Terminal</h1>
-      <p>Please enable JavaScript to access the real-time stock alert dashboard. StockMunch delivers millisecond-speed news directly from Indian stock exchanges.</p>
+    <div style="padding: 40px; text-align: center; background: #0b0f1a; color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 20px;">StockMunch Terminal</h1>
+      <p style="font-size: 1.2rem; max-width: 600px; line-height: 1.6; color: #94a3b8;">
+        StockMunch is India's fastest real-time stock alert dashboard. We deliver millisecond-speed news directly from the BSE and NSE exchanges.
+        <br><br>
+        <strong>Please enable JavaScript to access the full terminal features, AI analysis, and interactive charts.</strong>
+      </p>
+      <div style="margin-top: 30px;">
+        <a href="https://stockmunch.com/" style="color: #1fa84f; text-decoration: underline;">Refresh Page</a>
+      </div>
     </div>
   </noscript>
   <div id="root"></div>

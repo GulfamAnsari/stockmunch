@@ -1,0 +1,17 @@
+# StockMunch Robots.txt
+# India's fastest real-time stock alert engine
+
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /regulatory
+Allow: /login
+
+# Disallow indexing of private dashboard areas
+Disallow: /dashboard
+
+# Sitemaps
+Sitemap: https://stockmunch.com/sitemap.xml
