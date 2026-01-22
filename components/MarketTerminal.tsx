@@ -16,23 +16,14 @@ const getAuthToken = () => {
 
 const percentageMap = new Map();
 
+// Optimized audio handling with a real sound file
+const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
 const playAlertSound = () => {
-  try {
-    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 0.5);
-  } catch (e) {
-    console.warn("Audio alert failed to play.", e);
-  }
+  alertAudio.currentTime = 0;
+  alertAudio.play().catch(e => {
+    // Browsers often block autoplay until the first user interaction
+    console.debug("Audio play deferred or blocked by browser policy.");
+  });
 };
 
 // Universal NewsCard for both General and BSE feeds
@@ -337,6 +328,7 @@ const MarketTerminal: React.FC<{
 
   const lastParamsRef = useRef<string>("");
   const isFetchingRef = useRef<boolean>(false);
+  const isFetchingWatchlistRef = useRef<boolean>(false);
   const lastAlertIdRef = useRef<string | null>(null);
 
   const isFiltered = useMemo(() => sentimentFilters.some((f) => f !== "ALL"), [sentimentFilters]);
@@ -362,7 +354,9 @@ const MarketTerminal: React.FC<{
 
   // Watchlist Persistence API
   const fetchWatchlist = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || isFetchingWatchlistRef.current) return;
+    
+    isFetchingWatchlistRef.current = true;
     try {
       const resp = await fetch(`${API_BASE_URL}/localstorage?user_id=${userId}`, { cache: 'no-store' });
       const json = await resp.json();
@@ -371,6 +365,8 @@ const MarketTerminal: React.FC<{
       }
     } catch (e) {
       console.warn("Failed to fetch watchlist from node", e);
+    } finally {
+      isFetchingWatchlistRef.current = false;
     }
   }, [userId]);
 
@@ -390,9 +386,14 @@ const MarketTerminal: React.FC<{
     }
   }, [userId]);
 
+  // Use a ref to ensure we only trigger the initial fetch once per userId transition
+  const lastFetchedUserId = useRef<string | number | null>(null);
   useEffect(() => {
-    fetchWatchlist();
-  }, [fetchWatchlist]);
+    if (userId && userId !== lastFetchedUserId.current) {
+      lastFetchedUserId.current = userId;
+      fetchWatchlist();
+    }
+  }, [userId, fetchWatchlist]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -703,7 +704,6 @@ const MarketTerminal: React.FC<{
         {/* Global Utility Actions */}
         <div className="flex items-center gap-3 shrink-0 relative justify-end">
           {activeTab !== "BSE FEEDS" && (
-            /* @google/genai fix: Corrected syntax error on line 681 where quotes were misplaced in className and fill attributes */
             <button ref={filterBtnRef} onClick={(e) => { e.stopPropagation(); setIsFilterPanelOpen(!isFilterPanelOpen); }} className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 relative ${ isFilterPanelOpen ? "bg-blue-600 text-white border-blue-600 shadow-lg" : "bg-slate-900/40 border-white/[0.1] text-slate-500 hover:text-slate-300" }`}>
               {isFiltered && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0d121f] z-10 animate-pulse"></span>}
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
@@ -766,7 +766,6 @@ const MarketTerminal: React.FC<{
                 </div>
               ))}
             </div>
-            {/* @google/genai fix: This block was being incorrectly parsed due to the syntax error on line 681, resulting in 'Cannot find name div' */}
             {displayLimit < processedNews.length && (<div className="py-16 flex justify-center"><div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div></div>)}
           </>
         )}
