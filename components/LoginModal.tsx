@@ -230,7 +230,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToSign
           </div>
           <div className="mb-10 text-center">
             <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-2 opacity-90">{method === 'RESET' ? 'Reset Password' : 'Sign In'}</h2>
-            <p className="text-slate-500 text-sm opacity-60">Access your StockManch terminal.</p>
+            <p className="text-slate-500 text-sm opacity-60">Access your StockMunch terminal.</p>
           </div>
 
           {error && (

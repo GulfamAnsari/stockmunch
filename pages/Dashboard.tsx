@@ -489,7 +489,7 @@ const Dashboard: React.FC = () => {
 
   const handleLogout = () => {
     document.cookie = "sm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    localStorage.removeItem("stockmanch_settings");
+    localStorage.removeItem("stockmunch_settings");
     navigate('/login');
   };
 
@@ -520,7 +520,7 @@ const Dashboard: React.FC = () => {
   };
 
   const fetchSettingsData = async () => {
-    const cached = localStorage.getItem("stockmanch_settings");
+    const cached = localStorage.getItem("stockmunch_settings");
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
@@ -544,7 +544,7 @@ const Dashboard: React.FC = () => {
       const setJson = await setResp.json();
       if (setResp.status === 401 || setJson.error === 'unauthorized') return handleLogout();
       if (setJson.settings) {
-        localStorage.setItem("stockmanch_settings", JSON.stringify(setJson));
+        localStorage.setItem("stockmunch_settings", JSON.stringify(setJson));
         setSettingsData({
           telegram_push: !!Number(setJson.settings.telegram_push),
           daily_email: !!Number(setJson.settings.daily_email),
@@ -577,7 +577,7 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    document.title = "Terminal Dashboard | StockManch";
+    document.title = "Terminal Dashboard | StockMunch";
     fetchCoreData();
     fetchSettingsData(); // Always check/load settings on mount
     const handleOnline = () => setIsOnline(true);
@@ -612,7 +612,7 @@ const Dashboard: React.FC = () => {
       if (!response.ok || result.status === 'error') throw new Error("Server Update Failed");
       
       // Sync Cache
-      localStorage.setItem("stockmanch_settings", JSON.stringify({
+      localStorage.setItem("stockmunch_settings", JSON.stringify({
         settings: {
           telegram_push: updated.telegram_push ? 1 : 0,
           daily_email: updated.daily_email ? 1 : 0,
