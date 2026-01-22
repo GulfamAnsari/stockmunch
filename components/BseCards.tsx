@@ -155,12 +155,7 @@ const BseCards: React.FC<BseCardsProps> = ({
     return () => observer.disconnect();
   }, [filteredNews.length, displayLimit]);
 
-  const gridClasses = useMemo(() => {
-    if (isSidebarCollapsed) {
-      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-4 animate-in fade-in duration-700";
-    }
-    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-4 animate-in fade-in duration-700";
-  }, [isSidebarCollapsed]);
+  const gridClasses = "grid grid-cols-[repeat(auto-fill,minmax(310px,1fr))] gap-4 pt-4 animate-in fade-in duration-700";
 
   if (loading) {
     return (
