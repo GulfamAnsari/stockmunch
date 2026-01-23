@@ -14,6 +14,9 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onOpenLogin, onNavigateH
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Check for auth token in cookies
+  const hasToken = document.cookie.split('; ').some(row => row.trim().startsWith('sm_token='));
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -60,10 +63,10 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onOpenLogin, onNavigateH
 
         <div className="flex items-center space-x-4">
           <button 
-            onClick={onOpenLogin}
+            onClick={hasToken ? () => navigate('/dashboard') : onOpenLogin}
             className="hidden sm:flex px-6 md:px-8 py-2.5 md:py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-500/20 items-center group"
           >
-            Login
+            {hasToken ? 'My Account' : 'Login'}
             <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
@@ -105,10 +108,10 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenPricing, onOpenLogin, onNavigateH
               <svg className="w-4 h-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </Link>
             <button 
-              onClick={() => { setIsMobileMenuOpen(false); onOpenLogin(); }}
+              onClick={() => { setIsMobileMenuOpen(false); hasToken ? navigate('/dashboard') : onOpenLogin(); }}
               className="w-full py-5 bg-emerald-500 text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl mt-8 hover:bg-emerald-400 transition-all"
             >
-              Sign In to Terminal
+              {hasToken ? 'Enter Terminal' : 'Sign In to Terminal'}
             </button>
           </div>
         </div>
