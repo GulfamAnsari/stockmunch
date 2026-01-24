@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node build.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "update": "git stash && git pull && git stash pop"
   },
   "dependencies": {
     "@google/genai": "^1.35.0",
