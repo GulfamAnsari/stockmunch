@@ -360,7 +360,7 @@ const MarketTerminal: React.FC<{
     try {
       const resp = await fetch(`${API_BASE_URL}/localstorage?user_id=${userId}`, { cache: 'no-store' });
       const json = await resp.json();
-      if (json.status === 'success') {
+      if (json.status === 'success' && json.data?.watchlist && Array.isArray(json.data.watchlist)) {
         setWatchlist(json.data.watchlist);
       }
     } catch (e) {
@@ -371,7 +371,7 @@ const MarketTerminal: React.FC<{
   }, [userId]);
 
   const saveWatchlistToNode = useCallback(async (list: any[]) => {
-    if (!userId) return;
+    if (!userId || !Array.isArray(list)) return;
     try {
       await fetch(`${API_BASE_URL}/localstorage`, {
         method: 'POST',
@@ -415,6 +415,7 @@ const MarketTerminal: React.FC<{
 
   const updatePriceChange = useCallback((id: string, pct: number) => {
     setNews((prev) => {
+      if (!Array.isArray(prev)) return [];
       const idx = prev.findIndex((n) => n.id === id);
       if (idx === -1 || prev[idx].priceChange === pct) return prev;
       const next = [...prev];
@@ -422,6 +423,7 @@ const MarketTerminal: React.FC<{
       return next;
     });
     setWatchlist((prev) => {
+      if (!Array.isArray(prev)) return [];
       const idx = prev.findIndex((n) => n.id === id);
       if (idx === -1 || prev[idx].priceChange === pct) return prev;
       const next = [...prev];
@@ -493,10 +495,13 @@ const MarketTerminal: React.FC<{
           });
           allItems.push(...mappedItems);
         });
-        setNews((prevNews) => allItems.map(newItem => {
-            const existingItem = prevNews.find(p => p.id === newItem.id);
-            return { ...newItem, priceChange: existingItem ? existingItem.priceChange : 0 };
-          })
+        setNews((prevNews) => {
+            if (!Array.isArray(prevNews)) return allItems;
+            return allItems.map(newItem => {
+              const existingItem = prevNews.find(p => p.id === newItem.id);
+              return { ...newItem, priceChange: existingItem ? existingItem.priceChange : 0 };
+            });
+          }
         );
       }
     } catch (error) {
@@ -533,15 +538,21 @@ const MarketTerminal: React.FC<{
   };
 
   const handleWatchlistAdd = (item: any) => {
-    const newWatchlist = [item, ...watchlist.filter((w) => w.id !== item.id)];
-    setWatchlist(newWatchlist);
-    saveWatchlistToNode(newWatchlist);
+    setWatchlist((prev) => {
+      if (!Array.isArray(prev)) return [item];
+      const newWatchlist = [item, ...prev.filter((w) => w.id !== item.id)];
+      saveWatchlistToNode(newWatchlist);
+      return newWatchlist;
+    });
   };
 
   const removeFromWatchlist = (id: string) => {
-    const next = watchlist.filter((w) => w.id !== id);
-    setWatchlist(next);
-    saveWatchlistToNode(next);
+    setWatchlist((prev) => {
+      if (!Array.isArray(prev)) return [];
+      const next = prev.filter((w) => w.id !== id);
+      saveWatchlistToNode(next);
+      return next;
+    });
   };
 
   const handleSentimentToggle = (val: string) => {
