@@ -63,6 +63,14 @@ interface AlertData {
   created_at: string;
 }
 
+interface RecentActivityItem {
+  id: number;
+  event_type: string;
+  action: string;
+  meta: string | null;
+  created_at: string;
+}
+
 const Toggle: React.FC<{ 
   enabled: boolean; 
   onChange: (val: boolean) => void; 
@@ -80,9 +88,10 @@ const Toggle: React.FC<{
 const OverviewSection: React.FC<{ 
   data: SubscriptionData | null; 
   invites: TelegramInvite[];
+  activity: RecentActivityItem[];
   loading: boolean;
   onNavigate: (section: any) => void 
-}> = ({ data, invites, loading, onNavigate }) => {
+}> = ({ data, invites, activity, loading, onNavigate }) => {
   const [inviteUsedLocal, setInviteUsedLocal] = useState(false);
 
   if (loading) {
@@ -122,6 +131,20 @@ const OverviewSection: React.FC<{
     } catch (e) {
       return dateStr;
     }
+  };
+
+  const getTimeAgo = (dateStr: string) => {
+    const now = new Date();
+    const past = new Date(dateStr);
+    const diffMs = now.getTime() - past.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
   };
 
   const isAutoRenewOn = data?.auto_renew === 1 || data?.auto_renew === '1' || data?.auto_renew === true || data?.auto_renew === 'true';
@@ -245,25 +268,29 @@ const OverviewSection: React.FC<{
             System Integrity Log
           </h3>
           <div className="space-y-4">
-            {[
-              { msg: 'Access token validated via secure node', time: 'Just now', status: 'SUCCESS' },
-              { msg: `Subscription synchronized: ${data?.plan_code || 'PRO'}`, time: '5m ago', status: 'SYNC' },
-              { msg: 'Global market feed connection stable', time: '12m ago', status: 'INFO' }
-            ].map((act, i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-slate-950/40 rounded-2xl border border-white/[0.03]">
-                <div className="flex flex-col">
-                  <span className="text-[11px] font-bold text-slate-100">{act.msg}</span>
-                  <span className="text-[8px] text-slate-500 uppercase font-mono mt-1">{act.time}</span>
-                </div>
-                <span className={`text-[8px] font-black px-2 py-1 rounded border ${
-                  act.status === 'SUCCESS' ? 'border-emerald-600/30 text-emerald-500 bg-emerald-600/5' :
-                  act.status === 'SYNC' ? 'border-sky-600/30 text-sky-600 bg-sky-600/5' :
-                  'border-white/10 text-slate-500'
-                } tracking-tighter`}>
-                  {act.status}
-                </span>
+            {activity.length === 0 ? (
+              <div className="text-center py-6 opacity-20">
+                <p className="text-[10px] font-black uppercase tracking-widest">No recent telemetry found</p>
               </div>
-            ))}
+            ) : (
+              activity.slice(0, 3).map((act) => (
+                <div key={act.id} className="flex items-center justify-between p-4 bg-slate-950/40 rounded-2xl border border-white/[0.03]">
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-bold text-slate-100 uppercase tracking-tight">
+                      {act.event_type.replace('_', ' ')}: {act.action}
+                    </span>
+                    <span className="text-[8px] text-slate-500 uppercase font-mono mt-1">{getTimeAgo(act.created_at)}</span>
+                  </div>
+                  <span className={`text-[8px] font-black px-2 py-1 rounded border ${
+                    act.action === 'success' ? 'border-emerald-600/30 text-emerald-500 bg-emerald-600/5' :
+                    act.action === 'failed' ? 'border-rose-600/30 text-rose-600 bg-rose-600/5' :
+                    'border-white/10 text-slate-500'
+                  } tracking-tighter uppercase`}>
+                    {act.action}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -479,6 +506,7 @@ const Dashboard: React.FC = () => {
   const [isFullScreenMode, setIsFullScreenMode] = useState(false);
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
   const [inviteData, setInviteData] = useState<TelegramInvite[]>([]);
+  const [recentActivityData, setRecentActivityData] = useState<RecentActivityItem[]>([]);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [settingsData, setSettingsData] = useState<SettingsData | null>(null);
   const [alertData, setAlertData] = useState<AlertData[]>([]);
@@ -504,9 +532,15 @@ const Dashboard: React.FC = () => {
       const subResp = await fetch(`${API_BASE_URL}/control-center`, { method: 'GET', cache: "no-store", headers });
       const subJson = await subResp.json();
       if (subResp.status === 401 || subJson.error === 'unauthorized') return handleLogout();
+      
       const subData = subJson.subscription || (subJson.data && subJson.data.subscription);
       if (subData) setSubscriptionData(subData);
+      
       setInviteData(subJson.telegram_invites || []);
+      
+      const activityData = subJson.recent_activity?.data || [];
+      setRecentActivityData(activityData);
+
       const profResp = await fetch(`${API_BASE_URL}/profile`, { method: 'GET', cache: "no-store", headers });
       const profJson = await profResp.json();
       if (profResp.status === 401 || profJson.error === 'unauthorized') return handleLogout();
@@ -714,7 +748,7 @@ const Dashboard: React.FC = () => {
         {!isFullScreenMode && <aside className={`hidden lg:flex ${isSidebarCollapsed ? 'w-24' : 'w-72'} bg-[#0d121f] border-r border-white/[0.03] flex-col shrink-0 transition-all duration-500`}><SidebarContent /></aside>}
         <main className="flex-grow flex flex-col min-w-0 bg-[#0b0f1a] relative overflow-hidden">
             {activeSection === 'terminal' && <MarketTerminal onToggleFullScreen={setIsFullScreenMode} isSidebarCollapsed={isSidebarCollapsed} userId={profileData?.id} />}
-            {activeSection === 'overview' && <OverviewSection data={subscriptionData} invites={inviteData} loading={loadingCore} onNavigate={setActiveSection} />}
+            {activeSection === 'overview' && <OverviewSection data={subscriptionData} activity={recentActivityData} invites={inviteData} loading={loadingCore} onNavigate={setActiveSection} />}
             {activeSection === 'account' && <ProfileSection data={profileData} loading={loadingCore} />}
             {activeSection === 'notifications' && <AlertHistorySection data={alertData} loading={loadingAlerts} />}
             {activeSection === 'settings' && <SettingsSection data={settingsData} loading={loadingSettings} onUpdate={handleUpdateSettings} />}
