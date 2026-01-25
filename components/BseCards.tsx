@@ -6,6 +6,20 @@ const getAuthToken = () => {
   return document.cookie.split('; ').find(row => row.startsWith('sm_token='))?.split('=')[1] || null;
 };
 
+// Reuse sound trigger from terminal if needed, but we'll define a local one for direct access
+const playAlertSound = () => {
+  try {
+    const stored = localStorage.getItem("stockmanch_settings");
+    if (stored) {
+      const settingsObj = JSON.parse(stored);
+      if (settingsObj?.settings?.terminal_audio === 1) {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.play().catch(() => {});
+      }
+    }
+  } catch (e) {}
+};
+
 interface BseNewsItem {
   id: string;
   symbol: string;
@@ -45,6 +59,7 @@ const BseCards: React.FC<BseCardsProps> = ({
   const [displayLimit, setDisplayLimit] = useState(10);
   const loaderRef = useRef<HTMLDivElement>(null);
   const isFetchingRef = useRef(false);
+  const knownIdsRef = useRef<Set<string>>(new Set());
 
   const fetchBseFeeds = useCallback(async (isInitial = false) => {
     if (isFetchingRef.current) return;
@@ -85,6 +100,15 @@ const BseCards: React.FC<BseCardsProps> = ({
         });
 
         allItems.sort((a, b) => new Date(b.rawPublishedAt).getTime() - new Date(a.rawPublishedAt).getTime());
+        
+        // Sound logic for BSE
+        const incomingIds = allItems.map(i => i.id);
+        const hasBrandNew = incomingIds.some(id => !knownIdsRef.current.has(id));
+        if (hasBrandNew && knownIdsRef.current.size > 0 && externalAutoRefresh) {
+          playAlertSound();
+        }
+        incomingIds.forEach(id => knownIdsRef.current.add(id));
+
         setBseNews(allItems);
         
         if (onCategoriesLoad) {
@@ -102,7 +126,7 @@ const BseCards: React.FC<BseCardsProps> = ({
       isFetchingRef.current = false;
       if (isInitial) setLoading(false);
     }
-  }, [onCategoriesLoad]);
+  }, [onCategoriesLoad, externalAutoRefresh]);
 
   useEffect(() => {
     fetchBseFeeds(true);

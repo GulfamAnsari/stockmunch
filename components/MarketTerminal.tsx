@@ -16,17 +16,43 @@ const getAuthToken = () => {
 
 const percentageMap = new Map();
 
-// Optimized audio handling with a real sound file
+// Optimized audio handling
 const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
 const playAlertSound = () => {
-  alertAudio.currentTime = 0;
-  alertAudio.play().catch(e => {
-    // Browsers often block autoplay until the first user interaction
-    console.debug("Audio play deferred or blocked by browser policy.");
-  });
+  try {
+    const stored = localStorage.getItem("stockmanch_settings");
+    if (stored) {
+      const settingsObj = JSON.parse(stored);
+      if (settingsObj?.settings?.terminal_audio === 1) {
+        alertAudio.currentTime = 0;
+        alertAudio.play().catch(() => {});
+      }
+    }
+  } catch (e) {}
 };
 
-// Universal NewsCard for both General and BSE feeds
+// Global helper for persistent read status
+const markAsRead = (id: string) => {
+  try {
+    const readStr = localStorage.getItem('sm_read_ids') || '[]';
+    const readArray = JSON.parse(readStr);
+    if (!readArray.includes(id)) {
+      readArray.push(id);
+      // Keep only last 1000 items to prevent storage bloat
+      localStorage.setItem('sm_read_ids', JSON.stringify(readArray.slice(-1000)));
+    }
+  } catch (e) {}
+};
+
+const isIdRead = (id: string) => {
+  try {
+    const readStr = localStorage.getItem('sm_read_ids') || '[]';
+    return JSON.parse(readStr).includes(id);
+  } catch (e) {
+    return false;
+  }
+};
+
 export const NewsCard: React.FC<{
   news: any;
   isWatchlist?: boolean;
@@ -36,19 +62,19 @@ export const NewsCard: React.FC<{
   variant?: 'general' | 'bse';
 }> = ({ news, isWatchlist, onWatchlistAdd, onPriceUpdate, variant = 'general' }) => {
   const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
-  const [isRead, setIsRead] = useState(false);
+  const [isReadInternal, setIsReadInternal] = useState(() => isIdRead(news.id));
   const [isExpanded, setIsExpanded] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isBse = variant === 'bse';
 
-  const [isNew] = useState(() => {
+  const isActuallyNew = useMemo(() => {
     const publishedAt = new Date(news.rawPublishedAt).getTime();
     const now = Date.now();
     return (now - publishedAt) < 10 * 60 * 1000;
-  });
+  }, [news.rawPublishedAt]);
 
-  const shouldHighlight = isNew && !isRead;
+  const shouldHighlight = isActuallyNew && !isReadInternal;
 
   const fetchLocalPercent = useCallback(async (manualUpdate = false) => {
     if (isBse) return;
@@ -98,6 +124,13 @@ export const NewsCard: React.FC<{
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleCardClick = () => {
+    if (!isReadInternal) {
+      setIsReadInternal(true);
+      markAsRead(news.id);
+    }
+  };
+
   const getSentimentStyles = (sentiment: string) => {
     switch (sentiment?.toLowerCase()) {
       case "bullish": return "bg-[#062010] text-[#4ade80]";
@@ -121,7 +154,7 @@ export const NewsCard: React.FC<{
 
   return (
     <div
-      onClick={() => setIsRead(true)}
+      onClick={handleCardClick}
       className={`bg-[#111621] border ${
         shouldHighlight ? "border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.1)]" : "border-white/[0.06]"
       } rounded-2xl flex flex-col h-full hover:border-blue-500/30 transition-all group shadow-2xl relative cursor-pointer group/card min-w-[310px]`}
@@ -329,28 +362,9 @@ const MarketTerminal: React.FC<{
   const lastParamsRef = useRef<string>("");
   const isFetchingRef = useRef<boolean>(false);
   const isFetchingWatchlistRef = useRef<boolean>(false);
-  const lastAlertIdRef = useRef<string | null>(null);
+  const knownIdsRef = useRef<Set<string>>(new Set());
 
   const isFiltered = useMemo(() => sentimentFilters.some((f) => f !== "ALL"), [sentimentFilters]);
-
-  // Audio alert monitor
-  useEffect(() => {
-    if (news.length > 0) {
-      const topId = news[0].id;
-      if (lastAlertIdRef.current && lastAlertIdRef.current !== topId) {
-        try {
-          const stored = localStorage.getItem("stockmanch_settings");
-          if (stored) {
-            const settingsObj = JSON.parse(stored);
-            if (settingsObj?.settings?.terminal_audio === 1) {
-              playAlertSound();
-            }
-          }
-        } catch (e) {}
-      }
-      lastAlertIdRef.current = topId;
-    }
-  }, [news]);
 
   // Watchlist Persistence API
   const fetchWatchlist = useCallback(async () => {
@@ -386,7 +400,6 @@ const MarketTerminal: React.FC<{
     }
   }, [userId]);
 
-  // Use a ref to ensure we only trigger the initial fetch once per userId transition
   const lastFetchedUserId = useRef<string | number | null>(null);
   useEffect(() => {
     if (userId && userId !== lastFetchedUserId.current) {
@@ -495,6 +508,18 @@ const MarketTerminal: React.FC<{
           });
           allItems.push(...mappedItems);
         });
+
+        // Trigger sound only if new items found and it's a poll (not initial load)
+        const incomingIds = allItems.map(item => item.id);
+        const hasBrandNew = incomingIds.some(id => !knownIdsRef.current.has(id));
+        
+        if (hasBrandNew && knownIdsRef.current.size > 0 && isAuto) {
+          playAlertSound();
+        }
+
+        // Register all items as "seen" in session
+        incomingIds.forEach(id => knownIdsRef.current.add(id));
+
         setNews((prevNews) => {
             if (!Array.isArray(prevNews)) return allItems;
             return allItems.map(newItem => {
@@ -603,7 +628,6 @@ const MarketTerminal: React.FC<{
 
   return (
     <div className="flex-grow flex flex-col min-h-0 bg-[#0b0f1a] overflow-x-hidden relative">
-      {/* Mobile Toggle to Hide Header */}
       <div className="lg:hidden shrink-0 bg-[#0d121f] px-4 py-2 flex items-center justify-between border-b border-white/[0.05]">
         <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Terminal Controls</span>
         <button 
@@ -614,13 +638,10 @@ const MarketTerminal: React.FC<{
         </button>
       </div>
 
-      {/* Redesigned Header with full responsiveness */}
       <div className={`${isControlsVisible ? 'flex' : 'hidden lg:flex'} px-4 md:px-6 py-4 shrink-0 bg-[#0d121f] border-b border-white/[0.08] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-y-4 gap-x-6 z-40 overflow-visible`}>
         
-        {/* Row 1: Nav Tabs & Mobile Context */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-grow flex-wrap">
           
-          {/* Navigation Tabs */}
           <div className="flex bg-slate-950 rounded-2xl p-1 border border-white/[0.1] shadow-xl shrink-0 self-start sm:self-auto w-full sm:w-auto">
             {["ALL FEEDS", "BSE FEEDS", "WATCHLIST"].map((tab) => (
               <button 
@@ -635,7 +656,6 @@ const MarketTerminal: React.FC<{
 
           <div className="h-8 w-px bg-white/5 hidden xl:block"></div>
 
-          {/* Contextual Inputs (BSE or Standard) */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-grow min-w-0">
             {activeTab === "BSE FEEDS" ? (
               <div className="flex items-center space-x-3 flex-wrap gap-y-2 animate-in fade-in slide-in-from-left-2 duration-300 flex-grow">
@@ -712,7 +732,6 @@ const MarketTerminal: React.FC<{
           </div>
         </div>
 
-        {/* Global Utility Actions */}
         <div className="flex items-center gap-3 shrink-0 relative justify-end">
           {activeTab !== "BSE FEEDS" && (
             <button ref={filterBtnRef} onClick={(e) => { e.stopPropagation(); setIsFilterPanelOpen(!isFilterPanelOpen); }} className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 relative ${ isFilterPanelOpen ? "bg-blue-600 text-white border-blue-600 shadow-lg" : "bg-slate-900/40 border-white/[0.1] text-slate-500 hover:text-slate-300" }`}>
