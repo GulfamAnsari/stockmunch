@@ -20,7 +20,7 @@ const percentageMap = new Map();
 const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
 const playAlertSound = () => {
   try {
-    const stored = localStorage.getItem("stockmanch_settings");
+    const stored = localStorage.getItem("stockmunch_settings");
     if (stored) {
       const settingsObj = JSON.parse(stored);
       if (settingsObj?.settings?.terminal_audio === 1) {
@@ -68,10 +68,18 @@ export const NewsCard: React.FC<{
 
   const isBse = variant === 'bse';
 
+  // Synchronize read state if ID changes or on mount
+  useEffect(() => {
+    setIsReadInternal(isIdRead(news.id));
+  }, [news.id]);
+
   const isActuallyNew = useMemo(() => {
+    if (!news.rawPublishedAt) return false;
     const publishedAt = new Date(news.rawPublishedAt).getTime();
+    if (isNaN(publishedAt)) return false;
     const now = Date.now();
-    return (now - publishedAt) < 10 * 60 * 1000;
+    // Highlight if item is less than 30 minutes old
+    return (now - publishedAt) < 30 * 60 * 1000;
   }, [news.rawPublishedAt]);
 
   const shouldHighlight = isActuallyNew && !isReadInternal;
@@ -155,12 +163,14 @@ export const NewsCard: React.FC<{
   return (
     <div
       onClick={handleCardClick}
-      className={`bg-[#111621] border ${
-        shouldHighlight ? "border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.1)]" : "border-white/[0.06]"
-      } rounded-2xl flex flex-col h-full hover:border-blue-500/30 transition-all group shadow-2xl relative cursor-pointer group/card min-w-[310px]`}
+      className={`bg-[#111621] border-2 transition-all duration-300 group shadow-2xl relative cursor-pointer group/card min-w-[310px] rounded-2xl flex flex-col h-full ${
+        shouldHighlight 
+          ? "border-emerald-500 shadow-[0_0_25px_rgba(16,185,129,0.3)] ring-1 ring-emerald-500/20" 
+          : "border-white/[0.06] hover:border-blue-500/30"
+      }`}
     >
       {shouldHighlight && (
-        <div className="absolute -top-2 right-4 px-2 py-0.5 bg-emerald-600 text-slate-950 text-[8px] font-black uppercase rounded z-20 shadow-lg animate-pulse">
+        <div className="absolute -top-3 right-4 px-2 py-0.5 bg-emerald-600 text-slate-950 text-[9px] font-black uppercase rounded z-20 shadow-xl animate-bounce">
           New Alert
         </div>
       )}
