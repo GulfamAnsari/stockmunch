@@ -100,12 +100,12 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
         </div>
         
         <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-slate-200 mb-6 md:mb-8 tracking-tighter leading-[0.95] md:leading-[0.9] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 uppercase">
-          Never Miss a <span className="text-emerald-600 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.2)]">Market</span> <br className="hidden sm:block" />
-          <span className="text-emerald-600 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.2)]">Move</span> Again
+          Stop checking news. <span className="text-emerald-600 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.2)]"></span> <br className="hidden sm:block" />
+          <span className="text-emerald-600 italic drop-shadow-[0_0_20px_rgba(16,185,129,0.2)]"> Start getting alerts.</span>
         </h1>
         
         <p className="text-sm sm:text-base md:text-xl text-slate-400 mb-8 md:mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 font-medium">
-          Institutional-grade stock market news alerts delivered via Telegram. Stay ahead of the crowd with real-time notifications and professional terminals.
+          Get real-time stock market news alerts on Dashboard & Telegram
         </p>
         
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
@@ -114,12 +114,11 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
             className="w-full md:w-auto px-8 md:px-10 py-4 md:py-5 bg-emerald-700 hover:bg-emerald-600 text-slate-100 font-black uppercase tracking-widest rounded-xl transition-all shadow-2xl shadow-emerald-900/20 flex flex-col items-center justify-center group shrink-0"
           >
             <span className="flex items-center">
-              30-Day Free Trial
+              Sign Up Free
               <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </span>
-            <span className="text-[9px] opacity-70 mt-1 uppercase tracking-tighter">No credit card required</span>
           </button>
           
           <button 
@@ -138,7 +137,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
         </div>
 
         {/* Roadmap Roadmap/Coming Soon Badges */}
-        <div className="mt-8 flex flex-wrap justify-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
+        {/* <div className="mt-8 flex flex-wrap justify-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
           <div className="flex items-center space-x-2 px-3 py-1.5 bg-white/[0.02] rounded-full border border-white/[0.05]">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
             <span className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-500">WhatsApp Alerts Coming Soon</span>
@@ -147,7 +146,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
             <span className="w-1.5 h-1.5 rounded-full bg-sky-600 animate-pulse"></span>
             <span className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-500">Android & iOS Apps Coming Soon</span>
           </div>
-        </div>
+        </div> */}
 
         <div className="mt-16 md:mt-24 flex flex-col sm:flex-row justify-center items-center space-y-8 sm:space-y-0 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-500">
           <div className="text-center px-6 md:px-12 sm:border-x border-white/[0.05]">

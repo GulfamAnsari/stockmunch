@@ -67,7 +67,7 @@ const App: React.FC = () => {
       
       <main className="flex-grow">
         <AppRoutes 
-          onOpenPricing={() => scrollToSection('pricing')}
+          onOpenPricing={() => handleStartJourney('alerts-dashboard')}
           onScrollToSection={scrollToSection}
           hoveredPlanId={hoveredPlanId}
           setHoveredPlanId={setHoveredPlanId}
