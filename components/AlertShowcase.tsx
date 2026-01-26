@@ -2,7 +2,7 @@ import React from 'react';
 
 const AlertShowcase: React.FC = () => {
   return (
-    <section id="alerts" className="py-24 bg-[#0b0f1a] relative overflow-hidden border-t border-white/[0.05] selection:bg-emerald-600/20">
+    <section className="py-24 bg-[#0b0f1a] relative overflow-hidden border-t border-white/[0.05] selection:bg-emerald-600/20">
       {/* Decorative Glows */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-emerald-600/[0.02] blur-[120px] rounded-full"></div>
       <div className="absolute bottom-0 left-0 w-1/4 h-1/2 bg-sky-600/[0.02] blur-[100px] rounded-full"></div>
@@ -70,7 +70,7 @@ const AlertShowcase: React.FC = () => {
           </div>
 
           {/* Visual Side: Two Mobile Frames (Column 6-12) */}
-          <div className="lg:col-span-7 flex flex-col md:flex-row items-center justify-center gap-8 lg:gap-0 lg:relative lg:h-[700px]">
+          <div  id="alerts" className="lg:col-span-7 flex flex-col md:flex-row items-center justify-center gap-8 lg:gap-0 lg:relative lg:h-[700px]">
             
             {/* Frame 1: Notification Stack (Left/Back) */}
             <div className="lg:absolute lg:left-0 lg:top-0 transform lg:-rotate-6 lg:hover:rotate-0 lg:hover:z-30 transition-all duration-500">

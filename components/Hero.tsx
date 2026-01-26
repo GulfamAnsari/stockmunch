@@ -111,7 +111,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
           <button 
             onClick={onOpenPricing}
-            className="w-full md:w-auto px-8 md:px-10 py-4 md:py-5 bg-emerald-700 hover:bg-emerald-600 text-slate-100 font-black uppercase tracking-widest rounded-xl transition-all shadow-2xl shadow-emerald-900/20 flex flex-col items-center justify-center group shrink-0"
+            className="w-full md:w-auto px-8 md:px-10 py-6 md:py-5 bg-emerald-700 hover:bg-emerald-600 text-slate-100 font-black uppercase tracking-widest rounded-xl transition-all shadow-2xl shadow-emerald-900/20 flex flex-col items-center justify-center group shrink-0"
           >
             <span className="flex items-center">
               Sign Up Free
@@ -125,14 +125,14 @@ const Hero: React.FC<HeroProps> = ({ onOpenPricing, onScrollToSection }) => {
             onClick={() => onScrollToSection('alerts')}
             className="w-full md:w-auto px-8 py-4 md:py-5 bg-transparent hover:bg-emerald-600/5 text-emerald-600 font-bold rounded-xl border border-emerald-600/30 transition-all flex items-center justify-center"
           >
-            Explore Alerts
+            Sample Market Alerts
           </button>
 
           <button 
             onClick={() => onScrollToSection('dashboard')}
             className="w-full md:w-auto px-8 py-4 md:py-5 bg-white/[0.02] hover:bg-white/[0.05] text-slate-300 font-bold rounded-xl border border-white/[0.05] transition-all flex items-center justify-center"
           >
-            Live Terminal
+            View Terminal Preview
           </button>
         </div>
 
