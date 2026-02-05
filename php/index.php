@@ -1,6 +1,8 @@
 <?php
 $pageTitle = "Real-Time Stock Market Alerts & NSE News Terminal";
-$pageDescription = "India's fastest stock market news alerts engine. Receive instant Telegram notifications for corporate filings, BSE regulatory updates, and AI-driven market analysis.";
+$pageDescription = "India's fastest stock market news alerts engine. Get instant Telegram notifications for NSE/BSE corporate filings, regulatory updates, and AI-driven market analysis. Free 30-day trial available.";
+$pageKeywords = "stock market alerts India, NSE news alerts, BSE updates, real-time stock alerts, Telegram stock notifications, stock market terminal, corporate filings alerts, market news India, stock watchlist app, trading alerts";
+$canonicalUrl = "https://stockmunch.com";
 require_once __DIR__ . '/includes/header.php';
 ?>
 
@@ -438,5 +440,45 @@ require_once __DIR__ . '/includes/header.php';
             </div>
         </div>
     </section>
+
+    <!-- FAQ Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            <?php 
+            $faqItems = [];
+            foreach (FAQ_DATA as $faq) {
+                $faqItems[] = '{
+                    "@type": "Question",
+                    "name": "' . addslashes($faq['question']) . '",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "' . addslashes($faq['answer']) . '"
+                    }
+                }';
+            }
+            echo implode(',', $faqItems);
+            ?>
+        ]
+    }
+    </script>
+
+    <!-- Breadcrumb Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://stockmunch.com"
+            }
+        ]
+    }
+    </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

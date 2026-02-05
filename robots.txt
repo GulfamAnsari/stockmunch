@@ -1,17 +1,34 @@
 # StockMunch Robots.txt
 # India's fastest real-time stock alert engine
+# Last updated: 2026-02-06
 
 User-agent: *
 Allow: /
-Allow: /about
-Allow: /contact
-Allow: /privacy
-Allow: /terms
-Allow: /regulatory
-Allow: /login
+Allow: /about/
+Allow: /contact/
+Allow: /privacy/
+Allow: /terms/
+Allow: /regulatory/
+Allow: /login/
 
-# Disallow indexing of private dashboard areas
-Disallow: /dashboard
+# Disallow private and authenticated areas
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /includes/
+Disallow: /*.json$
+
+# Crawl delay for polite crawling
+Crawl-delay: 1
 
 # Sitemaps
 Sitemap: https://stockmunch.com/sitemap.xml
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing specific
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
