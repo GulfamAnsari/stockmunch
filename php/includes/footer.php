@@ -84,7 +84,7 @@
         </div>
     </footer>
 
-    <script src="/php-assets/js/main.js"></script>
+    
     <?php if (isset($extraScripts)) echo $extraScripts; ?>
 </body>
 </html>

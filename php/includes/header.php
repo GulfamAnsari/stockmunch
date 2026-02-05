@@ -141,6 +141,7 @@ $defaultImage = $siteUrl . '/php-assets/images/og-image.jpg';
         }
     }
     </script>
+    <script src="/php-assets/js/main.js" defer></script>
     <?php endif; ?>
 </head>
 <body class="bg-dark text-slate-300 selection-emerald">

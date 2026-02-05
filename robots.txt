@@ -5,17 +5,11 @@
 User-agent: *
 Allow: /
 
-# Block private / non-public areas
 Disallow: /dashboard/
 Disallow: /api/
 Disallow: /includes/
 Disallow: /*.json$
 
-# Crawl rate
 Crawl-delay: 1
 
-# Sitemap
 Sitemap: https://stockmunch.com/sitemap.xml
-
-# Content usage signals (advisory)
-Content-Signal: search=yes,ai-train=no
