@@ -1,7 +1,7 @@
 <?php
 $pageTitle = "Terminal Login | Secure Access to StockMunch";
 $pageDescription = "Sign in to your StockMunch terminal to monitor real-time stock market news, manage your watchlist, and configure Telegram alerts.";
-require_once __DIR__ . '/includes/config.php';
+require_once dirname(__DIR__) . '/includes/config.php';
 
 // If already logged in, redirect to dashboard
 if (isLoggedIn()) {

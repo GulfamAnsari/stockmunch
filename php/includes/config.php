@@ -54,31 +54,47 @@ $PRICING_PLANS = [
     ]
 ];
 
-// FAQ Data
+// FAQ Data (matching React app)
 $FAQ_DATA = [
     [
-        'question' => 'What is StockMunch?',
-        'answer' => 'StockMunch is India\'s definitive real-time stock alert engine. We provide instant Telegram notifications for corporate filings, BSE regulatory updates, and AI-driven market analysis to help traders stay ahead of the market.'
+        'question' => 'How quickly do I receive alerts?',
+        'answer' => 'Our system is designed for near-instant delivery. Most alerts are processed and delivered via Telegram within milliseconds of the news break.'
     ],
     [
-        'question' => 'How fast are the alerts?',
-        'answer' => 'Our high-speed alerting engine is directly connected to exchange data feeds. We measure our latency in milliseconds, not minutes. If it breaks on the exchange, it breaks on your phone.'
+        'question' => 'What is the Personal Watchlist?',
+        'answer' => 'The Personal Watchlist is a dedicated feature that allows you to save or pin specific news dispatches that you find important for future reference or deep study. It acts as your private repository of market intelligence and is completely independent of the real-time Telegram alert system.'
     ],
     [
-        'question' => 'Do you provide investment advice?',
-        'answer' => 'No. StockMunch provides information and alerts based on public filings and exchange data. We are a technology-driven information aggregator. We are not a registered investment advisor (RIA) or a broker-dealer.'
+        'question' => 'Is there a free trial available?',
+        'answer' => 'Absolutely! We offer a 30-day full access trial for all new users so you can experience the speed and power of StockMunch risk-free.'
     ],
     [
-        'question' => 'What is the 30-day trial?',
-        'answer' => 'All our plans come with a 30-day risk-free trial. You can experience the full power of our alerting engine and terminal access without any commitment. No credit card required to start.'
+        'question' => 'Can I cancel my subscription anytime?',
+        'answer' => 'Yes. You can cancel your subscription from your account settings at any time. If you are in the trial period, you won\'t be charged.'
     ],
     [
-        'question' => 'How do I receive alerts?',
-        'answer' => 'Currently, we deliver alerts via Telegram. WhatsApp and mobile app integrations are coming soon. Simply connect your Telegram account after signing up, and you\'ll start receiving real-time market alerts.'
+        'question' => 'Is StockMunch a SEBI registered investment advisor?',
+        'answer' => 'StockMunch is a technology-driven information aggregator and AI analysis platform. We do not provide personalized investment advice or buy/sell recommendations. We are not a SEBI registered advisor.'
     ],
     [
-        'question' => 'Can I cancel anytime?',
-        'answer' => 'Absolutely. Subscriptions can be canceled at any time from your dashboard. However, partial month refunds are not provided as subscriptions are billed in advance.'
+        'question' => 'What data sources does StockMunch use?',
+        'answer' => 'We fetch news and market updates directly from leading financial news media houses and verified journalistic sources to ensure you get comprehensive coverage of the market landscape.'
+    ],
+    [
+        'question' => 'Can I access the dashboard on my mobile phone?',
+        'answer' => 'Yes, our terminal is fully responsive and optimized for mobile browsers. You can monitor your watchlist and read news dispatches on the go.'
+    ],
+    [
+        'question' => 'How does the AI Sentiment Analysis work?',
+        'answer' => 'Our engine uses advanced Large Language Models to process news context in real-time. It evaluates the linguistic tone and potential impact on stock price to label news as Bullish, Bearish, or Neutral.'
+    ],
+    [
+        'question' => 'What happens after my 30-day free trial ends?',
+        'answer' => 'Once your trial expires, you will need to choose a paid plan to continue receiving alerts and accessing the professional terminal. No charges are made during the trial.'
+    ],
+    [
+        'question' => 'Can I link multiple Telegram accounts to one subscription?',
+        'answer' => 'Currently, each subscription is linked to a single verified Telegram account to ensure secure and dedicated alert delivery.'
     ]
 ];
 

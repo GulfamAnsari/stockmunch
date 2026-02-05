@@ -1,7 +1,7 @@
 <?php
 $pageTitle = "About StockMunch | Our Mission to Democratize Market Data";
 $pageDescription = "Learn about StockMunch's mission to provide retail traders with institutional-grade news speed. Discover how we built India's fastest stock alert engine.";
-require_once __DIR__ . '/includes/header.php';
+require_once dirname(__DIR__) . '/includes/header.php';
 ?>
 
     <main class="page-content">
@@ -42,7 +42,7 @@ require_once __DIR__ . '/includes/header.php';
 
                 <section class="text-center pt-12">
                     <h2 class="section-title mb-8">Ready to experience the future of news?</h2>
-                    <a href="/php/#pricing" class="btn btn-primary btn-lg">
+                    <a href="/#pricing" class="btn btn-primary btn-lg">
                         Start Your 30-Day Trial
                         <svg class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -51,7 +51,7 @@ require_once __DIR__ . '/includes/header.php';
                 </section>
             </div>
             
-            <a href="/php/" class="back-link">
+            <a href="/" class="back-link">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -60,4 +60,4 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </main>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>

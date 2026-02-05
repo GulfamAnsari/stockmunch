@@ -1,7 +1,7 @@
 <?php
 $pageTitle = "Terms of Usage | StockMunch Platform Agreement";
 $pageDescription = "Read the StockMunch Terms of Usage. Understand our service nature, subscription billing, and user responsibilities while accessing our stock alert engine.";
-require_once __DIR__ . '/includes/header.php';
+require_once dirname(__DIR__) . '/includes/header.php';
 ?>
 
     <main class="page-content">
@@ -37,7 +37,7 @@ require_once __DIR__ . '/includes/header.php';
                 </section>
             </div>
             
-            <a href="/php/" class="back-link">
+            <a href="/" class="back-link">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -46,4 +46,4 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </main>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>

@@ -1,7 +1,7 @@
 <?php
 $pageTitle = "Contact StockMunch | Support and Inquiries Hub";
 $pageDescription = "Need help with your StockMunch subscription or terminal access? Contact our support node for assistance with real-time stock alerts and data feeds.";
-require_once __DIR__ . '/includes/header.php';
+require_once dirname(__DIR__) . '/includes/header.php';
 ?>
 
     <main class="page-content">
@@ -121,7 +121,7 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
             </div>
 
-            <a href="/php/" class="back-link">
+            <a href="/" class="back-link">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -130,4 +130,4 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </main>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>

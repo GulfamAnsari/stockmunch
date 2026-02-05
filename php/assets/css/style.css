@@ -270,6 +270,8 @@ h1, h2, h3, h4, h5, h6 {
     border: none;
     cursor: pointer;
     transition: color var(--transition-fast);
+    position: relative;
+    z-index: 110;
 }
 
 .mobile-menu-toggle:hover {
@@ -279,6 +281,10 @@ h1, h2, h3, h4, h5, h6 {
 .mobile-menu-toggle svg {
     width: 2rem;
     height: 2rem;
+}
+
+.mobile-menu-toggle .close-icon {
+    color: white;
 }
 
 .mobile-menu {
