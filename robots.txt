@@ -4,31 +4,18 @@
 
 User-agent: *
 Allow: /
-Allow: /about/
-Allow: /contact/
-Allow: /privacy/
-Allow: /terms/
-Allow: /regulatory/
-Allow: /login/
 
-# Disallow private and authenticated areas
+# Block private / non-public areas
 Disallow: /dashboard/
 Disallow: /api/
 Disallow: /includes/
 Disallow: /*.json$
 
-# Crawl delay for polite crawling
+# Crawl rate
 Crawl-delay: 1
 
-# Sitemaps
+# Sitemap
 Sitemap: https://stockmunch.com/sitemap.xml
 
-# Google specific
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 0
-
-# Bing specific
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
+# Content usage signals (advisory)
+Content-Signal: search=yes,ai-train=no
