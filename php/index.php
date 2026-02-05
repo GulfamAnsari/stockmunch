@@ -449,7 +449,7 @@ require_once __DIR__ . '/includes/header.php';
         "mainEntity": [
             <?php 
             $faqItems = [];
-            foreach (FAQ_DATA as $faq) {
+            foreach ($FAQ_DATA as $faq) {
                 $faqItems[] = '{
                     "@type": "Question",
                     "name": "' . addslashes($faq['question']) . '",
