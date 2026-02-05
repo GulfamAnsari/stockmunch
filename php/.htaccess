@@ -1,12 +1,28 @@
 RewriteEngine On
 RewriteBase /
 
-# Don't process files and directories that exist
+# ------------------------------------
+# 1️⃣ Force HTTPS (SEO + Security)
+# ------------------------------------
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ------------------------------------
+# 2️⃣ Allow static files directly
+# (sitemap.xml, robots.txt, images, JS, CSS)
+# ------------------------------------
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Handle PHP pages in folders
+# ------------------------------------
+# 3️⃣ API routing
+# ------------------------------------
+RewriteRule ^api(/.*)?$ api/index.php [QSA,L]
+
+# ------------------------------------
+# 4️⃣ PHP Pages (folder-based structure)
+# ------------------------------------
 RewriteRule ^about/?$ about/index.php [L,NC]
 RewriteRule ^contact/?$ contact/index.php [L,NC]
 RewriteRule ^privacy/?$ privacy/index.php [L,NC]
@@ -14,9 +30,13 @@ RewriteRule ^terms/?$ terms/index.php [L,NC]
 RewriteRule ^regulatory/?$ regulatory/index.php [L,NC]
 RewriteRule ^login/?$ login/index.php [L,NC]
 
-# Dashboard SPA - serve the React app for all dashboard routes
+# ------------------------------------
+# 5️⃣ Dashboard SPA (React app)
+# ------------------------------------
 RewriteRule ^dashboard/?$ dashboard/index.html [L,NC]
 RewriteRule ^dashboard/(.*)$ dashboard/index.html [L,NC]
 
-# Homepage
+# ------------------------------------
+# 6️⃣ Homepage fallback
+# ------------------------------------
 RewriteRule ^$ index.php [L]
