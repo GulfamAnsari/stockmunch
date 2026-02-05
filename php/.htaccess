@@ -1,16 +1,12 @@
 RewriteEngine On
 RewriteBase /
 
-# Redirect to trailing slash for clean URLs
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_URI} !(.*)/$
-RewriteRule ^(.*)$ $1/ [L,R=301]
+# Don't process files and directories that exist
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-# If the request is for an existing file or directory, serve it directly
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-
-# Handle folder-based PHP pages
+# Handle PHP pages in folders
 RewriteRule ^about/?$ about/index.php [L,NC]
 RewriteRule ^contact/?$ contact/index.php [L,NC]
 RewriteRule ^privacy/?$ privacy/index.php [L,NC]
@@ -18,9 +14,9 @@ RewriteRule ^terms/?$ terms/index.php [L,NC]
 RewriteRule ^regulatory/?$ regulatory/index.php [L,NC]
 RewriteRule ^login/?$ login/index.php [L,NC]
 
-# Dashboard SPA - serve the React app
+# Dashboard SPA - serve the React app for all dashboard routes
 RewriteRule ^dashboard/?$ dashboard/index.html [L,NC]
 RewriteRule ^dashboard/(.*)$ dashboard/index.html [L,NC]
 
-# Default page
+# Homepage
 RewriteRule ^$ index.php [L]

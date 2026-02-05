@@ -167,7 +167,7 @@ $defaultImage = $siteUrl . '/php-assets/images/og-image.jpg';
 
             <div class="nav-actions">
                 <?php if ($isLoggedIn): ?>
-                    <a href="/dashboard" class="btn btn-primary desktop-only">
+                    <a href="/dashboard/" class="btn btn-primary desktop-only">
                         My Account
                         <svg class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -202,7 +202,7 @@ $defaultImage = $siteUrl . '/php-assets/images/og-image.jpg';
                 <a href="/about/" class="mobile-nav-link">Our Mission</a>
                 <a href="/contact/" class="mobile-nav-link">Contact</a>
                 <?php if ($isLoggedIn): ?>
-                    <a href="/dashboard" class="btn btn-primary btn-full">Enter Terminal</a>
+                    <a href="/dashboard/" class="btn btn-primary btn-full">Enter Terminal</a>
                 <?php else: ?>
                     <a href="/login/" class="btn btn-primary btn-full">Sign In to Terminal</a>
                 <?php endif; ?>

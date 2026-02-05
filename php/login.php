@@ -5,7 +5,7 @@ require_once __DIR__ . '/includes/config.php';
 
 // If already logged in, redirect to dashboard
 if (isLoggedIn()) {
-    header('Location: /dashboard');
+    header('Location: /dashboard/');
     exit;
 }
 ?>
@@ -276,7 +276,7 @@ if (isLoggedIn()) {
                     
                     if (data.token) {
                         setAuthCookie(data.token);
-                        window.location.href = '/dashboard';
+                        window.location.href = '/dashboard/';
                     } else {
                         showError(data.message || data.error || 'Incorrect login details.');
                     }
@@ -355,7 +355,7 @@ if (isLoggedIn()) {
                     
                     if (data.verified) {
                         if (data.token) setAuthCookie(data.token);
-                        window.location.href = '/dashboard';
+                        window.location.href = '/dashboard/';
                     } else {
                         showError(data.message || 'Incorrect OTP entered.');
                     }
