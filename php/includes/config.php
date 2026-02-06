@@ -70,7 +70,7 @@ $FAQ_DATA = [
     ],
     [
         'question' => 'Can I cancel my subscription anytime?',
-        'answer' => 'Yes. You can cancel your subscription from your account settings at any time. If you are in the trial period, you won\'t be charged.'
+        'answer' => "Yes. You can cancel your subscription from your account settings at any time. If you are in the trial period, you won't be charged."
     ],
     [
         'question' => 'Is StockMunch a SEBI registered investment advisor?',
