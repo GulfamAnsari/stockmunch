@@ -36,6 +36,7 @@ if (isLoggedIn()) {
         <div class="login-card">
             <div class="login-header">
                 <h1 id="signup-title">Create Account</h1>
+                <p id="plan-display" class="text-sm text-slate-400 mt-2"></p>
             </div>
 
             <div id="form-error" class="form-error hidden">
@@ -157,15 +158,30 @@ if (isLoggedIn()) {
     document.addEventListener('DOMContentLoaded', function() {
         const API_BASE_URL = '<?php echo API_BASE_URL; ?>';
         
+        // Plan mapping
+        const planNames = {
+            'alerts-only': 'Alerts Only',
+            'dashboard-only': 'Dashboard Only',
+            'alerts-dashboard': 'Alerts + Dashboard'
+        };
+        
         // Get plan from URL parameter, default to 'alerts-dashboard'
         const urlParams = new URLSearchParams(window.location.search);
         const planId = urlParams.get('plan') || 'alerts-dashboard';
+        const planName = planNames[planId] || 'Free Trial';
         
         // Form elements
         const phoneForm = document.getElementById('phone-form');
         const otpForm = document.getElementById('otp-form');
         const profileForm = document.getElementById('profile-form');
         const successView = document.getElementById('success-view');
+        
+        // Title
+        const signupTitle = document.getElementById('signup-title');
+        const planDisplay = document.getElementById('plan-display');
+        
+        // Display selected plan
+        planDisplay.textContent = `Plan: ${planName}`;
         
         // Title
         const signupTitle = document.getElementById('signup-title');
