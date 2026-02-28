@@ -29,6 +29,7 @@ RewriteRule ^privacy/?$ privacy/index.php [L,NC]
 RewriteRule ^terms/?$ terms/index.php [L,NC]
 RewriteRule ^regulatory/?$ regulatory/index.php [L,NC]
 RewriteRule ^login/?$ login/index.php [L,NC]
+RewriteRule ^signup/?$ signup/index.php [L,NC]
 
 # ------------------------------------
 # 5️⃣ Dashboard SPA (React app)
