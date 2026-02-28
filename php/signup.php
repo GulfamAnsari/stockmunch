@@ -1,6 +1,6 @@
 <?php
-$pageTitle = "Terminal Login | Secure Access to StockMunch";
-$pageDescription = "Sign in to your StockMunch terminal to monitor real-time stock market news, manage your watchlist, and configure Telegram alerts.";
+$pageTitle = "Create Account | StockMunch Free Trial";
+$pageDescription = "Sign up for StockMunch and get access to real-time stock market alerts, professional trading terminal, and AI-powered market analysis. Start your 30-day free trial today.";
 require_once dirname(__DIR__) . '/includes/config.php';
 
 // If already logged in, redirect to dashboard
@@ -35,8 +35,8 @@ if (isLoggedIn()) {
         
         <div class="login-card">
             <div class="login-header">
-                <h1 id="login-title">Sign In</h1>
-                <p>Access your StockMunch terminal.</p>
+                <h1 id="signup-title">Create Account</h1>
+                <p>Join 10,000+ traders already using StockMunch.</p>
             </div>
 
             <div id="form-error" class="form-error hidden">
@@ -44,19 +44,10 @@ if (isLoggedIn()) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <span></span>
-                <div id="signup-prompt" class="signup-prompt hidden">
-                    <a href="/php/signup.php" class="btn btn-primary">Sign Up</a>
-                </div>
-            </div>
-
-            <!-- Method Tabs -->
-            <div id="login-tabs" class="login-tabs">
-                <button class="login-tab active" data-method="OTP">OTP Login</button>
-                <button class="login-tab" data-method="PASSWORD">Password</button>
             </div>
 
             <!-- Input Step -->
-            <form id="login-form" class="space-y-8">
+            <form id="signup-form" class="space-y-8">
                 <div class="form-group">
                     <label class="form-label">Mobile Number*</label>
                     <div class="phone-input-wrapper">
@@ -73,11 +64,8 @@ if (isLoggedIn()) {
                     </div>
                 </div>
 
-                <div id="password-group" class="form-group hidden">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 0.25rem; margin-bottom: 0.75rem;">
-                        <label class="form-label" style="margin: 0;">Password*</label>
-                        <button type="button" id="forgot-btn" class="forgot-link">Forgot?</button>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Password* (min 6 chars)</label>
                     <input 
                         type="password" 
                         name="password"
@@ -87,9 +75,31 @@ if (isLoggedIn()) {
                     />
                 </div>
 
+                <div class="form-group">
+                    <label class="form-label">Confirm Password*</label>
+                    <input 
+                        type="password" 
+                        name="confirm_password"
+                        id="confirm-password-input"
+                        placeholder="••••••••"
+                        class="form-input"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="terms-checkbox" required>
+                        <span>I agree to the <a href="/terms" target="_blank" class="text-emerald-600 hover:text-emerald-500">Terms of Use</a> and <a href="/privacy" target="_blank" class="text-emerald-600 hover:text-emerald-500">Privacy Policy</a>*</span>
+                    </label>
+                </div>
+
                 <button type="submit" id="submit-btn" class="btn btn-primary btn-full">
-                    Send OTP
+                    Create Account
                 </button>
+
+                <div class="text-center">
+                    <p class="text-slate-400 text-sm">Already have an account? <a href="/php/login.php" class="text-emerald-600 hover:text-emerald-500 font-semibold">Sign In</a></p>
+                </div>
             </form>
 
             <!-- OTP Verification Step (Initially Hidden) -->
@@ -109,17 +119,6 @@ if (isLoggedIn()) {
                     </div>
                 </div>
 
-                <div id="new-password-group" class="form-group hidden">
-                    <label class="form-label">Set New Password* (min 6 chars)</label>
-                    <input 
-                        type="password" 
-                        name="new_password"
-                        id="new-password-input"
-                        placeholder="••••••••"
-                        class="form-input"
-                    />
-                </div>
-
                 <div class="space-y-4">
                     <button type="submit" id="verify-btn" class="btn btn-primary btn-full">
                         Verify OTP
@@ -137,9 +136,9 @@ if (isLoggedIn()) {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
-                <h3>Updated</h3>
-                <p>Credentials synced. Please sign in now.</p>
-                <button id="back-to-login-btn" class="btn btn-primary btn-full">Sign In</button>
+                <h3>Account Created!</h3>
+                <p>Your 30-day free trial is activated. Enjoy full access!</p>
+                <button id="go-to-dashboard-btn" class="btn btn-primary btn-full">Go to Dashboard</button>
             </div>
         </div>
     </div>
@@ -149,38 +148,24 @@ if (isLoggedIn()) {
         const API_BASE_URL = '<?php echo API_BASE_URL; ?>';
         
         // Elements
-        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
         const otpForm = document.getElementById('otp-form');
         const successView = document.getElementById('success-view');
-        const loginTabs = document.getElementById('login-tabs');
-        const tabs = document.querySelectorAll('.login-tab');
-        const loginTitle = document.getElementById('login-title');
-        const passwordGroup = document.getElementById('password-group');
-        const newPasswordGroup = document.getElementById('new-password-group');
+        const signupTitle = document.getElementById('signup-title');
         const phoneInput = document.getElementById('phone-input');
         const passwordInput = document.getElementById('password-input');
-        const newPasswordInput = document.getElementById('new-password-input');
+        const confirmPasswordInput = document.getElementById('confirm-password-input');
+        const termsCheckbox = document.getElementById('terms-checkbox');
         const submitBtn = document.getElementById('submit-btn');
         const verifyBtn = document.getElementById('verify-btn');
-        const forgotBtn = document.getElementById('forgot-btn');
         const changeNumberBtn = document.getElementById('change-number-btn');
-        const backToLoginBtn = document.getElementById('back-to-login-btn');
+        const goToDashboardBtn = document.getElementById('go-to-dashboard-btn');
         const errorContainer = document.getElementById('form-error');
-        const signupPrompt = document.getElementById('signup-prompt');
         const otpInputs = document.querySelectorAll('.otp-input');
 
-        let currentMethod = 'OTP';
         let currentStep = 'INPUT';
-
-        // Tab switching
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                currentMethod = this.dataset.method;
-                currentStep = 'INPUT';
-                hideError();
-                updateUI();
-            });
-        });
+        let userPhone = '';
+        let userPassword = '';
 
         // Phone input formatting
         phoneInput.addEventListener('input', function(e) {
@@ -208,14 +193,6 @@ if (isLoggedIn()) {
             });
         });
 
-        // Forgot password
-        forgotBtn.addEventListener('click', function() {
-            currentMethod = 'RESET';
-            currentStep = 'INPUT';
-            hideError();
-            updateUI();
-        });
-
         // Change number
         changeNumberBtn.addEventListener('click', function() {
             currentStep = 'INPUT';
@@ -224,21 +201,36 @@ if (isLoggedIn()) {
             updateUI();
         });
 
-        // Back to login after reset
-        backToLoginBtn.addEventListener('click', function() {
-            currentMethod = 'PASSWORD';
-            currentStep = 'INPUT';
-            hideError();
-            updateUI();
+        // Go to dashboard after signup
+        goToDashboardBtn.addEventListener('click', function() {
+            window.location.href = '/dashboard/';
         });
 
-        // Login form submit
-        loginForm.addEventListener('submit', async function(e) {
+        // Signup form submit
+        signupForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const phone = phoneInput.value;
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
             if (phone.length !== 10) {
                 showError('Mobile number must be exactly 10 digits.');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters.');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('Passwords do not match.');
+                return;
+            }
+
+            if (!termsCheckbox.checked) {
+                showError('You must accept the Terms of Use and Privacy Policy.');
                 return;
             }
 
@@ -246,54 +238,24 @@ if (isLoggedIn()) {
             hideError();
 
             try {
-                if (currentMethod === 'OTP') {
-                    const resp = await fetch(`${API_BASE_URL}/auth/send-otp-login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ phone })
-                    });
-                    const data = await resp.json();
-                    
-                    if (data.status === 'otp_sent' || data.status === 'success') {
-                        currentStep = 'VERIFY';
-                        clearOtpInputs();
-                        updateUI();
+                const resp = await fetch(`${API_BASE_URL}/auth/send-otp-signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+                const data = await resp.json();
+                
+                if (data.status === 'otp_sent' || data.status === 'success') {
+                    userPhone = phone;
+                    userPassword = password;
+                    currentStep = 'VERIFY';
+                    clearOtpInputs();
+                    updateUI();
+                } else {
+                    if (data.error === 'already_exists') {
+                        showError('This mobile number is already registered. <a href="/php/login.php" style="color: #4ade80;">Sign in instead</a>');
                     } else {
-                        if (data.error === 'not_registered') {
-                            showError('This mobile number is not registered.', true);
-                        } else {
-                            showError(data.message || data.error || 'Failed to send OTP.');
-                        }
-                    }
-                } else if (currentMethod === 'PASSWORD') {
-                    const password = passwordInput.value;
-                    const resp = await fetch(`${API_BASE_URL}/auth/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ phone, password })
-                    });
-                    const data = await resp.json();
-                    
-                    if (data.token) {
-                        setAuthCookie(data.token);
-                        window.location.href = '/dashboard/';
-                    } else {
-                        showError(data.message || data.error || 'Incorrect login details.');
-                    }
-                } else if (currentMethod === 'RESET') {
-                    const resp = await fetch(`${API_BASE_URL}/auth/send-otp-reset`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ phone })
-                    });
-                    const data = await resp.json();
-                    
-                    if (data.status === 'otp_sent' || data.status === 'success') {
-                        currentStep = 'VERIFY';
-                        clearOtpInputs();
-                        updateUI();
-                    } else {
-                        showError(data.message || data.error || 'Reset request failed.');
+                        showError(data.message || data.error || 'Failed to send OTP.');
                     }
                 }
             } catch (err) {
@@ -313,52 +275,27 @@ if (isLoggedIn()) {
                 return;
             }
 
-            if (currentMethod === 'RESET' && newPasswordInput.value.length < 6) {
-                showError('New password must be at least 6 characters.');
-                return;
-            }
-
             setLoading(verifyBtn, true);
             hideError();
 
             try {
-                if (currentMethod === 'RESET') {
-                    const resp = await fetch(`${API_BASE_URL}/auth/reset-password`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            phone: phoneInput.value, 
-                            otp, 
-                            password: newPasswordInput.value 
-                        })
-                    });
-                    const data = await resp.json();
-                    
-                    if (data.status === 'password_reset' || data.status === 'success') {
-                        if (data.token) setAuthCookie(data.token);
-                        currentStep = 'SUCCESS';
-                        updateUI();
-                    } else {
-                        showError(data.message || data.error || 'Failed to update password.');
-                    }
+                const resp = await fetch(`${API_BASE_URL}/auth/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        phone: userPhone, 
+                        otp,
+                        password: userPassword
+                    })
+                });
+                const data = await resp.json();
+                
+                if (data.verified || data.status === 'success') {
+                    if (data.token) setAuthCookie(data.token);
+                    currentStep = 'SUCCESS';
+                    updateUI();
                 } else {
-                    const resp = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            phone: phoneInput.value, 
-                            otp, 
-                            purpose: 'login' 
-                        })
-                    });
-                    const data = await resp.json();
-                    
-                    if (data.verified) {
-                        if (data.token) setAuthCookie(data.token);
-                        window.location.href = '/dashboard/';
-                    } else {
-                        showError(data.message || 'Incorrect OTP entered.');
-                    }
+                    showError(data.message || 'Incorrect OTP entered.');
                 }
             } catch (err) {
                 showError('Verification failed.');
@@ -368,87 +305,42 @@ if (isLoggedIn()) {
         });
 
         function updateUI() {
-            // Update tabs
-            tabs.forEach(tab => {
-                if (tab.dataset.method === currentMethod || 
-                    (currentMethod === 'RESET' && tab.dataset.method === 'PASSWORD')) {
-                    tab.classList.add('active');
-                } else {
-                    tab.classList.remove('active');
-                }
-            });
-
             // Update title
             if (currentStep === 'SUCCESS') {
-                loginTitle.textContent = 'Reset Done';
-            } else if (currentMethod === 'RESET') {
-                loginTitle.textContent = 'Reset Password';
+                signupTitle.textContent = 'Welcome!';
+            } else if (currentStep === 'VERIFY') {
+                signupTitle.textContent = 'Verify Phone';
             } else {
-                loginTitle.textContent = 'Sign In';
-            }
-
-            // Show/hide tabs
-            if (currentMethod === 'RESET' || currentStep === 'SUCCESS') {
-                loginTabs.classList.add('hidden');
-            } else {
-                loginTabs.classList.remove('hidden');
-            }
-
-            // Show/hide password field
-            if (currentMethod === 'PASSWORD' && currentStep === 'INPUT') {
-                passwordGroup.classList.remove('hidden');
-            } else {
-                passwordGroup.classList.add('hidden');
-            }
-
-            // Show/hide new password field
-            if (currentMethod === 'RESET' && currentStep === 'VERIFY') {
-                newPasswordGroup.classList.remove('hidden');
-            } else {
-                newPasswordGroup.classList.add('hidden');
-            }
-
-            // Update submit button text
-            if (currentMethod === 'PASSWORD') {
-                submitBtn.textContent = 'Sign In';
-            } else {
-                submitBtn.textContent = 'Send OTP';
+                signupTitle.textContent = 'Create Account';
             }
 
             // Show correct form/view
             if (currentStep === 'INPUT') {
-                loginForm.classList.remove('hidden');
+                signupForm.classList.remove('hidden');
                 otpForm.classList.add('hidden');
                 successView.classList.add('hidden');
             } else if (currentStep === 'VERIFY') {
-                loginForm.classList.add('hidden');
+                signupForm.classList.add('hidden');
                 otpForm.classList.remove('hidden');
                 successView.classList.add('hidden');
                 otpInputs[0].focus();
             } else if (currentStep === 'SUCCESS') {
-                loginForm.classList.add('hidden');
+                signupForm.classList.add('hidden');
                 otpForm.classList.add('hidden');
                 successView.classList.remove('hidden');
             }
         }
 
-        function showError(message, showSignup = false) {
+        function showError(message) {
             const span = errorContainer.querySelector('span');
-            span.textContent = message;
+            span.innerHTML = message;
             errorContainer.classList.remove('hidden');
             errorContainer.classList.add('animate-shake');
             setTimeout(() => errorContainer.classList.remove('animate-shake'), 500);
-            
-            if (showSignup) {
-                signupPrompt.classList.remove('hidden');
-            } else {
-                signupPrompt.classList.add('hidden');
-            }
         }
 
         function hideError() {
             errorContainer.classList.add('hidden');
-            signupPrompt.classList.add('hidden');
         }
 
         function setLoading(button, isLoading) {
@@ -457,7 +349,7 @@ if (isLoggedIn()) {
                 button.innerHTML = '<span class="loading-spinner"><span class="spinner"></span><span>Processing...</span></span>';
             } else {
                 button.textContent = button === submitBtn 
-                    ? (currentMethod === 'PASSWORD' ? 'Sign In' : 'Send OTP')
+                    ? 'Create Account'
                     : 'Verify OTP';
             }
         }
