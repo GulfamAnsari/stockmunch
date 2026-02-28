@@ -44,7 +44,7 @@ filesToCopy.forEach(file => {
 console.log('\nBuilding PHP pages...');
 
 // PHP pages that need folder structure (e.g., about.php -> about/index.php)
-const phpPages = ['about', 'contact', 'privacy', 'terms', 'regulatory', 'login'];
+const phpPages = ['about', 'contact', 'privacy', 'terms', 'regulatory', 'login', 'signup'];
 
 // Copy PHP index.php to dist root
 const phpIndexSrc = path.resolve(phpSourceDir, 'index.php');

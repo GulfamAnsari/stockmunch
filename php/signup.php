@@ -98,7 +98,7 @@ if (isLoggedIn()) {
                 </button>
 
                 <div class="text-center">
-                    <p class="text-slate-400 text-sm">Already have an account? <a href="/php/login.php" class="text-emerald-600 hover:text-emerald-500 font-semibold">Sign In</a></p>
+                    <p class="text-slate-400 text-sm">Already have an account? <a href="/login" class="text-emerald-600 hover:text-emerald-500 font-semibold">Sign In</a></p>
                 </div>
             </form>
 
