@@ -36,7 +36,6 @@ if (isLoggedIn()) {
         <div class="login-card">
             <div class="login-header">
                 <h1 id="signup-title">Create Account</h1>
-                <p>Join 10,000+ traders already using StockMunch.</p>
             </div>
 
             <div id="form-error" class="form-error hidden">
@@ -157,6 +156,10 @@ if (isLoggedIn()) {
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const API_BASE_URL = '<?php echo API_BASE_URL; ?>';
+        
+        // Get plan from URL parameter, default to 'alerts-dashboard'
+        const urlParams = new URLSearchParams(window.location.search);
+        const planId = urlParams.get('plan') || 'alerts-dashboard';
         
         // Form elements
         const phoneForm = document.getElementById('phone-form');
@@ -347,7 +350,7 @@ if (isLoggedIn()) {
                         password,
                         name,
                         email,
-                        plan_id: 'ALERT_DASH'
+                        plan_id: planId
                     })
                 });
                 const data = await resp.json();

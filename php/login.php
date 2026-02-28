@@ -45,7 +45,7 @@ if (isLoggedIn()) {
                 </svg>
                 <span></span>
                 <div id="signup-prompt" class="signup-prompt hidden">
-                    <a href="/signup" class="btn btn-primary">Sign Up</a>
+                    <a href="/signup?plan=alerts-dashboard" class="btn btn-primary">Sign Up</a>
                 </div>
             </div>
 
