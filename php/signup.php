@@ -48,6 +48,11 @@ if (isLoggedIn()) {
 
             <!-- Step 1: Phone Input -->
             <form id="phone-form" class="space-y-8">
+                <div id="plan-badge" class="plan-badge">
+                    <span class="plan-name"></span>
+                    <button type="button" class="change-plan-btn" onclick="window.history.back(); return false;">Change</button>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Mobile Number*</label>
                     <div class="phone-input-wrapper">
@@ -179,9 +184,12 @@ if (isLoggedIn()) {
         // Title
         const signupTitle = document.getElementById('signup-title');
         const planDisplay = document.getElementById('plan-display');
+        const planBadge = document.getElementById('plan-badge');
+        const planBadgeName = planBadge.querySelector('.plan-name');
         
         // Display selected plan
         planDisplay.textContent = `Plan: ${planName}`;
+        planBadgeName.textContent = planName;
         
         // Title
         const signupTitle = document.getElementById('signup-title');

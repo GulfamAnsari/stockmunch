@@ -2204,6 +2204,54 @@ h1, h2, h3, h4, h5, h6 {
     padding-left: 0.25rem;
 }
 
+.plan-badge {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(31, 168, 79, 0.1);
+    border: 1px solid var(--color-emerald);
+    border-radius: var(--border-radius-xl);
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.plan-badge .plan-name {
+    font-weight: 600;
+    color: var(--color-emerald);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.plan-badge .plan-name::before {
+    content: '✓';
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: var(--color-emerald);
+    color: var(--color-dark);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 1.25rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.change-plan-btn {
+    background: none;
+    border: none;
+    color: var(--color-slate-400);
+    cursor: pointer;
+    font-size: 0.875rem;
+    text-decoration: underline;
+    padding: 0;
+    transition: color var(--transition-fast);
+}
+
+.change-plan-btn:hover {
+    color: var(--color-slate-300);
+}
+
 .form-input,
 .form-textarea {
     width: 100%;
