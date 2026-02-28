@@ -89,7 +89,7 @@ if (isLoggedIn()) {
                 <div class="form-group">
                     <label class="checkbox-label">
                         <input type="checkbox" id="terms-checkbox" required>
-                        <span>I agree to the <a href="/terms" target="_blank" class="text-emerald-600 hover:text-emerald-500">Terms of Use</a> and <a href="/privacy" target="_blank" class="text-emerald-600 hover:text-emerald-500">Privacy Policy</a>*</span>
+                        <span>I agree to the <a href="/php/terms.php" target="_blank">Terms of Use</a> and <a href="/php/privacy.php" target="_blank">Privacy Policy</a>*</span>
                     </label>
                 </div>
 

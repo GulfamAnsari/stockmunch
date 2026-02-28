@@ -34,7 +34,7 @@ require_once __DIR__ . '/includes/header.php';
             </p>
             
             <div class="hero-buttons">
-                <a href="#pricing" class="btn btn-primary btn-lg">
+                <a href="/php/signup.php" class="btn btn-primary btn-lg">
                     Sign Up Free
                     <svg class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -303,7 +303,7 @@ require_once __DIR__ . '/includes/header.php';
                         <?php endforeach; ?>
                     </ul>
 
-                    <a href="/login/?plan=<?php echo $plan['id']; ?>" class="btn <?php echo isset($plan['popular']) && $plan['popular'] ? 'btn-primary' : 'btn-dark'; ?>">
+                    <a href="/php/signup.php" class="btn <?php echo isset($plan['popular']) && $plan['popular'] ? 'btn-primary' : 'btn-dark'; ?>">
                         <?php echo $plan['cta']; ?>
                     </a>
                 </div>
