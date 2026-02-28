@@ -46,8 +46,8 @@ if (isLoggedIn()) {
                 <span></span>
             </div>
 
-            <!-- Input Step -->
-            <form id="signup-form" class="space-y-8">
+            <!-- Step 1: Phone Input -->
+            <form id="phone-form" class="space-y-8">
                 <div class="form-group">
                     <label class="form-label">Mobile Number*</label>
                     <div class="phone-input-wrapper">
@@ -64,37 +64,8 @@ if (isLoggedIn()) {
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Password* (min 6 chars)</label>
-                    <input 
-                        type="password" 
-                        name="password"
-                        id="password-input"
-                        placeholder="••••••••"
-                        class="form-input"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Confirm Password*</label>
-                    <input 
-                        type="password" 
-                        name="confirm_password"
-                        id="confirm-password-input"
-                        placeholder="••••••••"
-                        class="form-input"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="terms-checkbox" required>
-                        <span>I agree to the <a href="/php/terms.php" target="_blank">Terms of Use</a> and <a href="/php/privacy.php" target="_blank">Privacy Policy</a>*</span>
-                    </label>
-                </div>
-
-                <button type="submit" id="submit-btn" class="btn btn-primary btn-full">
-                    Create Account
+                <button type="submit" id="phone-submit-btn" class="btn btn-primary btn-full">
+                    Send OTP
                 </button>
 
                 <div class="text-center">
@@ -102,7 +73,7 @@ if (isLoggedIn()) {
                 </div>
             </form>
 
-            <!-- OTP Verification Step (Initially Hidden) -->
+            <!-- Step 2: OTP Verification -->
             <form id="otp-form" class="space-y-8 hidden">
                 <div class="form-group">
                     <label class="form-label text-center block">Enter OTP</label>
@@ -120,16 +91,56 @@ if (isLoggedIn()) {
                 </div>
 
                 <div class="space-y-4">
-                    <button type="submit" id="verify-btn" class="btn btn-primary btn-full">
+                    <button type="submit" id="otp-submit-btn" class="btn btn-primary btn-full">
                         Verify OTP
                     </button>
-                    <button type="button" id="change-number-btn" class="change-number-btn">
+                    <button type="button" id="change-phone-btn" class="change-number-btn">
                         Change Number
                     </button>
                 </div>
             </form>
 
-            <!-- Success Step (Initially Hidden) -->
+            <!-- Step 3: Profile Setup -->
+            <form id="profile-form" class="space-y-8 hidden">
+                <div class="form-group">
+                    <label class="form-label">Full Name*</label>
+                    <input 
+                        type="text" 
+                        name="name"
+                        id="name-input"
+                        placeholder="John Doe"
+                        class="form-input"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address*</label>
+                    <input 
+                        type="email" 
+                        name="email"
+                        id="email-input"
+                        placeholder="john@example.com"
+                        class="form-input"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password* (min 6 chars)</label>
+                    <input 
+                        type="password" 
+                        name="password"
+                        id="password-input"
+                        placeholder="••••••••"
+                        class="form-input"
+                    />
+                </div>
+
+                <button type="submit" id="profile-submit-btn" class="btn btn-primary btn-full">
+                    Create Account
+                </button>
+            </form>
+
+            <!-- Step 4: Success -->
             <div id="success-view" class="login-success hidden">
                 <div class="login-success-icon">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -147,25 +158,38 @@ if (isLoggedIn()) {
     document.addEventListener('DOMContentLoaded', function() {
         const API_BASE_URL = '<?php echo API_BASE_URL; ?>';
         
-        // Elements
-        const signupForm = document.getElementById('signup-form');
+        // Form elements
+        const phoneForm = document.getElementById('phone-form');
         const otpForm = document.getElementById('otp-form');
+        const profileForm = document.getElementById('profile-form');
         const successView = document.getElementById('success-view');
+        
+        // Title
         const signupTitle = document.getElementById('signup-title');
+        
+        // Phone step
         const phoneInput = document.getElementById('phone-input');
-        const passwordInput = document.getElementById('password-input');
-        const confirmPasswordInput = document.getElementById('confirm-password-input');
-        const termsCheckbox = document.getElementById('terms-checkbox');
-        const submitBtn = document.getElementById('submit-btn');
-        const verifyBtn = document.getElementById('verify-btn');
-        const changeNumberBtn = document.getElementById('change-number-btn');
-        const goToDashboardBtn = document.getElementById('go-to-dashboard-btn');
-        const errorContainer = document.getElementById('form-error');
+        const phoneSubmitBtn = document.getElementById('phone-submit-btn');
+        
+        // OTP step
         const otpInputs = document.querySelectorAll('.otp-input');
+        const otpSubmitBtn = document.getElementById('otp-submit-btn');
+        const changePhoneBtn = document.getElementById('change-phone-btn');
+        
+        // Profile step
+        const nameInput = document.getElementById('name-input');
+        const emailInput = document.getElementById('email-input');
+        const passwordInput = document.getElementById('password-input');
+        const profileSubmitBtn = document.getElementById('profile-submit-btn');
+        
+        // Dashboard
+        const goToDashboardBtn = document.getElementById('go-to-dashboard-btn');
+        
+        // Error
+        const errorContainer = document.getElementById('form-error');
 
-        let currentStep = 'INPUT';
+        let currentStep = 'PHONE';
         let userPhone = '';
-        let userPassword = '';
 
         // Phone input formatting
         phoneInput.addEventListener('input', function(e) {
@@ -193,48 +217,30 @@ if (isLoggedIn()) {
             });
         });
 
-        // Change number
-        changeNumberBtn.addEventListener('click', function() {
-            currentStep = 'INPUT';
+        // Change phone
+        changePhoneBtn.addEventListener('click', function() {
+            currentStep = 'PHONE';
             hideError();
             clearOtpInputs();
             updateUI();
         });
 
-        // Go to dashboard after signup
+        // Go to dashboard
         goToDashboardBtn.addEventListener('click', function() {
             window.location.href = '/dashboard/';
         });
 
-        // Signup form submit
-        signupForm.addEventListener('submit', async function(e) {
+        // Phone form submit
+        phoneForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const phone = phoneInput.value;
-            const password = passwordInput.value;
-            const confirmPassword = confirmPasswordInput.value;
-
             if (phone.length !== 10) {
                 showError('Mobile number must be exactly 10 digits.');
                 return;
             }
 
-            if (password.length < 6) {
-                showError('Password must be at least 6 characters.');
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                showError('Passwords do not match.');
-                return;
-            }
-
-            if (!termsCheckbox.checked) {
-                showError('You must accept the Terms of Use and Privacy Policy.');
-                return;
-            }
-
-            setLoading(submitBtn, true);
+            setLoading(phoneSubmitBtn, true);
             hideError();
 
             try {
@@ -247,13 +253,13 @@ if (isLoggedIn()) {
                 
                 if (data.status === 'otp_sent' || data.status === 'success') {
                     userPhone = phone;
-                    userPassword = password;
-                    currentStep = 'VERIFY';
+                    currentStep = 'OTP';
                     clearOtpInputs();
                     updateUI();
+                    otpInputs[0].focus();
                 } else {
-                    if (data.error === 'already_exists') {
-                        showError('This mobile number is already registered. <a href="/php/login.php" style="color: #4ade80;">Sign in instead</a>');
+                    if (data.error === 'user_exists' || data.error === 'already_exists') {
+                        showError('This mobile number is already registered. <a href="/login" style="color: #4ade80;">Sign in instead</a>');
                     } else {
                         showError(data.message || data.error || 'Failed to send OTP.');
                     }
@@ -261,7 +267,7 @@ if (isLoggedIn()) {
             } catch (err) {
                 showError('Network error. Please try again.');
             } finally {
-                setLoading(submitBtn, false);
+                setLoading(phoneSubmitBtn, false);
             }
         });
 
@@ -275,60 +281,112 @@ if (isLoggedIn()) {
                 return;
             }
 
-            setLoading(verifyBtn, true);
+            setLoading(otpSubmitBtn, true);
             hideError();
 
             try {
-                const resp = await fetch(`${API_BASE_URL}/auth/signup`, {
+                const resp = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         phone: userPhone, 
                         otp,
-                        password: userPassword
+                        purpose: 'signup'
                     })
                 });
                 const data = await resp.json();
                 
                 if (data.verified || data.status === 'success') {
                     if (data.token) setAuthCookie(data.token);
-                    currentStep = 'SUCCESS';
+                    currentStep = 'PROFILE';
                     updateUI();
+                    nameInput.focus();
                 } else {
                     showError(data.message || 'Incorrect OTP entered.');
                 }
             } catch (err) {
                 showError('Verification failed.');
             } finally {
-                setLoading(verifyBtn, false);
+                setLoading(otpSubmitBtn, false);
+            }
+        });
+
+        // Profile form submit
+        profileForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!name || name.length < 2) {
+                showError('Please enter your full name.');
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Please provide a valid email address.');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters.');
+                return;
+            }
+
+            setLoading(profileSubmitBtn, true);
+            hideError();
+
+            try {
+                const resp = await fetch(`${API_BASE_URL}/auth/set-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        phone: userPhone, 
+                        password,
+                        name,
+                        email,
+                        plan_id: 'ALERT_DASH'
+                    })
+                });
+                const data = await resp.json();
+                
+                if (data.status === 'password_set' || data.status === 'success' || data.verified) {
+                    if (data.token) setAuthCookie(data.token);
+                    currentStep = 'SUCCESS';
+                    updateUI();
+                } else {
+                    showError(data.message || data.error || 'Failed to create account.');
+                }
+            } catch (err) {
+                showError('Network error. Please try again.');
+            } finally {
+                setLoading(profileSubmitBtn, false);
             }
         });
 
         function updateUI() {
             // Update title
-            if (currentStep === 'SUCCESS') {
-                signupTitle.textContent = 'Welcome!';
-            } else if (currentStep === 'VERIFY') {
-                signupTitle.textContent = 'Verify Phone';
-            } else {
-                signupTitle.textContent = 'Create Account';
+            switch(currentStep) {
+                case 'OTP':
+                    signupTitle.textContent = 'Verify Phone';
+                    break;
+                case 'PROFILE':
+                    signupTitle.textContent = 'Complete Profile';
+                    break;
+                case 'SUCCESS':
+                    signupTitle.textContent = 'Welcome!';
+                    break;
+                default:
+                    signupTitle.textContent = 'Create Account';
             }
 
-            // Show correct form/view
-            if (currentStep === 'INPUT') {
-                signupForm.classList.remove('hidden');
-                otpForm.classList.add('hidden');
-                successView.classList.add('hidden');
-            } else if (currentStep === 'VERIFY') {
-                signupForm.classList.add('hidden');
-                otpForm.classList.remove('hidden');
-                successView.classList.add('hidden');
-                otpInputs[0].focus();
-            } else if (currentStep === 'SUCCESS') {
-                signupForm.classList.add('hidden');
-                otpForm.classList.add('hidden');
-                successView.classList.remove('hidden');
-            }
+            // Show correct form
+            phoneForm.classList.toggle('hidden', currentStep !== 'PHONE');
+            otpForm.classList.toggle('hidden', currentStep !== 'OTP');
+            profileForm.classList.toggle('hidden', currentStep !== 'PROFILE');
+            successView.classList.toggle('hidden', currentStep !== 'SUCCESS');
         }
 
         function showError(message) {
@@ -348,9 +406,13 @@ if (isLoggedIn()) {
             if (isLoading) {
                 button.innerHTML = '<span class="loading-spinner"><span class="spinner"></span><span>Processing...</span></span>';
             } else {
-                button.textContent = button === submitBtn 
-                    ? 'Create Account'
-                    : 'Verify OTP';
+                if (button === phoneSubmitBtn) {
+                    button.textContent = 'Send OTP';
+                } else if (button === otpSubmitBtn) {
+                    button.textContent = 'Verify OTP';
+                } else if (button === profileSubmitBtn) {
+                    button.textContent = 'Create Account';
+                }
             }
         }
 
