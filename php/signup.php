@@ -169,11 +169,22 @@ if (isLoggedIn()) {
             'dashboard-only': 'Dashboard Only',
             'alerts-dashboard': 'Alerts + Dashboard'
         };
+
+        // Map plan IDs like React component
+        const getMappedPlanId = (pid) => {
+            switch (pid) {
+                case 'alerts-only': return 'ALERT';
+                case 'dashboard-only': return 'DASHBOARD';
+                case 'alerts-dashboard': return 'ALERT_DASH';
+                default: return 'ALERT';
+            }
+        };
         
         // Get plan from URL parameter, default to 'alerts-dashboard'
         const urlParams = new URLSearchParams(window.location.search);
         const planId = urlParams.get('plan') || 'alerts-dashboard';
         const planName = planNames[planId] || 'Free Trial';
+        const mappedPlanId = getMappedPlanId(planId);
         
         // Form elements
         const phoneForm = document.getElementById('phone-form');
@@ -190,9 +201,6 @@ if (isLoggedIn()) {
         // Display selected plan
         planDisplay.textContent = `Plan: ${planName}`;
         planBadgeName.textContent = planName;
-        
-        // Title
-        const signupTitle = document.getElementById('signup-title');
         
         // Phone step
         const phoneInput = document.getElementById('phone-input');
@@ -374,7 +382,7 @@ if (isLoggedIn()) {
                         password,
                         name,
                         email,
-                        plan_id: planId
+                        plan_id: mappedPlanId
                     })
                 });
                 const data = await resp.json();
