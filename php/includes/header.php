@@ -14,17 +14,13 @@ $defaultImage = $siteUrl . '/php-assets/images/og-image.jpg';
 
 <?php
 $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$normalizedPath = trim($requestPath, '/');
+$normalized  = trim($requestPath, '/');
 
-$finalCanonical = rtrim($siteUrl, '/') . '/';
-
-if (!empty($normalizedPath)) {
-    $finalCanonical .= $normalizedPath . '/';
+if ($normalized === '') {
+    $canonical = 'https://stockmunch.com/';
+} else {
+    $canonical = 'https://stockmunch.com/' . $normalized . '/';
 }
-
-$canonical = isset($canonicalUrl)
-    ? htmlspecialchars($canonicalUrl)
-    : $finalCanonical;
 ?>
 
 <!DOCTYPE html>
