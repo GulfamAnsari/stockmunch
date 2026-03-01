@@ -89,76 +89,80 @@ if ($normalized === '') {
     <link rel="apple-touch-icon" sizes="180x180" href="/php-assets/images/apple-touch-icon.png">
     
     <!-- Structured Data - Organization -->
-    <script type="application/ld+json">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://stockmunch.com/#organization",
+  "name": "StockMunch",
+  "url": "https://stockmunch.com/",
+  "description": "India's fastest stock market news alerts engine providing real-time Telegram notifications for corporate filings and market updates.",
+  "foundingDate": "2024",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "https://stockmunch.com/php-assets/images/logo.png"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "support@stockmunch.com",
+    "contactType": "customer support",
+    "availableLanguage": ["English", "Hindi"]
+  },
+  "sameAs": [
+    "https://www.instagram.com/stock_munch"
+  ],
+  "areaServed": {
+    "@type": "Country",
+    "name": "India"
+  }
+}
+</script>
+
+<?php if ($currentPage === 'home' || $currentPage === ''): ?>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+
     {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "@id": "https://stockmunch.com/#organization",
-    "name": "StockMunch",
-    "url": "https://stockmunch.com/",
-    "description": "India's fastest stock market news alerts engine providing real-time Telegram notifications for corporate filings and market updates.",
-    "foundingDate": "2024",
-    "logo": {
-        "@type": "ImageObject",
-        "url": "https://stockmunch.com/php-assets/images/logo.png"
+      "@type": "WebSite",
+      "@id": "https://stockmunch.com/#website",
+      "url": "https://stockmunch.com/",
+      "name": "StockMunch",
+      "description": "Real-time stock market alerts and NSE/BSE news terminal for Indian traders",
+      "inLanguage": "en-IN",
+      "publisher": {
+        "@id": "https://stockmunch.com/#organization"
+      },
+      "mainEntity": {
+        "@id": "https://stockmunch.com/#application"
+      }
     },
-    "contactPoint": {
-        "@type": "ContactPoint",
-        "email": "support@stockmunch.com",
-        "contactType": "customer support",
-        "availableLanguage": ["English", "Hindi"]
-    },
-    "sameAs": [
-        "https://www.instagram.com/stock_munch"
-    ],
-    "areaServed": {
-        "@type": "Country",
-        "name": "India"
-    }
-    }
-    </script>
 
-    <?php if ($currentPage === 'home' || $currentPage === ''): ?>
-
-    <script type="application/ld+json">
     {
-    "@context": "https://schema.org",
-    "@graph": [
-
-        {
-        "@type": "WebSite",
-        "@id": "https://stockmunch.com/#website",
-        "url": "https://stockmunch.com/",
-        "name": "StockMunch",
-        "description": "Real-time stock market alerts and NSE/BSE news terminal for Indian traders",
-        "publisher": {
-            "@id": "https://stockmunch.com/#organization"
-        }
-        },
-
-        {
-        "@type": "SoftwareApplication",
-        "@id": "https://stockmunch.com/#application",
-        "name": "StockMunch Terminal",
-        "url": "https://stockmunch.com/",
-        "description": "Web-based stock market alerts terminal providing real-time NSE and BSE corporate filing notifications via Telegram.",
-        "applicationCategory": "FinanceApplication",
-        "operatingSystem": "Web",
-        "publisher": {
-            "@id": "https://stockmunch.com/#organization"
-        },
-        "offers": {
-            "@type": "Offer",
-            "price": "150",
-            "priceCurrency": "INR"
-        }
-        }
-
-    ]
+      "@type": "SoftwareApplication",
+      "@id": "https://stockmunch.com/#application",
+      "name": "StockMunch Terminal",
+      "url": "https://stockmunch.com/",
+      "description": "Web-based stock market alerts terminal providing real-time NSE and BSE corporate filing notifications via Telegram.",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "publisher": {
+        "@id": "https://stockmunch.com/#organization"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "150",
+        "priceCurrency": "INR"
+      }
     }
-    </script>
 
-    <?php endif; ?>
+  ]
+}
+</script>
+
+<?php endif; ?>
     <script src="/php-assets/js/main.js" defer></script>
 </head>
 <body class="bg-dark text-slate-300 selection-emerald">
