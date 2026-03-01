@@ -41,10 +41,12 @@ require_once __DIR__ . '/includes/header.php';
                     </svg>
                 </a>
                 
-                <a href="#alerts" class="btn btn-secondary btn-lg">
-                    Sample Market Alerts
+                <a href="https://t.me/+CIQ6ffncy_lkMjRl" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    class="btn btn-secondary btn-lg">
+                        Join our Telegram Channel
                 </a>
-
                 <a href="#dashboard" class="btn btn-outline btn-lg">
                     View Terminal Preview
                 </a>
