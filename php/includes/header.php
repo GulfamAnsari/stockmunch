@@ -9,7 +9,7 @@ $siteName = SITE_NAME;
 $defaultTitle = 'Real-Time Stock Market Alerts & NSE News Terminal';
 $defaultDescription = 'India\'s fastest stock market news alerts engine. Get instant Telegram notifications for corporate filings, BSE/NSE regulatory updates, and AI-driven market analysis. Start your free 30-day trial.';
 $defaultKeywords = 'stock market alerts, NSE news, BSE updates, stock alerts India, real-time market news, Telegram stock alerts, stock market terminal, corporate filings alerts, market news India, stock watchlist';
-$defaultImage = $siteUrl . '/php-assets/images/og-image.jpg';
+$defaultImage = $siteUrl . 'php-assets/images/og-image.jpg';
 ?>
 
 <?php
@@ -73,7 +73,7 @@ if ($normalized === '') {
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://stockmunch.com">
+    <link rel="preconnect" href="https://stockmunch.com/">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     
     <!-- Fonts -->

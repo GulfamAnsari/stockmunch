@@ -8,15 +8,16 @@ RewriteCond %{HTTPS} off
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # ------------------------------------
-# 2️⃣ Force Trailing Slash (Except Files)
+# 2️⃣ Force Trailing Slash (Except Files & Root Safe)
 # ------------------------------------
+RewriteCond %{REQUEST_URI} !^/$
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{1,5}$ 
+RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{1,5}$
 RewriteCond %{REQUEST_URI} !/$
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1/ [L,R=301]
 
 # ------------------------------------
-# 3️⃣ Allow Static Files Directly
+# 3️⃣ Allow Existing Files & Folders
 # ------------------------------------
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
