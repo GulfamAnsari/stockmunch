@@ -2,26 +2,33 @@ RewriteEngine On
 RewriteBase /
 
 # ------------------------------------
-# 1️⃣ Force HTTPS (SEO + Security)
+# 1️⃣ Force HTTPS
 # ------------------------------------
 RewriteCond %{HTTPS} off
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # ------------------------------------
-# 2️⃣ Allow static files directly
-# (sitemap.xml, robots.txt, images, JS, CSS)
+# 2️⃣ Force Trailing Slash (Except Files)
+# ------------------------------------
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{1,5}$ 
+RewriteCond %{REQUEST_URI} !/$
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1/ [L,R=301]
+
+# ------------------------------------
+# 3️⃣ Allow Static Files Directly
 # ------------------------------------
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
 # ------------------------------------
-# 3️⃣ API routing
+# 4️⃣ API Routing
 # ------------------------------------
-RewriteRule ^api(/.*)?$ api/index.php [QSA,L]
+RewriteRule ^api(/.*)?/?$ api/index.php [QSA,L]
 
 # ------------------------------------
-# 4️⃣ PHP Pages (folder-based structure)
+# 5️⃣ PHP Pages (Folder Based)
 # ------------------------------------
 RewriteRule ^about/?$ about/index.php [L,NC]
 RewriteRule ^contact/?$ contact/index.php [L,NC]
@@ -32,12 +39,12 @@ RewriteRule ^login/?$ login/index.php [L,NC]
 RewriteRule ^signup/?$ signup/index.php [L,NC]
 
 # ------------------------------------
-# 5️⃣ Dashboard SPA (React app)
+# 6️⃣ Dashboard SPA (React)
 # ------------------------------------
 RewriteRule ^dashboard/?$ dashboard/index.html [L,NC]
 RewriteRule ^dashboard/(.*)$ dashboard/index.html [L,NC]
 
 # ------------------------------------
-# 6️⃣ Homepage fallback
+# 7️⃣ Homepage
 # ------------------------------------
 RewriteRule ^$ index.php [L]

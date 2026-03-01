@@ -11,6 +11,22 @@ $defaultDescription = 'India\'s fastest stock market news alerts engine. Get ins
 $defaultKeywords = 'stock market alerts, NSE news, BSE updates, stock alerts India, real-time market news, Telegram stock alerts, stock market terminal, corporate filings alerts, market news India, stock watchlist';
 $defaultImage = $siteUrl . '/php-assets/images/og-image.jpg';
 ?>
+
+<?php
+$requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$normalizedPath = trim($requestPath, '/');
+
+$finalCanonical = rtrim($siteUrl, '/') . '/';
+
+if (!empty($normalizedPath)) {
+    $finalCanonical .= $normalizedPath . '/';
+}
+
+$canonical = isset($canonicalUrl)
+    ? htmlspecialchars($canonicalUrl)
+    : $finalCanonical;
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,11 +43,10 @@ $defaultImage = $siteUrl . '/php-assets/images/og-image.jpg';
     <meta name="googlebot" content="index, follow">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="<?php echo isset($canonicalUrl) ? $canonicalUrl : $siteUrl . ($_SERVER['REQUEST_URI'] === '/' ? '' : rtrim($_SERVER['REQUEST_URI'], '/')); ?>">
-    
+    <link rel="canonical" href="<?php echo $canonical; ?>">
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="<?php echo isset($canonicalUrl) ? $canonicalUrl : $siteUrl . $_SERVER['REQUEST_URI']; ?>">
+    <meta property="og:url" content="<?php echo $canonical; ?>">
     <meta property="og:title" content="<?php echo isset($pageTitle) ? htmlspecialchars($pageTitle) . ' | ' . $siteName : $siteName . ' | ' . $defaultTitle; ?>">
     <meta property="og:description" content="<?php echo isset($pageDescription) ? htmlspecialchars($pageDescription) : $defaultDescription; ?>">
     <meta property="og:image" content="<?php echo isset($ogImage) ? $ogImage : $defaultImage; ?>">
@@ -42,7 +57,7 @@ $defaultImage = $siteUrl . '/php-assets/images/og-image.jpg';
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="<?php echo isset($canonicalUrl) ? $canonicalUrl : $siteUrl . $_SERVER['REQUEST_URI']; ?>">
+    <meta name="twitter:url" content="<?php echo $canonical; ?>">
     <meta name="twitter:title" content="<?php echo isset($pageTitle) ? htmlspecialchars($pageTitle) . ' | ' . $siteName : $siteName . ' | ' . $defaultTitle; ?>">
     <meta name="twitter:description" content="<?php echo isset($pageDescription) ? htmlspecialchars($pageDescription) : $defaultDescription; ?>">
     <meta name="twitter:image" content="<?php echo isset($ogImage) ? $ogImage : $defaultImage; ?>">
@@ -83,7 +98,7 @@ $defaultImage = $siteUrl . '/php-assets/images/og-image.jpg';
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "StockMunch",
-        "url": "https://stockmunch.com",
+        "url": "https://stockmunch.com/",
         "logo": "https://stockmunch.com/php-assets/images/logo.png",
         "description": "India's fastest stock market news alerts engine providing real-time Telegram notifications for corporate filings and market updates.",
         "foundingDate": "2024",
@@ -110,7 +125,7 @@ $defaultImage = $siteUrl . '/php-assets/images/og-image.jpg';
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "StockMunch",
-        "url": "https://stockmunch.com",
+        "url": "https://stockmunch.com/",
         "description": "Real-time stock market alerts and NSE/BSE news terminal for Indian traders",
         "publisher": {
             "@type": "Organization",
