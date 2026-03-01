@@ -4,7 +4,7 @@
  */
 
 define('SITE_NAME', 'StockMunch');
-define('SITE_URL', 'https://stockmunch.com');
+define('SITE_URL', 'https://stockmunch.com/');
 define('API_BASE_URL', 'https://stockmunch.com/api');
 
 // Pricing Plans
