@@ -91,69 +91,75 @@ if ($normalized === '') {
     <!-- Structured Data - Organization -->
     <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "StockMunch",
-        "url": "https://stockmunch.com/",
-        "logo": "https://stockmunch.com/php-assets/images/logo.png",
-        "description": "India's fastest stock market news alerts engine providing real-time Telegram notifications for corporate filings and market updates.",
-        "foundingDate": "2024",
-        "contactPoint": {
-            "@type": "ContactPoint",
-            "email": "support@stockmunch.com",
-            "contactType": "customer support",
-            "availableLanguage": ["English", "Hindi"]
-        },
-        "sameAs": [
-            "https://www.instagram.com/stock_munch"
-        ],
-        "areaServed": {
-            "@type": "Country",
-            "name": "India"
-        }
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "https://stockmunch.com/#organization",
+    "name": "StockMunch",
+    "url": "https://stockmunch.com/",
+    "description": "India's fastest stock market news alerts engine providing real-time Telegram notifications for corporate filings and market updates.",
+    "foundingDate": "2024",
+    "logo": {
+        "@type": "ImageObject",
+        "url": "https://stockmunch.com/php-assets/images/logo.png"
+    },
+    "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "support@stockmunch.com",
+        "contactType": "customer support",
+        "availableLanguage": ["English", "Hindi"]
+    },
+    "sameAs": [
+        "https://www.instagram.com/stock_munch"
+    ],
+    "areaServed": {
+        "@type": "Country",
+        "name": "India"
+    }
     }
     </script>
-    
+
     <?php if ($currentPage === 'home' || $currentPage === ''): ?>
-    <!-- Structured Data - WebSite with SearchAction -->
+
     <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
+    "@context": "https://schema.org",
+    "@graph": [
+
+        {
         "@type": "WebSite",
-        "name": "StockMunch",
+        "@id": "https://stockmunch.com/#website",
         "url": "https://stockmunch.com/",
+        "name": "StockMunch",
         "description": "Real-time stock market alerts and NSE/BSE news terminal for Indian traders",
         "publisher": {
-            "@type": "Organization",
-            "name": "StockMunch"
+            "@id": "https://stockmunch.com/#organization"
         }
-    }
-    </script>
-    
-    <!-- Structured Data - SoftwareApplication -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
+        },
+
+        {
         "@type": "SoftwareApplication",
+        "@id": "https://stockmunch.com/#application",
         "name": "StockMunch Terminal",
+        "url": "https://stockmunch.com/",
+        "description": "Web-based stock market alerts terminal providing real-time NSE and BSE corporate filing notifications via Telegram.",
         "applicationCategory": "FinanceApplication",
         "operatingSystem": "Web",
-        "offers": {
-            "@type": "AggregateOffer",
-            "lowPrice": "150",
-            "highPrice": "250",
-            "priceCurrency": "INR",
-            "offerCount": "3"
+        "publisher": {
+            "@id": "https://stockmunch.com/#organization"
         },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.8",
-            "ratingCount": "150"
+        "offers": {
+            "@type": "Offer",
+            "price": "150",
+            "priceCurrency": "INR"
         }
+        }
+
+    ]
     }
     </script>
-    <script src="/php-assets/js/main.js" defer></script>
+
     <?php endif; ?>
+    <script src="/php-assets/js/main.js" defer></script>
 </head>
 <body class="bg-dark text-slate-300 selection-emerald">
     <!-- Navigation -->
