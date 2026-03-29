@@ -18,6 +18,8 @@ export interface StockNews {
   userSentiment?: 'BULLISH' | 'BEARISH';
   rawPublishedAt: string;
   bseCode: string;
+  ctaUrl?: string;
+  pdfUrl?: string;
 }
 
 export interface PricingPlan {
