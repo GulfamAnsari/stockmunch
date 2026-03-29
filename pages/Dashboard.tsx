@@ -545,7 +545,10 @@ const Dashboard: React.FC = () => {
       const profJson = await profResp.json();
       if (profResp.status === 401 || profJson.error === 'unauthorized') return handleLogout();
       const finalProf = profJson.data || profJson.profile || profJson;
-      if (finalProf && finalProf.name) setProfileData(finalProf);
+      if (finalProf && finalProf.name) {
+        setProfileData(finalProf);
+        sessionStorage.setItem("user", JSON.stringify(finalProf));
+      }
     } catch (e) {
       console.error("Core Data Sync Failure", e);
     } finally {

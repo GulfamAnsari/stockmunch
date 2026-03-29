@@ -471,7 +471,9 @@ const MarketTerminal: React.FC<{
         const parts = d.split("-");
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
       };
-      const url = `${API_BASE_URL}/terminal?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}&source=g`;
+      const user = sessionStorage.getItem("user");
+      const userType = user ? JSON.parse(user).user_type || "general" : "general";
+      const url = `${API_BASE_URL}/terminal?from=${toApiDate(fromDateInput)}&to=${toApiDate(toDateInput)}&source=g&user_type=${userType}`;
       const response = await fetch(url, {
         cache: "no-store",
         headers: { 'Authorization': `Bearer ${getAuthToken()}` }
