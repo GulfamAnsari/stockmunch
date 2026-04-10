@@ -60,13 +60,25 @@ export const NewsCard: React.FC<{
   onPriceUpdate?: (id: string, pct: number) => void;
   autoRefresh?: boolean;
   variant?: 'general' | 'bse';
-}> = ({ news, isWatchlist, onWatchlistAdd, onPriceUpdate, variant = 'general' }) => {
+}> = ({ news, isWatchlist, onWatchlistAdd, onPriceUpdate, autoRefresh, variant = 'general' }) => {
   const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
   const [isReadInternal, setIsReadInternal] = useState(() => isIdRead(news.id));
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showAIInsights, setShowAIInsights] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isBse = variant === 'bse';
+
+  // Check AI insights setting from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("stockmunch_settings");
+      if (stored) {
+        const settingsObj = JSON.parse(stored);
+        setShowAIInsights(!!settingsObj?.settings?.ai_insight);
+      }
+    } catch (e) {}
+  }, []);
 
   // Synchronize read state if ID changes or on mount
   useEffect(() => {
@@ -82,7 +94,8 @@ export const NewsCard: React.FC<{
     return (now - publishedAt) < 30 * 60 * 1000;
   }, [news.rawPublishedAt]);
 
-  const shouldHighlight = isActuallyNew && !isReadInternal;
+  // Only highlight if monitor is on AND item is newly added
+  const shouldHighlight = autoRefresh && isActuallyNew && !isReadInternal && news.isNewlyAdded;
 
   const fetchLocalPercent = useCallback(async (manualUpdate = false) => {
     if (isBse) return;
@@ -261,7 +274,7 @@ export const NewsCard: React.FC<{
         </div>
 
         <div className="mt-auto">
-          {!isBse && news.aiAnalysis && (
+          {!isBse && showAIInsights && news.aiAnalysis && (
             <div className="mb-4 p-3 bg-white/[0.015] rounded-xl border border-white/[0.04]">
               <span className="text-[8px] font-black text-emerald-600/80 uppercase tracking-widest block mb-1.5">Analysis Node</span>
               <p className="text-[10px] text-[#9ca3af] leading-relaxed line-clamp-2 font-medium italic">{news.aiAnalysis}</p>
@@ -332,7 +345,7 @@ export const NewsCard: React.FC<{
                 <span>FILING</span>
               </button>
             )}
-            {!isBse && (
+            {!isBse && showAIInsights && (
               <div className={`px-2.5 py-1.5 rounded-lg text-[10px] font-normal uppercase tracking-wide inline-flex items-center ${getSentimentStyles(news.sentiment)}`}>
                 AI: {news.sentiment || 'NEUTRAL'} ({news.sentimentScore || 0}%)
               </div>
@@ -343,6 +356,12 @@ export const NewsCard: React.FC<{
     </div>
   );
 };
+
+interface SavedFilter {
+  id: string;
+  name: string;
+  stocks: string[];
+}
 
 const MarketTerminal: React.FC<{
   onToggleFullScreen?: (state: boolean) => void;
@@ -368,7 +387,14 @@ const MarketTerminal: React.FC<{
   const [watchlist, setWatchlist] = useState<any[]>([]);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [filterDropdownSide, setFilterDropdownSide] = useState<"left" | "right">("right");
+  const [showCustomFilterModal, setShowCustomFilterModal] = useState(false);
+  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
+  const [selectedStocksForFilter, setSelectedStocksForFilter] = useState<string[]>([]);
+  const [newFilterName, setNewFilterName] = useState("");
+  const [appliedFilterId, setAppliedFilterId] = useState<string | null>(null);
+  const [isReloadAnimating, setIsReloadAnimating] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(20);
+  const [snackbar, setSnackbar] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const filterBtnRef = useRef<HTMLButtonElement>(null);
   const filterPanelRef = useRef<HTMLDivElement>(null);
@@ -379,8 +405,17 @@ const MarketTerminal: React.FC<{
   const isFetchingRef = useRef<boolean>(false);
   const isFetchingWatchlistRef = useRef<boolean>(false);
   const knownIdsRef = useRef<Set<string>>(new Set());
+  const previousNewsCountRef = useRef<number>(0);
 
   const isFiltered = useMemo(() => sentimentFilters.some((f) => f !== "ALL"), [sentimentFilters]);
+
+  // Load and manage custom filters from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('stockmunch_custom_filters');
+      if (saved) setSavedFilters(JSON.parse(saved));
+    } catch (e) {}
+  }, []);
 
   // Watchlist Persistence API
   const fetchWatchlist = useCallback(async () => {
@@ -540,9 +575,17 @@ const MarketTerminal: React.FC<{
         // Register all items as "seen" in session
         incomingIds.forEach(id => knownIdsRef.current.add(id));
 
+        // Mark newly added items only when autoRefresh is active
+        const allItemsWithNewFlag = allItems.map(item => ({
+          ...item,
+          isNewlyAdded: autoRefresh && (previousNewsCountRef.current > 0 && !knownIdsRef.current.has(item.id))
+        }));
+
+        previousNewsCountRef.current = allItems.length;
+
         setNews((prevNews) => {
-          if (!Array.isArray(prevNews)) return allItems;
-          return allItems.map(newItem => {
+          if (!Array.isArray(prevNews)) return allItemsWithNewFlag;
+          return allItemsWithNewFlag.map(newItem => {
             const existingItem = prevNews.find(p => p.id === newItem.id);
             return { ...newItem, priceChange: existingItem ? existingItem.priceChange : 0 };
           });
@@ -615,6 +658,13 @@ const MarketTerminal: React.FC<{
       const lower = searchTerm.toLowerCase();
       list = list.filter((n) => n.symbol?.toLowerCase().includes(lower) || n.title.toLowerCase().includes(lower) || n.companyName?.toLowerCase().includes(lower));
     }
+    // Apply custom stock filter if one is selected
+    if (appliedFilterId) {
+      const appliedFilter = savedFilters.find(f => f.id === appliedFilterId);
+      if (appliedFilter && appliedFilter.stocks.length > 0) {
+        list = list.filter((n) => appliedFilter.stocks.includes(n.symbol) || appliedFilter.stocks.includes(n.companyName));
+      }
+    }
     if (!sentimentFilters.includes("ALL")) list = list.filter((n) => sentimentFilters.includes(n.sentiment.toUpperCase()));
     list = list.filter((n) => {
       const hour = new Date(n.rawPublishedAt).getHours();
@@ -624,14 +674,21 @@ const MarketTerminal: React.FC<{
     else if (sortOrder === "SENTIMENT") list.sort((a, b) => b.sentimentScore - a.sentimentScore);
     else if (sortOrder === "CHANGE") list.sort((a, b) => b.priceChange - a.priceChange);
     return list;
-  }, [news, watchlist, activeTab, searchTerm, sortOrder, sentimentFilters, timeRange]);
+  }, [news, watchlist, activeTab, searchTerm, sortOrder, sentimentFilters, timeRange, appliedFilterId, savedFilters]);
 
   const pagedNews = useMemo(() => processedNews.slice(0, displayLimit), [processedNews, displayLimit]);
 
   const copyAllTitles = () => {
     const content = processedNews.map((n) => `${n.timestamp} | ${n.symbol || n.bseCode} | ${n.title}`).join("\n");
     navigator.clipboard.writeText(content);
-    alert(`${processedNews.length} titles copied.`);
+    showSnackbar(`${processedNews.length} titles copied.`);
+  };
+
+  const showSnackbar = (message: string) => {
+    setSnackbar({ message, visible: true });
+    setTimeout(() => {
+      setSnackbar({ message: "", visible: false });
+    }, 3000);
   };
 
   const toggleFullScreen = () => {
@@ -698,8 +755,17 @@ const MarketTerminal: React.FC<{
                     placeholder="SEARCH FILINGS..."
                     value={bseSearchTerm}
                     onChange={(e) => setBseSearchTerm(e.target.value)}
-                    className="w-full bg-slate-900 border border-white/[0.15] rounded-xl pl-12 pr-4 py-2.5 text-[11px] text-white focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-400"
+                    className="w-full bg-slate-900 border border-white/[0.15] rounded-xl pl-12 pr-10 py-2.5 text-[11px] text-white focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-400"
                   />
+                  {bseSearchTerm && (
+                    <button
+                      onClick={() => setBseSearchTerm("")}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-200 transition-colors"
+                      title="Clear search"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  )}
                 </div>
                 <button
                   onClick={() => setBseAwardsOnly(!bseAwardsOnly)}
@@ -726,8 +792,17 @@ const MarketTerminal: React.FC<{
                     placeholder="FILTER TERMINAL..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-slate-900 border border-white/[0.15] rounded-xl pl-12 pr-4 py-2.5 text-[11px] text-white focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-400"
+                    className="w-full bg-slate-900 border border-white/[0.15] rounded-xl pl-12 pr-10 py-2.5 text-[11px] text-white focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-400"
                   />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm("")}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-200 transition-colors"
+                      title="Clear search"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  )}
                 </div>
 
                 {activeTab === "ALL FEEDS" && (
@@ -735,8 +810,8 @@ const MarketTerminal: React.FC<{
                     <input type="date" value={fromDateInput} onChange={(e) => setFromDateInput(e.target.value)} className="bg-slate-950/50 border border-white/5 rounded-lg px-3 py-1.5 text-[10px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-[120px] cursor-pointer" />
                     <span className="text-slate-700 text-[10px]">→</span>
                     <input type="date" value={toDateInput} onChange={(e) => setToDateInput(e.target.value)} className="bg-slate-950/50 border border-white/5 rounded-lg px-3 py-1.5 text-[10px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-[120px] cursor-pointer" />
-                    <button onClick={() => fetchNews(false)} disabled={loading} className="p-2 bg-blue-600/10 text-blue-500 rounded-lg border border-blue-500/20 hover:bg-blue-600/20 transition-all min-w-[36px]">
-                      {loading ? <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div> : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>}
+                    <button onClick={() => { setIsReloadAnimating(true); fetchNews(false); setTimeout(() => setIsReloadAnimating(false), 600); }} disabled={loading} className="p-2 bg-blue-600/10 text-blue-500 rounded-lg border border-blue-500/20 hover:bg-blue-600/20 transition-all min-w-[36px]">
+                      {loading || isReloadAnimating ? <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div> : <svg className={`w-4 h-4 transition-transform duration-600 ${isReloadAnimating ? 'rotate-360' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>}
                     </button>
                   </div>
                 )}
@@ -752,20 +827,36 @@ const MarketTerminal: React.FC<{
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0 relative justify-end">
+        <div className="flex items-center gap-2 lg:gap-3 shrink-0 relative justify-end flex-wrap lg:flex-nowrap">
           {activeTab !== "BSE FEEDS" && (
-            <button ref={filterBtnRef} onClick={(e) => { e.stopPropagation(); setIsFilterPanelOpen(!isFilterPanelOpen); }} className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center space-x-2 relative ${isFilterPanelOpen ? "bg-blue-600 text-white border-blue-600 shadow-lg" : "bg-slate-900/40 border-white/[0.1] text-slate-500 hover:text-slate-300"}`}>
-              {isFiltered && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0d121f] z-10 animate-pulse"></span>}
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
-              <span className="hidden sm:inline">Filter</span>
+            <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} title="Sort by" className="bg-slate-900 border border-white/[0.1] rounded-lg px-2.5 lg:px-3 py-2 text-[9px] lg:text-[10px] text-slate-300 font-mono uppercase focus:outline-none focus:border-blue-500/40 transition-all cursor-pointer hover:border-white/20 shrink-0 h-10 flex items-center">
+              <option value="TIME">Sort: Time</option>
+              <option value="SENTIMENT">Sort: Confidence</option>
+              <option value="CHANGE">Sort: Volatility</option>
+            </select>
+          )}
+          
+          {activeTab !== "BSE FEEDS" && (
+            <button ref={filterBtnRef} onClick={(e) => { e.stopPropagation(); setIsFilterPanelOpen(!isFilterPanelOpen); }} className={`px-2.5 lg:px-3 py-2 h-10 rounded-lg text-[9px] lg:text-[10px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-1.5 relative whitespace-nowrap ${isFilterPanelOpen ? "bg-blue-600 text-white border-blue-600 shadow-lg" : "bg-slate-900/40 border-white/[0.1] text-slate-500 hover:text-slate-300 hover:border-white/20"}`}>
+              {(isFiltered || appliedFilterId) && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0d121f] z-10 animate-pulse"></span>}
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+              <span className="hidden lg:inline">Filter</span>
             </button>
           )}
-          <button onClick={copyAllTitles} className="p-2.5 bg-slate-900/40 hover:bg-slate-800 text-slate-500 hover:text-slate-200 rounded-xl border border-white/[0.1] transition-all"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg></button>
-          <button onClick={toggleFullScreen} className={`p-2.5 bg-slate-900/40 hover:bg-slate-800 rounded-xl border border-white/[0.1] transition-all ${isFullScreen ? "text-blue-500 border-blue-500/30" : "text-slate-500 hover:text-slate-200"}`}><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" /></svg></button>
+          
+          <button onClick={copyAllTitles} title="Copy all titles" className="px-2.5 lg:px-3 py-2 h-10 bg-slate-900/40 hover:bg-slate-800 text-slate-500 hover:text-slate-200 rounded-lg border border-white/[0.1] transition-all flex items-center justify-center space-x-1.5 flex-shrink-0">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+            <span className="hidden lg:inline text-[10px] font-black">Copy</span>
+          </button>
+          
+          <button onClick={toggleFullScreen} title={isFullScreen ? "Exit fullscreen" : "Fullscreen"} className={`px-2.5 lg:px-3 py-2 h-10 rounded-lg border transition-all flex items-center justify-center space-x-1.5 flex-shrink-0 ${isFullScreen ? "text-blue-500 border-blue-500/30 bg-blue-600/10" : "bg-slate-900/40 text-slate-500 hover:text-slate-200 hover:border-white/20 border-white/[0.1]"}`}>
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>
+            <span className="hidden lg:inline text-[10px] font-black">Fullscreen</span>
+          </button>
 
           {isFilterPanelOpen && activeTab !== "BSE FEEDS" && (
             <div ref={filterPanelRef} className={`absolute top-full mt-4 w-64 sm:w-72 bg-[#161b27] border border-white/10 rounded-[2rem] shadow-[0_30px_70px_rgba(0,0,0,0.8)] p-8 z-[100] animate-in fade-in zoom-in-95 duration-200 ${filterDropdownSide === "left" ? "right-0" : "left-0"}`}>
-              <div className="space-y-8">
+              <div className="space-y-6">
                 <div className="space-y-4">
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">AI SENTIMENT FILTER</span>
                   <div className="grid grid-cols-1 gap-3">
@@ -780,11 +871,46 @@ const MarketTerminal: React.FC<{
                     ))}
                   </div>
                 </div>
+                
+                {savedFilters.length > 0 && (
+                  <>
+                    <div className="h-px bg-white/[0.05]"></div>
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">SAVED FILTERS</span>
+                      <div className="space-y-2.5">
+                        {savedFilters.map((filter) => (
+                          <button
+                            key={filter.id}
+                            onClick={() => {
+                              setAppliedFilterId(appliedFilterId === filter.id ? null : filter.id);
+                            }}
+                            className={`w-full px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-tight text-left transition-all border ${
+                              appliedFilterId === filter.id
+                                ? "bg-emerald-600/20 border-emerald-600/40 text-emerald-300"
+                                : "bg-slate-900/40 border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span>{filter.name}</span>
+                              {appliedFilterId === filter.id && (
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                              )}
+                            </div>
+                            <span className="text-[9px] text-slate-500 font-mono">{filter.stocks.length} stocks</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+                
                 <div className="h-px bg-white/[0.05]"></div>
-                <div className="space-y-4">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">SORT ENGINE</span>
-                  <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-[11px] text-slate-300 font-mono uppercase focus:outline-none focus:border-blue-500/40 transition-all"><option value="TIME">Time Descending</option><option value="SENTIMENT">AI Confidence</option><option value="CHANGE">Market Volatility</option></select>
-                </div>
+                <button
+                  onClick={() => setShowCustomFilterModal(true)}
+                  className="w-full px-4 py-3 bg-emerald-600/10 border border-emerald-600/30 text-emerald-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600/20 transition-all"
+                >
+                  + Create New Filter
+                </button>
               </div>
             </div>
           )}
@@ -825,6 +951,147 @@ const MarketTerminal: React.FC<{
         <div className="flex items-center space-x-8 md:space-x-12"><div className="flex items-center space-x-3"><span className="text-blue-500/60 font-black">NODE:</span><span>READY</span></div><div className="flex items-center space-x-3"><span className="text-blue-500/60 font-black">STREAM:</span><span>{activeTab === "BSE FEEDS" ? "BSE TUNNEL SYNCED" : `${processedNews.length} DISPATCHES SYNCED`}</span></div></div>
         <div className="flex items-center space-x-3"><div className="w-1.5 h-1.5 rounded-full bg-blue-500/40"></div><span className="opacity-40 italic tracking-tighter uppercase text-center">StockManch Terminal Build v5.0.1</span></div>
       </footer>
+
+      {showCustomFilterModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+          <div className="bg-[#161b27] border border-white/10 rounded-[2rem] shadow-[0_30px_70px_rgba(0,0,0,0.8)] p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-black text-white uppercase tracking-tighter">Manage Filters</h3>
+              <button onClick={() => { setShowCustomFilterModal(false); setNewFilterName(""); setSelectedStocksForFilter([]); }} className="p-2 hover:bg-white/10 rounded-xl transition-all">
+                <svg className="w-5 h-5 text-slate-400 hover:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Saved Filters Section */}
+              <div className="space-y-4">
+                <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Saved Filters ({savedFilters.length})</h4>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {savedFilters.length === 0 ? (
+                    <p className="text-[11px] text-slate-500 italic">No filters saved yet</p>
+                  ) : (
+                    savedFilters.map((filter) => (
+                      <div key={filter.id} className={`p-4 rounded-xl border transition-all ${appliedFilterId === filter.id ? 'bg-blue-600/20 border-blue-600/50 shadow-lg' : 'bg-slate-900/40 border-white/10 hover:border-white/20'}`}>
+                        <div className="flex items-center justify-between mb-3">
+                          <h5 className={`text-[11px] font-black uppercase tracking-tight ${appliedFilterId === filter.id ? 'text-blue-300' : 'text-slate-200'}`}>
+                            {filter.name}
+                            {appliedFilterId === filter.id && <span className="ml-2 px-2 py-1 bg-blue-600 text-[9px] rounded-lg font-black">ACTIVE</span>}
+                          </h5>
+                        </div>
+                        <div className="mb-3 flex flex-wrap gap-2">
+                          {filter.stocks.map((stock) => (
+                            <span key={stock} className="px-2 py-1 bg-white/5 text-[9px] font-mono text-slate-400 rounded-lg border border-white/10">
+                              {stock}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setAppliedFilterId(appliedFilterId === filter.id ? null : filter.id)}
+                            className={`flex-1 px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border ${appliedFilterId === filter.id ? 'bg-blue-600/20 text-blue-400 border-blue-600/50 hover:bg-blue-600/30' : 'bg-blue-600/10 text-blue-500 border-blue-600/30 hover:bg-blue-600/20'}`}
+                          >
+                            {appliedFilterId === filter.id ? 'Remove' : 'Apply'}
+                          </button>
+                          <button
+                            onClick={() => {
+                              const updated = savedFilters.filter(f => f.id !== filter.id);
+                              setSavedFilters(updated);
+                              localStorage.setItem('stockmunch_custom_filters', JSON.stringify(updated));
+                              if (appliedFilterId === filter.id) setAppliedFilterId(null);
+                            }}
+                            className="px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border bg-rose-600/10 text-rose-500 border-rose-600/30 hover:bg-rose-600/20"
+                          >
+                            Del
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Create New Filter Section */}
+              <div className="space-y-4">
+                <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Create New Filter</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Filter Name</label>
+                    <input
+                      type="text"
+                      value={newFilterName}
+                      onChange={(e) => setNewFilterName(e.target.value)}
+                      placeholder="e.g., Tech Stocks"
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-[12px] text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/40 transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Select Stocks</label>
+                    <div className="space-y-2 max-h-48 overflow-y-auto bg-slate-950/30 rounded-xl p-3 border border-white/5">
+                      {Array.from(new Set(processedNews.map(n => n.symbol || n.companyName))).filter(Boolean).map((stock) => (
+                        <label key={stock} className="flex items-center space-x-3 cursor-pointer group p-2 hover:bg-white/[0.02] rounded-lg transition-all">
+                          <div className="relative flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={selectedStocksForFilter.includes(stock as string)}
+                              onChange={(e) => {
+                                if (e.target.checked) setSelectedStocksForFilter([...selectedStocksForFilter, stock as string]);
+                                else setSelectedStocksForFilter(selectedStocksForFilter.filter(s => s !== stock));
+                              }}
+                              className="peer h-4 w-4 appearance-none border border-white/10 rounded-lg bg-slate-950 checked:bg-emerald-600 checked:border-emerald-600 transition-all cursor-pointer"
+                            />
+                            <svg className="absolute w-3 h-3 text-white left-0.5 pointer-events-none hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4"><path d="M5 13l4 4L19 7" /></svg>
+                          </div>
+                          <span className="text-[10px] font-semibold text-slate-300 group-hover:text-slate-100 transition-colors">{stock}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {selectedStocksForFilter.length > 0 && (
+                      <div className="mt-2 text-[9px] text-emerald-500 font-black">{selectedStocksForFilter.length} stock(s) selected</div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        if (newFilterName && selectedStocksForFilter.length > 0) {
+                          const newFilter: SavedFilter = {
+                            id: Date.now().toString(),
+                            name: newFilterName,
+                            stocks: selectedStocksForFilter
+                          };
+                          const updated = [...savedFilters, newFilter];
+                          setSavedFilters(updated);
+                          localStorage.setItem('stockmunch_custom_filters', JSON.stringify(updated));
+                          setAppliedFilterId(newFilter.id);
+                          setNewFilterName("");
+                          setSelectedStocksForFilter([]);
+                        }
+                      }}
+                      disabled={!newFilterName || selectedStocksForFilter.length === 0}
+                      className="flex-1 px-4 py-3 bg-emerald-600 disabled:bg-slate-700 text-white font-black rounded-xl text-[10px] uppercase tracking-widest transition-all hover:bg-emerald-700 disabled:cursor-not-allowed"
+                    >
+                      Save & Apply
+                    </button>
+                    <button onClick={() => { setShowCustomFilterModal(false); setNewFilterName(""); setSelectedStocksForFilter([]); }} className="flex-1 px-4 py-3 bg-slate-900 border border-white/10 text-slate-300 font-black rounded-xl text-[10px] uppercase tracking-widest transition-all hover:bg-slate-800">
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {snackbar.visible && (
+        <div className="fixed bottom-6 left-6 right-6 sm:left-auto sm:right-6 sm:w-80 z-[200] animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-emerald-600/90 backdrop-blur-md border border-emerald-500/30 rounded-xl px-4 py-3 text-white text-[13px] font-semibold shadow-lg flex items-center space-x-3">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            <span>{snackbar.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
