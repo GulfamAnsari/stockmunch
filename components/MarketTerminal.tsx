@@ -701,6 +701,16 @@ const MarketTerminal: React.FC<{
     handleSentimentToggle(opt);
   };
 
+  const handleDeleteFilter = (filterId: string) => {
+    const updated = savedFilters.filter(f => f.id !== filterId);
+    setSavedFilters(updated);
+    localStorage.setItem('stockmunch_custom_filters', JSON.stringify(updated));
+    if (appliedFilterId === filterId) {
+      setAppliedFilterId(null);
+    }
+    showSnackbar('Filter deleted successfully.');
+  };
+
   const gridClasses = "grid grid-cols-[repeat(auto-fill,minmax(310px,1fr))] gap-4 pt-2";
 
   return (
@@ -715,25 +725,23 @@ const MarketTerminal: React.FC<{
         </button>
       </div>
 
-      <div className={`${isControlsVisible ? 'flex' : 'hidden lg:flex'} px-4 md:px-6 py-4 shrink-0 bg-[#0d121f] border-b border-white/[0.08] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-y-4 gap-x-6 z-40 overflow-visible`}>
+      <div className={`${isControlsVisible ? 'flex' : 'hidden lg:flex'} px-4 md:px-6 py-4 shrink-0 bg-[#0d121f] border-b border-white/[0.08] flex flex-col gap-3 z-40 overflow-visible relative`}>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-grow flex-wrap">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 lg:gap-3 w-full flex-wrap justify-between">
 
-          <div className="flex bg-slate-950 rounded-2xl p-1 border border-white/[0.1] shadow-xl shrink-0 self-start sm:self-auto w-full sm:w-auto">
+          <div className="flex bg-slate-950 rounded-lg p-1 border border-white/[0.1] shadow-xl shrink-0 h-10 items-center w-full sm:w-auto">
             {["ALL FEEDS", "BSE FEEDS", "WATCHLIST"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => { setActiveTab(tab); setIsFilterPanelOpen(false); }}
-                className={`flex-1 sm:flex-none px-4 md:px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all ${activeTab === tab ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" : "text-slate-500 hover:text-slate-300"}`}
+                className={`flex-1 sm:flex-none px-3 md:px-4 py-0 h-full text-[9px] lg:text-[10px] font-black uppercase tracking-[0.12em] rounded-md transition-all flex items-center justify-center ${activeTab === tab ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" : "text-slate-500 hover:text-slate-300"}`}
               >
                 {tab}
               </button>
             ))}
           </div>
 
-          <div className="h-8 w-px bg-white/5 hidden xl:block"></div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-grow min-w-0">
+          <div className="flex items-center gap-2 lg:gap-3 flex-wrap justify-end">
             {activeTab === "BSE FEEDS" ? (
               <div className="flex items-center space-x-3 flex-wrap gap-y-2 animate-in fade-in slide-in-from-left-2 duration-300 flex-grow">
                 <div className="flex items-center space-x-3 bg-slate-900/80 px-4 py-2.5 rounded-xl border border-white/[0.1] shadow-inner flex-grow sm:flex-grow-0">
@@ -781,9 +789,19 @@ const MarketTerminal: React.FC<{
                   <span>LIVE</span>
                 </button>
               </div>
-            ) : (
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 flex-grow">
-                <div className="relative flex-grow sm:max-w-md">
+            ) : null}
+            {activeTab === "ALL FEEDS" && (
+              <>
+                <div className="flex items-center space-x-1 bg-slate-900/80 p-1 rounded-lg border border-white/[0.1] shadow-inner shrink-0 h-10">
+                  <input type="date" value={fromDateInput} onChange={(e) => setFromDateInput(e.target.value)} className="bg-slate-950/50 border border-white/5 rounded-md px-2 py-1 text-[9px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-20 h-8 cursor-pointer" />
+                  <span className="text-slate-700 text-[9px]">→</span>
+                  <input type="date" value={toDateInput} onChange={(e) => setToDateInput(e.target.value)} className="bg-slate-950/50 border border-white/5 rounded-md px-2 py-1 text-[9px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-20 h-8 cursor-pointer" />
+                  <button onClick={() => { setIsReloadAnimating(true); fetchNews(false); setTimeout(() => setIsReloadAnimating(false), 600); }} disabled={loading} className="px-2 h-8 bg-blue-600/10 text-blue-500 rounded-md border border-blue-500/20 hover:bg-blue-600/20 transition-all flex items-center justify-center">
+                    {loading || isReloadAnimating ? <div className="w-3.5 h-3.5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div> : <svg className={`w-3.5 h-3.5 transition-transform duration-600 ${isReloadAnimating ? 'rotate-360' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>}
+                  </button>
+                </div>
+
+                <div className="relative shrink-0 w-56">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </div>
@@ -792,7 +810,7 @@ const MarketTerminal: React.FC<{
                     placeholder="FILTER TERMINAL..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-slate-900 border border-white/[0.15] rounded-xl pl-12 pr-10 py-2.5 text-[11px] text-white focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-400"
+                    className="w-full bg-slate-900 border border-white/[0.15] rounded-lg pl-12 pr-10 py-2.5 text-[9px] text-white focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-400 h-10"
                   />
                   {searchTerm && (
                     <button
@@ -805,57 +823,66 @@ const MarketTerminal: React.FC<{
                   )}
                 </div>
 
-                {activeTab === "ALL FEEDS" && (
-                  <div className="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-white/[0.1] shadow-inner shrink-0">
-                    <input type="date" value={fromDateInput} onChange={(e) => setFromDateInput(e.target.value)} className="bg-slate-950/50 border border-white/5 rounded-lg px-3 py-1.5 text-[10px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-[120px] cursor-pointer" />
-                    <span className="text-slate-700 text-[10px]">→</span>
-                    <input type="date" value={toDateInput} onChange={(e) => setToDateInput(e.target.value)} className="bg-slate-950/50 border border-white/5 rounded-lg px-3 py-1.5 text-[10px] text-slate-400 font-mono focus:border-blue-500/40 focus:outline-none w-[120px] cursor-pointer" />
-                    <button onClick={() => { setIsReloadAnimating(true); fetchNews(false); setTimeout(() => setIsReloadAnimating(false), 600); }} disabled={loading} className="p-2 bg-blue-600/10 text-blue-500 rounded-lg border border-blue-500/20 hover:bg-blue-600/20 transition-all min-w-[36px]">
-                      {loading || isReloadAnimating ? <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div> : <svg className={`w-4 h-4 transition-transform duration-600 ${isReloadAnimating ? 'rotate-360' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>}
-                    </button>
-                  </div>
-                )}
+                <button onClick={() => setAutoRefresh(!autoRefresh)} className={`px-2.5 h-10 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-1.5 shrink-0 ${autoRefresh ? "bg-emerald-600/10 border-emerald-600/50 text-emerald-500" : "bg-slate-900/40 border-white/[0.1] text-slate-500 hover:text-slate-300"}`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${autoRefresh ? "bg-emerald-600 animate-pulse" : "bg-slate-700"}`}></div>
+                  <span className="hidden sm:inline">Monitor</span>
+                </button>
+              </>
+            )}
 
-                {activeTab === "ALL FEEDS" && (
-                  <button onClick={() => setAutoRefresh(!autoRefresh)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-2 shrink-0 ${autoRefresh ? "bg-emerald-600/10 border-emerald-600/50 text-emerald-500" : "bg-slate-900/40 border-white/[0.1] text-slate-500 hover:text-slate-300"}`}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${autoRefresh ? "bg-emerald-600 animate-pulse" : "bg-slate-700"}`}></div>
-                    <span>Monitor</span>
+            {activeTab === "WATCHLIST" && (
+              <div className="relative shrink-0 w-56">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="SEARCH WATCHLIST..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-slate-900 border border-white/[0.15] rounded-lg pl-12 pr-10 py-2.5 text-[9px] text-white focus:outline-none focus:border-blue-500/40 transition-all font-mono placeholder:text-slate-400 h-10"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-200 transition-colors"
+                    title="Clear search"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 )}
               </div>
             )}
+
+            <div className="flex items-center gap-1 shrink-0 relative h-10 bg-slate-900/40 border border-white/[0.1] rounded-lg p-1">
+            {activeTab === "ALL FEEDS" && (
+              <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} title="Sort by" className="bg-transparent border-none px-2 text-[9px] text-slate-300 font-mono uppercase focus:outline-none cursor-pointer shrink-0 h-8 flex items-center">
+                <option value="TIME">Sort: Time</option>
+                <option value="SENTIMENT">Sort: Confidence</option>
+                <option value="CHANGE">Sort: Volatility</option>
+              </select>
+            )}
+
+            <button ref={filterBtnRef} onClick={(e) => { e.stopPropagation(); setIsFilterPanelOpen(!isFilterPanelOpen); }} className={`px-2 h-8 rounded-md text-[9px] font-black uppercase tracking-widest border-0 transition-all flex items-center justify-center space-x-1.5 relative whitespace-nowrap ${isFilterPanelOpen ? "bg-blue-600 text-white shadow-lg" : "hover:bg-slate-800 text-slate-300 hover:text-slate-100"}`}>
+              {(isFiltered || appliedFilterId) && <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full border border-[#0d121f] z-10 animate-pulse"></span>}
+              <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+              <span className="hidden lg:inline">Filter</span>
+            </button>
+
+            <button onClick={copyAllTitles} title="Copy all titles" className="px-2 h-8 hover:bg-slate-800 text-slate-300 hover:text-slate-100 rounded-md border-0 transition-all flex items-center justify-center space-x-1.5 flex-shrink-0">
+              <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+              <span className="hidden lg:inline text-[9px] font-black">Copy</span>
+            </button>
+
+            <button onClick={toggleFullScreen} title={isFullScreen ? "Exit fullscreen" : "Fullscreen"} className={`px-2 h-8 rounded-md border-0 transition-all flex items-center justify-center space-x-1.5 flex-shrink-0 ${isFullScreen ? "text-blue-400 bg-blue-600/20" : "hover:bg-slate-800 text-slate-300 hover:text-slate-100"}`}>
+              <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>
+              <span className="hidden lg:inline text-[9px] font-black">FS</span>
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 lg:gap-3 shrink-0 relative justify-end flex-wrap lg:flex-nowrap">
-          {activeTab !== "BSE FEEDS" && (
-            <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)} title="Sort by" className="bg-slate-900 border border-white/[0.1] rounded-lg px-2.5 lg:px-3 py-2 text-[9px] lg:text-[10px] text-slate-300 font-mono uppercase focus:outline-none focus:border-blue-500/40 transition-all cursor-pointer hover:border-white/20 shrink-0 h-10 flex items-center">
-              <option value="TIME">Sort: Time</option>
-              <option value="SENTIMENT">Sort: Confidence</option>
-              <option value="CHANGE">Sort: Volatility</option>
-            </select>
-          )}
-          
-          {activeTab !== "BSE FEEDS" && (
-            <button ref={filterBtnRef} onClick={(e) => { e.stopPropagation(); setIsFilterPanelOpen(!isFilterPanelOpen); }} className={`px-2.5 lg:px-3 py-2 h-10 rounded-lg text-[9px] lg:text-[10px] font-black uppercase tracking-widest border transition-all flex items-center justify-center space-x-1.5 relative whitespace-nowrap ${isFilterPanelOpen ? "bg-blue-600 text-white border-blue-600 shadow-lg" : "bg-slate-900/40 border-white/[0.1] text-slate-500 hover:text-slate-300 hover:border-white/20"}`}>
-              {(isFiltered || appliedFilterId) && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0d121f] z-10 animate-pulse"></span>}
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
-              <span className="hidden lg:inline">Filter</span>
-            </button>
-          )}
-          
-          <button onClick={copyAllTitles} title="Copy all titles" className="px-2.5 lg:px-3 py-2 h-10 bg-slate-900/40 hover:bg-slate-800 text-slate-500 hover:text-slate-200 rounded-lg border border-white/[0.1] transition-all flex items-center justify-center space-x-1.5 flex-shrink-0">
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
-            <span className="hidden lg:inline text-[10px] font-black">Copy</span>
-          </button>
-          
-          <button onClick={toggleFullScreen} title={isFullScreen ? "Exit fullscreen" : "Fullscreen"} className={`px-2.5 lg:px-3 py-2 h-10 rounded-lg border transition-all flex items-center justify-center space-x-1.5 flex-shrink-0 ${isFullScreen ? "text-blue-500 border-blue-500/30 bg-blue-600/10" : "bg-slate-900/40 text-slate-500 hover:text-slate-200 hover:border-white/20 border-white/[0.1]"}`}>
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>
-            <span className="hidden lg:inline text-[10px] font-black">Fullscreen</span>
-          </button>
-
-          {isFilterPanelOpen && activeTab !== "BSE FEEDS" && (
-            <div ref={filterPanelRef} className={`absolute top-full mt-4 w-64 sm:w-72 bg-[#161b27] border border-white/10 rounded-[2rem] shadow-[0_30px_70px_rgba(0,0,0,0.8)] p-8 z-[100] animate-in fade-in zoom-in-95 duration-200 ${filterDropdownSide === "left" ? "right-0" : "left-0"}`}>
+        {isFilterPanelOpen && activeTab !== "BSE FEEDS" && (
+          <div ref={filterPanelRef} className={`absolute top-full mt-2 w-64 sm:w-72 bg-[#161b27] border border-white/10 rounded-[2rem] shadow-[0_30px_70px_rgba(0,0,0,0.8)] p-8 z-[100] animate-in fade-in zoom-in-95 duration-200 ${filterDropdownSide === "left" ? "right-0" : "left-0"}`}>
               <div className="space-y-6">
                 <div className="space-y-4">
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">AI SENTIMENT FILTER</span>
@@ -879,25 +906,33 @@ const MarketTerminal: React.FC<{
                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">SAVED FILTERS</span>
                       <div className="space-y-2.5">
                         {savedFilters.map((filter) => (
-                          <button
-                            key={filter.id}
-                            onClick={() => {
-                              setAppliedFilterId(appliedFilterId === filter.id ? null : filter.id);
-                            }}
-                            className={`w-full px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-tight text-left transition-all border ${
-                              appliedFilterId === filter.id
-                                ? "bg-emerald-600/20 border-emerald-600/40 text-emerald-300"
-                                : "bg-slate-900/40 border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span>{filter.name}</span>
-                              {appliedFilterId === filter.id && (
-                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                              )}
-                            </div>
-                            <span className="text-[9px] text-slate-500 font-mono">{filter.stocks.length} stocks</span>
-                          </button>
+                          <div key={filter.id} className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                setAppliedFilterId(appliedFilterId === filter.id ? null : filter.id);
+                              }}
+                              className={`flex-1 px-3 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-tight text-left transition-all border ${
+                                appliedFilterId === filter.id
+                                  ? "bg-emerald-600/20 border-emerald-600/40 text-emerald-300"
+                                  : "bg-slate-900/40 border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span>{filter.name}</span>
+                                {appliedFilterId === filter.id && (
+                                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                                )}
+                              </div>
+                              <span className="text-[9px] text-slate-500 font-mono">{filter.stocks.length} stocks</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteFilter(filter.id)}
+                              title="Delete filter"
+                              className="px-2.5 py-2.5 rounded-lg border border-white/10 text-slate-500 hover:text-red-500 hover:border-red-500/30 hover:bg-red-600/10 transition-all flex-shrink-0"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -912,8 +947,9 @@ const MarketTerminal: React.FC<{
                   + Create New Filter
                 </button>
               </div>
-            </div>
-          )}
+          </div>
+          
+        )}
         </div>
       </div>
 
