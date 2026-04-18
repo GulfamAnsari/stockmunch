@@ -518,7 +518,7 @@ const Dashboard: React.FC = () => {
   const handleLogout = () => {
     document.cookie = "sm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     localStorage.removeItem("stockmunch_settings");
-    navigate('/login');
+    window.location.href = '/';
   };
 
   const fetchCoreData = async () => {
