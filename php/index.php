@@ -272,11 +272,11 @@ require_once __DIR__ . '/includes/header.php';
     <!-- Pricing Section -->
     <section id="pricing" class="section section-dark">
         <div class="container text-center">
-            <span class="badge badge-emerald mb-6">Limited Time: 30-Day Risk-Free Trial</span>
+            <span class="badge badge-emerald mb-6">🎉 Everything Free - Limited Time Offer</span>
             <h2 class="section-title mb-6">
-                Choose Your <span class="text-emerald">Plan</span>
+                All Plans <span class="text-emerald">100% Free</span>
             </h2>
-            <p class="section-subtitle mb-20">Get professional alerts and dashboard access. Instant Telegram delivery for serious traders.</p>
+            <p class="section-subtitle mb-20">For a limited time, enjoy complete access to all features absolutely free. Professional alerts, dashboard access, and instant Telegram delivery included. Don't miss out!</p>
             
             <div class="pricing-grid">
                 <?php foreach ($PRICING_PLANS as $plan): ?>
@@ -289,6 +289,9 @@ require_once __DIR__ . '/includes/header.php';
                     <h3 class="pricing-name"><?php echo $plan['name']; ?></h3>
 
                     <div class="pricing-price">
+                        <?php if (isset($plan['original_price']) && $plan['original_price'] > 0): ?>
+                        <span class="pricing-original">₹<?php echo $plan['original_price']; ?></span>
+                        <?php endif; ?>
                         <span class="pricing-currency">₹</span>
                         <span class="pricing-amount"><?php echo $plan['price']; ?></span>
                         <span class="pricing-period">/mo</span>

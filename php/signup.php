@@ -50,25 +50,23 @@ if (isLoggedIn()) {
             <form id="phone-form" class="space-y-8">
                 <div id="plan-badge" class="plan-badge">
                     <span class="plan-name"></span>
-                    <button type="button" class="change-plan-btn" onclick="window.history.back(); return false;">Change</button>
-                </div>
+                        <button type="button" class="change-plan-btn" onclick="window.location.href='/#pricing'; return false;">Change</button>                    </div>
 
-                <div class="form-group">
-                    <label class="form-label">Mobile Number*</label>
-                    <div class="phone-input-wrapper">
-                        <span class="phone-prefix">+91</span>
-                        <input 
-                            type="tel" 
-                            name="phone"
-                            id="phone-input"
-                            required
-                            maxlength="10"
-                            placeholder="98765 43210"
-                            class="form-input phone-input"
-                        />
+                    <div class="form-group">
+                        <label class="form-label">Mobile Number*</label>
+                        <div class="phone-input-wrapper">
+                            <span class="phone-prefix">+91</span>
+                            <input 
+                                type="tel" 
+                                name="phone"
+                                id="phone-input"
+                                required
+                                maxlength="10"
+                                placeholder="98765 43210"
+                                class="form-input phone-input"
+                            />
+                        </div>
                     </div>
-                </div>
-
                 <button type="submit" id="phone-submit-btn" class="btn btn-primary btn-full">
                     Send OTP
                 </button>
@@ -165,9 +163,9 @@ if (isLoggedIn()) {
         
         // Plan mapping
         const planNames = {
-            'alerts-only': 'Alerts Only',
-            'dashboard-only': 'Dashboard Only',
-            'alerts-dashboard': 'Alerts + Dashboard'
+            'alerts-only': 'Alerts Only - FREE',
+            'dashboard-only': 'Dashboard Only - FREE',
+            'alerts-dashboard': 'Alerts + Dashboard - FREE'
         };
 
         // Map plan IDs like React component
@@ -183,7 +181,7 @@ if (isLoggedIn()) {
         // Get plan from URL parameter, default to 'alerts-dashboard'
         const urlParams = new URLSearchParams(window.location.search);
         const planId = urlParams.get('plan') || 'alerts-dashboard';
-        const planName = planNames[planId] || 'Free Trial';
+        const planName = planNames[planId] || 'Free Plan';
         const mappedPlanId = getMappedPlanId(planId);
         
         // Form elements

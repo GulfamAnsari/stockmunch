@@ -12,7 +12,8 @@ $PRICING_PLANS = [
     [
         'id' => 'alerts-only',
         'name' => 'Alerts Only',
-        'price' => 150,
+        'original_price' => 150,
+        'price' => 0,
         'features' => [
             '30-Day Free Trial',
             'Real-time Telegram Alerts',
@@ -25,7 +26,8 @@ $PRICING_PLANS = [
     [
         'id' => 'dashboard-only',
         'name' => 'Dashboard Only',
-        'price' => 150,
+        'original_price' => 150,
+        'price' => 0,
         'features' => [
             '30-Day Free Trial',
             'Full Terminal Access',
@@ -39,7 +41,8 @@ $PRICING_PLANS = [
     [
         'id' => 'alerts-dashboard',
         'name' => 'Alerts + Dashboard',
-        'price' => 250,
+        'original_price' => 250,
+        'price' => 0,
         'popular' => true,
         'features' => [
             '30-Day Free Trial',

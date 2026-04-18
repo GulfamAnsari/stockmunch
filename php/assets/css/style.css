@@ -1391,6 +1391,14 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
 }
 
+.pricing-original {
+    font-size: 1.5rem;
+    color: var(--color-slate-500);
+    text-decoration: line-through;
+    margin-right: 0.75rem;
+    font-weight: 700;
+}
+
 .pricing-features {
     list-style: none;
     text-align: left;
