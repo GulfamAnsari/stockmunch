@@ -7,6 +7,9 @@ define('SITE_NAME', 'StockMunch');
 define('SITE_URL', 'https://stockmunch.com/');
 define('API_BASE_URL', 'https://stockmunch.com/api');
 
+// Google OAuth Configuration
+define('GOOGLE_CLIENT_ID', '178472119524-tpqsccasgq55enr1gugj5a9a83ramcp3.apps.googleusercontent.com'); // Update this with your Google Client ID
+
 // Pricing Plans
 $PRICING_PLANS = [
     [
