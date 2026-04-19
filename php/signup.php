@@ -482,77 +482,106 @@ if (isLoggedIn()) {
     <!-- Google Sign-In SDK -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const GOOGLE_CLIENT_ID = '<?php echo GOOGLE_CLIENT_ID; ?>';
-        const API_BASE_URL = '<?php echo API_BASE_URL; ?>';
-        
-        const googleSignupBtn = document.getElementById('google-signup-btn');
-        
-        if (googleSignupBtn) {
-            googleSignupBtn.addEventListener('click', async function(e) {
-                e.preventDefault();
-                
-                // Initialize Google Sign-In
-                google.accounts.id.initialize({
-                    client_id: GOOGLE_CLIENT_ID,
-                    callback: handleGoogleSignUp
-                });
-                
-                // Trigger the OAuth flow
-                google.accounts.id.renderButton(
-                    document.createElement('div'),
-                    { theme: 'outline', size: 'large' }
-                );
-                
-                google.accounts.id.prompt();
-            });
+    const GOOGLE_CLIENT_ID = '<?php echo GOOGLE_CLIENT_ID; ?>';
+    const API_BASE_URL = '<?php echo API_BASE_URL; ?>';
+    let googleInitialized = false;
+    
+    async function handleGoogleSignUp(response) {
+        if (!response.credential) {
+            console.error('No credential received from Google');
+            return;
         }
         
-        async function handleGoogleSignUp(response) {
-            if (!response.credential) {
-                console.error('No credential received from Google');
-                return;
+        try {
+            // Call unified Google sign-in endpoint
+            const apiResponse = await fetch(`${API_BASE_URL}/auth/google-signin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    google_token: response.credential
+                })
+            });
+            
+            const data = await apiResponse.json();
+            
+            if (apiResponse.ok && data.status === 'success') {
+                // Set auth token
+                document.cookie = `sm_token=${data.token}; max-age=2592000; path=/; SameSite=Lax`;
+                
+                if (data.is_new_user) {
+                    // New user - redirect to complete profile or dashboard
+                    setTimeout(() => {
+                        window.location.href = '/dashboard/';
+                    }, 500);
+                } else {
+                    // Existing user - redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = '/dashboard/';
+                    }, 500);
+                }
+            } else {
+                alert(data.message || 'Sign-in failed. Please try again.');
+            }
+        } catch (error) {
+            console.error('Google Sign-In Error:', error);
+            alert('An error occurred during sign-in. Please try again.');
+        }
+    }
+    
+    // Initialize Google Sign-In once when SDK is ready
+    function initializeGoogle() {
+        if (!googleInitialized && typeof google !== 'undefined') {
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleGoogleSignUp
+            });
+            googleInitialized = true;
+            
+            // Get or create container for hidden Google button
+            let googleContainer = document.getElementById('google-signup-container');
+            if (!googleContainer) {
+                googleContainer = document.createElement('div');
+                googleContainer.id = 'google-signup-container';
+                googleContainer.style.display = 'none';
+                document.body.appendChild(googleContainer);
             }
             
-            try {
-                // Call unified Google sign-in endpoint
-                const apiResponse = await fetch(`${API_BASE_URL}/auth/google-signin`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        google_token: response.credential
-                    })
-                });
-                
-                const data = await apiResponse.json();
-                
-                if (apiResponse.ok && data.status === 'success') {
-                    // Set auth token
-                    document.cookie = `sm_token=${data.token}; max-age=2592000; path=/; SameSite=Lax`;
-                    
-                    if (data.is_new_user) {
-                        // New user - redirect to complete profile or dashboard
-                        setTimeout(() => {
-                            window.location.href = '/dashboard/';
-                        }, 500);
-                    } else {
-                        // Existing user - redirect to dashboard
-                        setTimeout(() => {
-                            window.location.href = '/dashboard/';
-                        }, 500);
-                    }
-                } else {
-                    alert(data.message || 'Sign-in failed. Please try again.');
+            // Render the official Google button into hidden container
+            google.accounts.id.renderButton(
+                googleContainer,
+                {
+                    type: 'standard',
+                    theme: 'outline',
+                    size: 'large',
+                    text: 'continue_with',
+                    logo_alignment: 'center'
                 }
-            } catch (error) {
-                console.error('Google Sign-In Error:', error);
-                alert('An error occurred during sign-in. Please try again.');
+            );
+            
+            // Connect custom button to hidden Google button
+            const googleSignupBtn = document.getElementById('google-signup-btn');
+            if (googleSignupBtn) {
+                googleSignupBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Find and click the hidden Google button
+                    const hiddenBtn = googleContainer.querySelector('div[role="button"]');
+                    if (hiddenBtn) {
+                        hiddenBtn.click();
+                    }
+                });
             }
         }
-        
-        // Make handleGoogleSignUp globally available
-        window.handleGoogleSignUp = handleGoogleSignUp;
-    });
+    }
+    
+    // Initialize when DOM is ready and script is loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeGoogle);
+    } else {
+        initializeGoogle();
+    }
+    
+    // Also try to initialize on window load as fallback
+    window.addEventListener('load', initializeGoogle);
     </script>
 </body>
 </html>
