@@ -56,7 +56,7 @@ if (isLoggedIn()) {
             </div>
 
             <!-- Input Step -->
-            <form id="login-form" class="space-y-8">
+            <form id="login-form" class="space-y-4">
                 <div class="form-group">
                     <label class="form-label">Mobile Number*</label>
                     <div class="phone-input-wrapper">
@@ -113,7 +113,7 @@ if (isLoggedIn()) {
             </form>
 
             <!-- OTP Verification Step (Initially Hidden) -->
-            <form id="otp-form" class="space-y-8 hidden">
+            <form id="otp-form" class="space-y-4 hidden">
                 <div class="form-group">
                     <label class="form-label text-center block">Enter OTP</label>
                     <p class="otp-note">

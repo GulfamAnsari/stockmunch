@@ -136,7 +136,7 @@ const OverviewSection: React.FC<{
   const getTimeAgo = (dateStr: string) => {
     const now = new Date();
     const past = new Date(dateStr);
-    const diffMs = now.getTime() - past.getTime();
+    const diffMs = Math.abs(now.getTime() - past.getTime());
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
@@ -323,7 +323,7 @@ const ProfileSection: React.FC<{ data: ProfileData | null; loading: boolean }> =
   );
 
   return (
-    <div className="flex-grow p-4 md:p-12 animate-in fade-in duration-700">
+    <div className="flex-grow overflow-y-auto p-4 md:p-12 animate-in fade-in duration-700">
       <div className="max-w-4xl mx-auto">
         <div className="bg-[#111621] border border-white/[0.03] rounded-[3rem] p-10 md:p-16 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-5">

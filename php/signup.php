@@ -36,7 +36,6 @@ if (isLoggedIn()) {
         <div class="login-card">
             <div class="login-header">
                 <h1 id="signup-title">Create Account</h1>
-                <p id="plan-display" class="text-sm text-slate-400 mt-2"></p>
             </div>
 
             <div id="form-error" class="form-error hidden">
@@ -47,7 +46,7 @@ if (isLoggedIn()) {
             </div>
 
             <!-- Step 1: Phone Input -->
-            <form id="phone-form" class="space-y-8">
+            <form id="phone-form" class="space-y-4">
                 <div id="plan-badge" class="plan-badge">
                     <span class="plan-name"></span>
                         <button type="button" class="change-plan-btn" onclick="window.location.href='/#pricing'; return false;">Change</button>                    </div>
@@ -93,7 +92,7 @@ if (isLoggedIn()) {
             </form>
 
             <!-- Step 2: OTP Verification -->
-            <form id="otp-form" class="space-y-8 hidden">
+            <form id="otp-form" class="space-y-4 hidden">
                 <div class="form-group">
                     <label class="form-label text-center block">Enter OTP</label>
                     <p class="otp-note">
@@ -120,7 +119,7 @@ if (isLoggedIn()) {
             </form>
 
             <!-- Step 3: Profile Setup -->
-            <form id="profile-form" class="space-y-8 hidden">
+            <form id="profile-form" class="space-y-4 hidden">
                 <div class="form-group">
                     <label class="form-label">Full Name*</label>
                     <input 
@@ -208,12 +207,10 @@ if (isLoggedIn()) {
         
         // Title
         const signupTitle = document.getElementById('signup-title');
-        const planDisplay = document.getElementById('plan-display');
         const planBadge = document.getElementById('plan-badge');
         const planBadgeName = planBadge.querySelector('.plan-name');
         
         // Display selected plan
-        planDisplay.textContent = `Plan: ${planName}`;
         planBadgeName.textContent = planName;
         
         // Phone step
