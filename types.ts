@@ -16,6 +16,7 @@ export interface StockNews {
   image?: string;
   aiAnalysis?: string;
   userSentiment?: 'BULLISH' | 'BEARISH';
+  userRemark?: string;
   rawPublishedAt: string;
   bseCode: string;
   ctaUrl?: string;

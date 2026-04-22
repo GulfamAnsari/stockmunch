@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { StockNews } from "../types";
 import BseCards from "./BseCards";
+import { RemarkModal } from "./RemarkModal";
 import { API_BASE_URL } from "../config";
 
 const getAuthToken = () => {
@@ -57,15 +58,18 @@ export const NewsCard: React.FC<{
   news: any;
   isWatchlist?: boolean;
   onWatchlistAdd?: (item: any) => void;
+  onRemarkSave?: (itemId: string, remark: string) => void;
+  onRemarkOpen?: (itemId: string, currentRemark?: string) => void;
   onPriceUpdate?: (id: string, pct: number) => void;
   autoRefresh?: boolean;
   variant?: 'general' | 'bse';
-}> = ({ news, isWatchlist, onWatchlistAdd, onPriceUpdate, autoRefresh, variant = 'general' }) => {
-  const [showWatchlistOpts, setShowWatchlistOpts] = useState(false);
+}> = ({ news, isWatchlist, onWatchlistAdd, onRemarkSave, onRemarkOpen, onPriceUpdate, autoRefresh, variant = 'general' }) => {
+  const [isHighlighted, setIsHighlighted] = useState(true);
   const [isReadInternal, setIsReadInternal] = useState(() => isIdRead(news.id));
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAIInsights, setShowAIInsights] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const highlightTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const isBse = variant === 'bse';
 
@@ -94,8 +98,20 @@ export const NewsCard: React.FC<{
     return (now - publishedAt) < 30 * 60 * 1000;
   }, [news.rawPublishedAt]);
 
-  // Only highlight if monitor is on AND item is newly added
-  const shouldHighlight = autoRefresh && isActuallyNew && !isReadInternal && news.isNewlyAdded;
+  // Only highlight if monitor is on AND item is newly added AND isHighlighted is true
+  const shouldHighlight = autoRefresh && isActuallyNew && !isReadInternal && news.isNewlyAdded && isHighlighted && !isWatchlist;
+
+  // Auto-unhighlight after 5 minutes
+  useEffect(() => {
+    if (shouldHighlight) {
+      highlightTimerRef.current = setTimeout(() => {
+        setIsHighlighted(false);
+      }, 5 * 60 * 1000); // 5 minutes
+      return () => {
+        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+      };
+    }
+  }, [shouldHighlight]);
 
   const fetchLocalPercent = useCallback(async (manualUpdate = false) => {
     if (isBse) return;
@@ -142,10 +158,18 @@ export const NewsCard: React.FC<{
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    };
   }, []);
 
   const handleCardClick = () => {
+    // Remove highlight when card is clicked
+    if (shouldHighlight) {
+      setIsHighlighted(false);
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    }
     if (!isReadInternal) {
       setIsReadInternal(true);
       markAsRead(news.id);
@@ -184,13 +208,6 @@ export const NewsCard: React.FC<{
       {shouldHighlight && (
         <div className="absolute -top-3 right-4 px-2 py-0.5 bg-emerald-600 text-slate-950 text-[9px] font-black uppercase rounded z-20 shadow-xl animate-bounce">
           New Alert
-        </div>
-      )}
-
-      {!isBse && isWatchlist && news.userSentiment && (
-        <div className={`absolute -top-2 -left-2 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest z-30 border shadow-lg ${news.userSentiment === "BULLISH" ? "bg-emerald-600 text-slate-950 border-emerald-500" : "bg-rose-600 text-slate-100 border-rose-500"
-          }`}>
-          {news.userSentiment}
         </div>
       )}
 
@@ -306,27 +323,42 @@ export const NewsCard: React.FC<{
         <div className="pt-4 flex items-center justify-between border-t border-white/[0.05] gap-2 min-w-0">
           {!isBse ? (
             <div className="flex items-center gap-2 relative shrink-0" ref={dropdownRef}>
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowWatchlistOpts(!showWatchlistOpts); }}
-                className="px-3 py-1.5 bg-white/[0.03] hover:bg-emerald-500/10 text-[#9ca3af] hover:text-emerald-500 border border-white/[0.08] rounded-lg text-[8px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
-              >
-                + WATCHLIST
-              </button>
-              {showWatchlistOpts && (
-                <div className="absolute bottom-full left-0 mb-3 w-32 bg-[#1c2230] border border-white/10 rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-50 animate-in fade-in slide-in-from-bottom-2">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onWatchlistAdd?.({ ...news, userSentiment: "BULLISH" }); setShowWatchlistOpts(false); }}
-                    className="w-full text-left px-4 py-2 text-[9px] font-black text-emerald-500 hover:bg-emerald-600/10 uppercase tracking-widest border-b border-white/[0.05]"
-                  >
-                    BULLISH
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onWatchlistAdd?.({ ...news, userSentiment: "BEARISH" }); setShowWatchlistOpts(false); }}
-                    className="w-full text-left px-4 py-2 text-[9px] font-black text-rose-500 hover:bg-rose-600/10 uppercase tracking-widest"
-                  >
-                    BEARISH
-                  </button>
+              {isWatchlist ? (
+                <div className="flex items-center gap-1.5">
+                  {news.userRemark ? (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-600/10 rounded-lg border border-blue-500/30">
+                      <span className="text-[8px] font-black text-blue-400 uppercase tracking-widest max-w-[150px] truncate">
+                        {news.userRemark}
+                      </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onRemarkOpen?.(news.id, news.userRemark); }}
+                        className="p-0.5 text-blue-400 hover:text-blue-300 transition-colors"
+                        title="Edit remark"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onRemarkOpen?.(news.id); }}
+                      className="p-2 bg-white/[0.03] hover:bg-blue-500/10 text-[#9ca3af] hover:text-blue-400 border border-white/[0.08] rounded-lg transition-all"
+                      title="Add remark"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 0m0 0l3 0m-3 0v-3m0 3v3" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
+              ) : (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onWatchlistAdd?.({ ...news }); }}
+                  className="px-3 py-1.5 bg-white/[0.03] hover:bg-emerald-500/10 text-[#9ca3af] hover:text-emerald-500 border border-white/[0.08] rounded-lg text-[8px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
+                >
+                  + WATCHLIST
+                </button>
               )}
             </div>
           ) : (
@@ -352,6 +384,7 @@ export const NewsCard: React.FC<{
             )}
           </div>
         </div>
+
       </div>
     </div>
   );
@@ -395,6 +428,9 @@ const MarketTerminal: React.FC<{
   const [isReloadAnimating, setIsReloadAnimating] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(20);
   const [snackbar, setSnackbar] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
+  const [remarkModalOpen, setRemarkModalOpen] = useState(false);
+  const [remarkModalItemId, setRemarkModalItemId] = useState<string | null>(null);
+  const [remarkModalCurrentRemark, setRemarkModalCurrentRemark] = useState<string | undefined>(undefined);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const filterBtnRef = useRef<HTMLButtonElement>(null);
   const filterPanelRef = useRef<HTMLDivElement>(null);
@@ -631,6 +667,21 @@ const MarketTerminal: React.FC<{
       const newWatchlist = [item, ...prev.filter((w) => w.id !== item.id)];
       saveWatchlistToNode(newWatchlist);
       return newWatchlist;
+    });
+  };
+
+  const handleRemarkSave = (itemId: string, remark: string) => {
+    // Update in watchlist
+    setWatchlist((prev) => {
+      if (!Array.isArray(prev)) return [];
+      const newWatchlist = prev.map((w) => w.id === itemId ? { ...w, userRemark: remark } : w);
+      saveWatchlistToNode(newWatchlist);
+      return newWatchlist;
+    });
+    // Update in news feed
+    setNews((prev) => {
+      if (!Array.isArray(prev)) return [];
+      return prev.map((n) => n.id === itemId ? { ...n, userRemark: remark } : n);
     });
   };
 
@@ -975,7 +1026,7 @@ const MarketTerminal: React.FC<{
             <div className={gridClasses}>
               {pagedNews.map((newsItem) => (
                 <div key={newsItem.id} className="relative">
-                  <NewsCard news={newsItem} isWatchlist={activeTab === "WATCHLIST"} onWatchlistAdd={handleWatchlistAdd} onPriceUpdate={updatePriceChange} autoRefresh={autoRefresh} variant="general" />
+                  <NewsCard news={newsItem} isWatchlist={activeTab === "WATCHLIST"} onWatchlistAdd={handleWatchlistAdd} onRemarkSave={handleRemarkSave} onRemarkOpen={(id, remark) => { setRemarkModalItemId(id); setRemarkModalCurrentRemark(remark); setRemarkModalOpen(true); }} onPriceUpdate={updatePriceChange} autoRefresh={autoRefresh} variant="general" />
                   {activeTab === "WATCHLIST" && (<button onClick={() => removeFromWatchlist(newsItem.id)} className="absolute -top-3 -right-3 w-8 h-8 bg-rose-600 text-white rounded-full flex items-center justify-center text-[12px] font-black shadow-2xl hover:scale-110 transition-all z-40 border-4 border-[#0b0f1a]">✕</button>)}
                 </div>
               ))}
@@ -1130,6 +1181,20 @@ const MarketTerminal: React.FC<{
           </div>
         </div>
       )}
+
+      <RemarkModal
+        isOpen={remarkModalOpen}
+        currentRemark={remarkModalCurrentRemark}
+        onClose={() => setRemarkModalOpen(false)}
+        onSave={(remark) => {
+          if (remarkModalItemId) {
+            handleRemarkSave(remarkModalItemId, remark);
+            setRemarkModalOpen(false);
+            setRemarkModalItemId(null);
+            setRemarkModalCurrentRemark(undefined);
+          }
+        }}
+      />
     </div>
   );
 };
