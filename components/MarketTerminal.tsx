@@ -11,6 +11,19 @@ import BseCards from "./BseCards";
 import { RemarkModal } from "./RemarkModal";
 import { API_BASE_URL } from "../config";
 
+// Color scheme for remarks
+const REMARK_COLORS: { [key: string]: { bgColor: string; borderColor: string; textColor: string; icon: string } } = {
+  'Bullish': { bgColor: 'bg-emerald-500/10', borderColor: 'border-emerald-500/30', textColor: 'text-emerald-400', icon: '📈' },
+  'Bearish': { bgColor: 'bg-red-500/10', borderColor: 'border-red-500/30', textColor: 'text-red-400', icon: '📉' },
+  'Swing': { bgColor: 'bg-amber-500/10', borderColor: 'border-amber-500/30', textColor: 'text-amber-400', icon: '⚡' },
+  'Long Term': { bgColor: 'bg-cyan-500/10', borderColor: 'border-cyan-500/30', textColor: 'text-cyan-400', icon: '📅' },
+  'Positioned': { bgColor: 'bg-violet-500/10', borderColor: 'border-violet-500/30', textColor: 'text-violet-400', icon: '🎯' },
+};
+
+const getRemarkColor = (remark: string) => {
+  return REMARK_COLORS[remark] || { bgColor: 'bg-blue-600/10', borderColor: 'border-blue-500/30', textColor: 'text-blue-400', icon: '📝' };
+};
+
 const getAuthToken = () => {
   return document.cookie.split('; ').find(row => row.startsWith('sm_token='))?.split('=')[1] || null;
 };
@@ -64,7 +77,7 @@ export const NewsCard: React.FC<{
   autoRefresh?: boolean;
   variant?: 'general' | 'bse';
 }> = ({ news, isWatchlist, onWatchlistAdd, onRemarkSave, onRemarkOpen, onPriceUpdate, autoRefresh, variant = 'general' }) => {
-  const [isHighlighted, setIsHighlighted] = useState(true);
+  const [isHighlighted, setIsHighlighted] = useState(false);
   const [isReadInternal, setIsReadInternal] = useState(() => isIdRead(news.id));
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAIInsights, setShowAIInsights] = useState(true);
@@ -326,16 +339,17 @@ export const NewsCard: React.FC<{
               {isWatchlist ? (
                 <div className="flex items-center gap-1.5">
                   {news.userRemark ? (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-600/10 rounded-lg border border-blue-500/30">
-                      <span className="text-[8px] font-black text-blue-400 uppercase tracking-widest max-w-[150px] truncate">
+                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg border ${getRemarkColor(news.userRemark).bgColor} ${getRemarkColor(news.userRemark).borderColor}`}>
+                      <span className="text-sm">{getRemarkColor(news.userRemark).icon}</span>
+                      <span className={`text-[7px] font-black ${getRemarkColor(news.userRemark).textColor} uppercase tracking-widest max-w-[100px] truncate`}>
                         {news.userRemark}
                       </span>
                       <button
                         onClick={(e) => { e.stopPropagation(); onRemarkOpen?.(news.id, news.userRemark); }}
-                        className="p-0.5 text-blue-400 hover:text-blue-300 transition-colors"
-                        title="Edit remark"
+                        className={`p-0.5 ${getRemarkColor(news.userRemark).textColor} hover:opacity-75 transition-all`}
+                        title="Edit note"
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                       </button>
@@ -344,10 +358,10 @@ export const NewsCard: React.FC<{
                     <button
                       onClick={(e) => { e.stopPropagation(); onRemarkOpen?.(news.id); }}
                       className="p-2 bg-white/[0.03] hover:bg-blue-500/10 text-[#9ca3af] hover:text-blue-400 border border-white/[0.08] rounded-lg transition-all"
-                      title="Add remark"
+                      title="Add note"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 0m0 0l3 0m-3 0v-3m0 3v3" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
                   )}
@@ -424,6 +438,7 @@ const MarketTerminal: React.FC<{
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
   const [selectedStocksForFilter, setSelectedStocksForFilter] = useState<string[]>([]);
   const [newFilterName, setNewFilterName] = useState("");
+  const [filterSearchTerm, setFilterSearchTerm] = useState("");
   const [appliedFilterId, setAppliedFilterId] = useState<string | null>(null);
   const [isReloadAnimating, setIsReloadAnimating] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(20);
@@ -471,10 +486,17 @@ const MarketTerminal: React.FC<{
     }
   }, [userId]);
 
+  const showSnackbar = (message: string) => {
+    setSnackbar({ message, visible: true });
+    setTimeout(() => {
+      setSnackbar({ message: "", visible: false });
+    }, 3000);
+  };
+
   const saveWatchlistToNode = useCallback(async (list: any[]) => {
     if (!userId || !Array.isArray(list)) return;
     try {
-      await fetch(`${API_BASE_URL}/localstorage`, {
+      const response = await fetch(`${API_BASE_URL}/localstorage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -482,10 +504,14 @@ const MarketTerminal: React.FC<{
           watchlist: list
         })
       });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
     } catch (e) {
       console.warn("Failed to sync watchlist to node", e);
+      showSnackbar('Error: Could not save watchlist to server. Your data may not be synced.');
     }
-  }, [userId]);
+  }, [userId, showSnackbar]);
 
   const lastFetchedUserId = useRef<string | number | null>(null);
   useEffect(() => {
@@ -662,12 +688,18 @@ const MarketTerminal: React.FC<{
   };
 
   const handleWatchlistAdd = (item: any) => {
-    setWatchlist((prev) => {
-      if (!Array.isArray(prev)) return [item];
-      const newWatchlist = [item, ...prev.filter((w) => w.id !== item.id)];
-      saveWatchlistToNode(newWatchlist);
-      return newWatchlist;
-    });
+    try {
+      setWatchlist((prev) => {
+        if (!Array.isArray(prev)) return [item];
+        const newWatchlist = [item, ...prev.filter((w) => w.id !== item.id)];
+        saveWatchlistToNode(newWatchlist);
+        showSnackbar(`${item.symbol || item.bseCode || 'Item'} added to watchlist successfully!`);
+        return newWatchlist;
+      });
+    } catch (error) {
+      showSnackbar(`Failed to add ${item.symbol || item.bseCode || 'item'} to watchlist. Please try again.`);
+      console.error('Watchlist add error:', error);
+    }
   };
 
   const handleRemarkSave = (itemId: string, remark: string) => {
@@ -733,13 +765,6 @@ const MarketTerminal: React.FC<{
     const content = processedNews.map((n) => `${n.timestamp} | ${n.symbol || n.bseCode} | ${n.title}`).join("\n");
     navigator.clipboard.writeText(content);
     showSnackbar(`${processedNews.length} titles copied.`);
-  };
-
-  const showSnackbar = (message: string) => {
-    setSnackbar({ message, visible: true });
-    setTimeout(() => {
-      setSnackbar({ message: "", visible: false });
-    }, 3000);
   };
 
   const toggleFullScreen = () => {
@@ -1042,129 +1067,273 @@ const MarketTerminal: React.FC<{
       </footer>
 
       {showCustomFilterModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
-          <div className="bg-[#161b27] border border-white/10 rounded-[2rem] shadow-[0_30px_70px_rgba(0,0,0,0.8)] p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-black text-white uppercase tracking-tighter">Manage Filters</h3>
-              <button onClick={() => { setShowCustomFilterModal(false); setNewFilterName(""); setSelectedStocksForFilter([]); }} className="p-2 hover:bg-white/10 rounded-xl transition-all">
-                <svg className="w-5 h-5 text-slate-400 hover:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[200] p-4">
+          <div className="bg-gradient-to-br from-[#1a1f2e] to-[#0f1219] border border-white/10 rounded-3xl shadow-[0_30px_90px_rgba(0,0,0,0.9)] w-full max-w-3xl max-h-[85vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-[#1a1f2e] to-[#0f1219] border-b border-white/10 p-6 backdrop-blur-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 flex items-center justify-center bg-blue-600/20 rounded-xl border border-blue-500/30">
+                    <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-white uppercase tracking-tight">Manage Filters</h3>
+                    <p className="text-xs text-slate-400 mt-0.5">Create and manage your custom stock filters</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => { setShowCustomFilterModal(false); setNewFilterName(""); setSelectedStocksForFilter([]); setFilterSearchTerm(""); }} 
+                  className="p-2 hover:bg-white/10 rounded-lg transition-all text-slate-400 hover:text-white"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Saved Filters Section */}
-              <div className="space-y-4">
-                <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Saved Filters ({savedFilters.length})</h4>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {savedFilters.length === 0 ? (
-                    <p className="text-[11px] text-slate-500 italic">No filters saved yet</p>
-                  ) : (
-                    savedFilters.map((filter) => (
-                      <div key={filter.id} className={`p-4 rounded-xl border transition-all ${appliedFilterId === filter.id ? 'bg-blue-600/20 border-blue-600/50 shadow-lg' : 'bg-slate-900/40 border-white/10 hover:border-white/20'}`}>
-                        <div className="flex items-center justify-between mb-3">
-                          <h5 className={`text-[11px] font-black uppercase tracking-tight ${appliedFilterId === filter.id ? 'text-blue-300' : 'text-slate-200'}`}>
-                            {filter.name}
-                            {appliedFilterId === filter.id && <span className="ml-2 px-2 py-1 bg-blue-600 text-[9px] rounded-lg font-black">ACTIVE</span>}
-                          </h5>
-                        </div>
-                        <div className="mb-3 flex flex-wrap gap-2">
-                          {filter.stocks.map((stock) => (
-                            <span key={stock} className="px-2 py-1 bg-white/5 text-[9px] font-mono text-slate-400 rounded-lg border border-white/10">
-                              {stock}
-                            </span>
-                          ))}
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setAppliedFilterId(appliedFilterId === filter.id ? null : filter.id)}
-                            className={`flex-1 px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border ${appliedFilterId === filter.id ? 'bg-blue-600/20 text-blue-400 border-blue-600/50 hover:bg-blue-600/30' : 'bg-blue-600/10 text-blue-500 border-blue-600/30 hover:bg-blue-600/20'}`}
-                          >
-                            {appliedFilterId === filter.id ? 'Remove' : 'Apply'}
-                          </button>
-                          <button
-                            onClick={() => {
-                              const updated = savedFilters.filter(f => f.id !== filter.id);
-                              setSavedFilters(updated);
-                              localStorage.setItem('stockmunch_custom_filters', JSON.stringify(updated));
-                              if (appliedFilterId === filter.id) setAppliedFilterId(null);
-                            }}
-                            className="px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border bg-rose-600/10 text-rose-500 border-rose-600/30 hover:bg-rose-600/20"
-                          >
-                            Del
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              {/* Create New Filter Section */}
-              <div className="space-y-4">
-                <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Create New Filter</h4>
+            {/* Content */}
+            <div className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Saved Filters Section */}
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Filter Name</label>
-                    <input
-                      type="text"
-                      value={newFilterName}
-                      onChange={(e) => setNewFilterName(e.target.value)}
-                      placeholder="e.g., Tech Stocks"
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-[12px] text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/40 transition-all"
-                    />
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 flex items-center justify-center bg-emerald-600/20 rounded-lg border border-emerald-500/30">
+                      <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-white uppercase tracking-tight">Saved Filters</h4>
+                      <p className="text-xs text-slate-500">{savedFilters.length} filter(s)</p>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Select Stocks</label>
-                    <div className="space-y-2 max-h-48 overflow-y-auto bg-slate-950/30 rounded-xl p-3 border border-white/5">
-                      {Array.from(new Set(processedNews.map(n => n.symbol || n.companyName))).filter(Boolean).map((stock) => (
-                        <label key={stock} className="flex items-center space-x-3 cursor-pointer group p-2 hover:bg-white/[0.02] rounded-lg transition-all">
-                          <div className="relative flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={selectedStocksForFilter.includes(stock as string)}
-                              onChange={(e) => {
-                                if (e.target.checked) setSelectedStocksForFilter([...selectedStocksForFilter, stock as string]);
-                                else setSelectedStocksForFilter(selectedStocksForFilter.filter(s => s !== stock));
-                              }}
-                              className="peer h-4 w-4 appearance-none border border-white/10 rounded-lg bg-slate-950 checked:bg-emerald-600 checked:border-emerald-600 transition-all cursor-pointer"
-                            />
-                            <svg className="absolute w-3 h-3 text-white left-0.5 pointer-events-none hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4"><path d="M5 13l4 4L19 7" /></svg>
+                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    {savedFilters.length === 0 ? (
+                      <div className="text-center py-12 px-4">
+                        <div className="w-12 h-12 mx-auto mb-3 flex items-center justify-center bg-slate-800/50 rounded-xl">
+                          <svg className="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                          </svg>
+                        </div>
+                        <p className="text-xs text-slate-500 italic">No filters saved yet</p>
+                        <p className="text-xs text-slate-600 mt-1">Create your first filter →</p>
+                      </div>
+                    ) : (
+                      savedFilters.map((filter) => (
+                        <div 
+                          key={filter.id} 
+                          className={`p-4 rounded-xl border transition-all duration-200 ${
+                            appliedFilterId === filter.id 
+                              ? 'bg-gradient-to-r from-blue-600/15 to-blue-500/10 border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.2)]' 
+                              : 'bg-slate-800/30 border-white/5 hover:border-white/15 hover:bg-slate-800/50'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h5 className={`text-sm font-black uppercase tracking-tight ${
+                                  appliedFilterId === filter.id ? 'text-blue-300' : 'text-slate-100'
+                                }`}>
+                                  {filter.name}
+                                </h5>
+                                {appliedFilterId === filter.id && (
+                                  <span className="px-2 py-0.5 bg-blue-600/30 border border-blue-500/50 text-blue-300 text-[8px] rounded-lg font-black">✓ ACTIVE</span>
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-500 mt-1">{filter.stocks.length} stock(s)</p>
+                            </div>
                           </div>
-                          <span className="text-[10px] font-semibold text-slate-300 group-hover:text-slate-100 transition-colors">{stock}</span>
-                        </label>
-                      ))}
-                    </div>
-                    {selectedStocksForFilter.length > 0 && (
-                      <div className="mt-2 text-[9px] text-emerald-500 font-black">{selectedStocksForFilter.length} stock(s) selected</div>
+                          <div className="mb-3 flex flex-wrap gap-1.5">
+                            {filter.stocks.slice(0, 3).map((stock) => (
+                              <span key={stock} className="px-2 py-1 bg-blue-600/10 text-blue-400 text-[8px] font-mono rounded-lg border border-blue-600/30">
+                                {stock}
+                              </span>
+                            ))}
+                            {filter.stocks.length > 3 && (
+                              <span className="px-2 py-1 bg-slate-700/50 text-slate-400 text-[8px] font-mono rounded-lg border border-slate-600/30">
+                                +{filter.stocks.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setAppliedFilterId(appliedFilterId === filter.id ? null : filter.id)}
+                              className={`flex-1 px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border flex items-center justify-center gap-1.5 ${
+                                appliedFilterId === filter.id 
+                                  ? 'bg-blue-600/30 text-blue-300 border-blue-500/40 hover:bg-blue-600/40' 
+                                  : 'bg-blue-600/10 text-blue-500 border-blue-600/30 hover:bg-blue-600/20'
+                              }`}
+                            >
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={appliedFilterId === filter.id ? "M6 18L18 6M6 6l12 12" : "M12 4v16m8-8H4"} />
+                              </svg>
+                              {appliedFilterId === filter.id ? 'Remove' : 'Apply'}
+                            </button>
+                            <button
+                              onClick={() => {
+                                const updated = savedFilters.filter(f => f.id !== filter.id);
+                                setSavedFilters(updated);
+                                localStorage.setItem('stockmunch_custom_filters', JSON.stringify(updated));
+                                if (appliedFilterId === filter.id) setAppliedFilterId(null);
+                              }}
+                              className="px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border bg-rose-600/10 text-rose-500 border-rose-600/30 hover:bg-rose-600/20"
+                            >
+                              ✕ Del
+                            </button>
+                          </div>
+                        </div>
+                      ))
                     )}
                   </div>
+                </div>
 
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => {
-                        if (newFilterName && selectedStocksForFilter.length > 0) {
-                          const newFilter: SavedFilter = {
-                            id: Date.now().toString(),
-                            name: newFilterName,
-                            stocks: selectedStocksForFilter
-                          };
-                          const updated = [...savedFilters, newFilter];
-                          setSavedFilters(updated);
-                          localStorage.setItem('stockmunch_custom_filters', JSON.stringify(updated));
-                          setAppliedFilterId(newFilter.id);
-                          setNewFilterName("");
-                          setSelectedStocksForFilter([]);
-                        }
-                      }}
-                      disabled={!newFilterName || selectedStocksForFilter.length === 0}
-                      className="flex-1 px-4 py-3 bg-emerald-600 disabled:bg-slate-700 text-white font-black rounded-xl text-[10px] uppercase tracking-widest transition-all hover:bg-emerald-700 disabled:cursor-not-allowed"
-                    >
-                      Save & Apply
-                    </button>
-                    <button onClick={() => { setShowCustomFilterModal(false); setNewFilterName(""); setSelectedStocksForFilter([]); }} className="flex-1 px-4 py-3 bg-slate-900 border border-white/10 text-slate-300 font-black rounded-xl text-[10px] uppercase tracking-widest transition-all hover:bg-slate-800">
-                      Close
-                    </button>
+                {/* Create New Filter Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 flex items-center justify-center bg-amber-600/20 rounded-lg border border-amber-500/30">
+                      <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-white uppercase tracking-tight">Create New</h4>
+                      <p className="text-xs text-slate-500">Add a custom filter</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* Filter Name Input */}
+                    <div>
+                      <label className="text-xs font-black text-slate-300 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+                        <svg className="w-3 h-3 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                        Filter Name
+                      </label>
+                      <input
+                        type="text"
+                        value={newFilterName}
+                        onChange={(e) => setNewFilterName(e.target.value)}
+                        placeholder="e.g., Tech Giants, Pharma Stocks..."
+                        className="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 transition-all"
+                      />
+                    </div>
+
+                    {/* Stock Selection */}
+                    <div>
+                      <label className="text-xs font-black text-slate-300 uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+                        <svg className="w-3 h-3 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Select Stocks
+                      </label>
+                      
+                      {/* Search Box */}
+                      <div className="relative mb-3">
+                        <svg className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                          type="text"
+                          value={filterSearchTerm}
+                          onChange={(e) => setFilterSearchTerm(e.target.value)}
+                          placeholder="Search stocks..."
+                          className="w-full bg-slate-900/50 border border-white/10 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 transition-all"
+                        />
+                      </div>
+
+                      {/* Stock List */}
+                      <div className="space-y-1 max-h-40 overflow-y-auto bg-slate-900/30 rounded-lg p-3 border border-white/5">
+                        {Array.from(new Set(processedNews.map(n => n.symbol || n.companyName))).filter(Boolean).filter((stock) => 
+                          (stock as string).toLowerCase().includes(filterSearchTerm.toLowerCase())
+                        ).length === 0 ? (
+                          <p className="text-xs text-slate-500 text-center py-4">No stocks found</p>
+                        ) : (
+                          Array.from(new Set(processedNews.map(n => n.symbol || n.companyName))).filter(Boolean).filter((stock) => 
+                            (stock as string).toLowerCase().includes(filterSearchTerm.toLowerCase())
+                          ).map((stock) => (
+                            <label 
+                              key={stock} 
+                              className="flex items-center gap-2 p-2 hover:bg-white/5 rounded-lg transition-all cursor-pointer group"
+                            >
+                              <div className="relative flex items-center">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedStocksForFilter.includes(stock as string)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) setSelectedStocksForFilter([...selectedStocksForFilter, stock as string]);
+                                    else setSelectedStocksForFilter(selectedStocksForFilter.filter(s => s !== stock));
+                                  }}
+                                  className="peer h-4 w-4 appearance-none border border-white/20 rounded-md bg-slate-800 checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer"
+                                />
+                                <svg className="absolute w-3 h-3 text-white left-0.5 top-0.5 pointer-events-none hidden peer-checked:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
+                                  <path d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                              <span className="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors flex-1">{stock}</span>
+                              {selectedStocksForFilter.includes(stock as string) && (
+                                <span className="text-[8px] text-blue-400 font-black">✓</span>
+                              )}
+                            </label>
+                          ))
+                        )}
+                      </div>
+
+                      {/* Selected Count */}
+                      {selectedStocksForFilter.length > 0 && (
+                        <div className="mt-2 px-3 py-1.5 bg-blue-600/10 border border-blue-500/30 rounded-lg flex items-center justify-between">
+                          <span className="text-xs font-black text-blue-400">
+                            {selectedStocksForFilter.length} stock(s) selected
+                          </span>
+                          <button
+                            onClick={() => setSelectedStocksForFilter([])}
+                            className="text-xs text-blue-500 hover:text-blue-400 font-black transition-colors"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        onClick={() => {
+                          if (newFilterName && selectedStocksForFilter.length > 0) {
+                            const newFilter: SavedFilter = {
+                              id: Date.now().toString(),
+                              name: newFilterName,
+                              stocks: selectedStocksForFilter
+                            };
+                            const updated = [...savedFilters, newFilter];
+                            setSavedFilters(updated);
+                            localStorage.setItem('stockmunch_custom_filters', JSON.stringify(updated));
+                            setAppliedFilterId(newFilter.id);
+                            setNewFilterName("");
+                            setSelectedStocksForFilter([]);
+                            setFilterSearchTerm("");
+                          }
+                        }}
+                        disabled={!newFilterName || selectedStocksForFilter.length === 0}
+                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 disabled:from-slate-700 disabled:to-slate-700 text-white font-black rounded-lg text-xs uppercase tracking-widest transition-all hover:shadow-lg hover:shadow-blue-500/30 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Save & Apply
+                      </button>
+                      <button 
+                        onClick={() => { setShowCustomFilterModal(false); setNewFilterName(""); setSelectedStocksForFilter([]); setFilterSearchTerm(""); }} 
+                        className="flex-1 px-4 py-2.5 bg-slate-800/50 border border-white/10 text-slate-300 hover:text-white font-black rounded-lg text-xs uppercase tracking-widest transition-all hover:bg-slate-800 flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Close
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
