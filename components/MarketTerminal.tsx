@@ -111,6 +111,13 @@ export const NewsCard: React.FC<{
     return (now - publishedAt) < 30 * 60 * 1000;
   }, [news.rawPublishedAt]);
 
+  // Initialize highlight state when conditions are met
+  useEffect(() => {
+    if (autoRefresh && isActuallyNew && !isReadInternal && news.isNewlyAdded && !isWatchlist && !isHighlighted) {
+      setIsHighlighted(true);
+    }
+  }, [autoRefresh, isActuallyNew, isReadInternal, news.isNewlyAdded, isWatchlist]);
+
   // Only highlight if monitor is on AND item is newly added AND isHighlighted is true
   const shouldHighlight = autoRefresh && isActuallyNew && !isReadInternal && news.isNewlyAdded && isHighlighted && !isWatchlist;
 
