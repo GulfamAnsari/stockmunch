@@ -77,12 +77,13 @@ export const NewsCard: React.FC<{
   autoRefresh?: boolean;
   variant?: 'general' | 'bse';
 }> = ({ news, isWatchlist, onWatchlistAdd, onRemarkSave, onRemarkOpen, onPriceUpdate, autoRefresh, variant = 'general' }) => {
-  const [isHighlighted, setIsHighlighted] = useState(false);
   const [isReadInternal, setIsReadInternal] = useState(() => isIdRead(news.id));
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAIInsights, setShowAIInsights] = useState(true);
+  const [shouldHighlight, setShouldHighlight] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const highlightTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const hasBeenHighlightedRef = useRef<boolean>(false);
 
   const isBse = variant === 'bse';
 
@@ -102,31 +103,20 @@ export const NewsCard: React.FC<{
     setIsReadInternal(isIdRead(news.id));
   }, [news.id]);
 
-  const isActuallyNew = useMemo(() => {
-    if (!news.rawPublishedAt) return false;
-    const publishedAt = new Date(news.rawPublishedAt).getTime();
-    if (isNaN(publishedAt)) return false;
-    const now = Date.now();
-    // Highlight if item is less than 30 minutes old
-    return (now - publishedAt) < 30 * 60 * 1000;
-  }, [news.rawPublishedAt]);
-
-  // Initialize highlight state when conditions are met
+  // Highlight if item is newly added and conditions are met
   useEffect(() => {
-    if (autoRefresh && isActuallyNew && !isReadInternal && news.isNewlyAdded && !isWatchlist && !isHighlighted) {
-      setIsHighlighted(true);
+    if (autoRefresh && news.isNewlyAdded && !isReadInternal && !isWatchlist && !hasBeenHighlightedRef.current) {
+      setShouldHighlight(true);
+      hasBeenHighlightedRef.current = true;
     }
-  }, [autoRefresh, isActuallyNew, isReadInternal, news.isNewlyAdded, isWatchlist]);
+  }, [autoRefresh, news.isNewlyAdded, isReadInternal, isWatchlist]);
 
-  // Only highlight if monitor is on AND item is newly added AND isHighlighted is true
-  const shouldHighlight = autoRefresh && isActuallyNew && !isReadInternal && news.isNewlyAdded && isHighlighted && !isWatchlist;
-
-  // Auto-unhighlight after 5 minutes
+  // Auto-unhighlight after 30 minutes
   useEffect(() => {
     if (shouldHighlight) {
       highlightTimerRef.current = setTimeout(() => {
-        setIsHighlighted(false);
-      }, 5 * 60 * 1000); // 5 minutes
+        setShouldHighlight(false);
+      }, 30 * 60 * 1000); // 30 minutes
       return () => {
         if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
       };
@@ -187,7 +177,7 @@ export const NewsCard: React.FC<{
   const handleCardClick = () => {
     // Remove highlight when card is clicked
     if (shouldHighlight) {
-      setIsHighlighted(false);
+      setShouldHighlight(false);
       if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
     }
     if (!isReadInternal) {
@@ -635,7 +625,8 @@ const MarketTerminal: React.FC<{
 
         // Trigger sound only if new items found and it's a poll (not initial load)
         const incomingIds = allItems.map(item => item.id);
-        const hasBrandNew = incomingIds.some(id => !knownIdsRef.current.has(id));
+        const brandNewIds = new Set(incomingIds.filter(id => !knownIdsRef.current.has(id)));
+        const hasBrandNew = brandNewIds.size > 0;
 
         if (hasBrandNew && knownIdsRef.current.size > 0 && isAuto) {
           playAlertSound();
@@ -647,7 +638,7 @@ const MarketTerminal: React.FC<{
         // Mark newly added items only when autoRefresh is active
         const allItemsWithNewFlag = allItems.map(item => ({
           ...item,
-          isNewlyAdded: autoRefresh && (previousNewsCountRef.current > 0 && !knownIdsRef.current.has(item.id))
+          isNewlyAdded: autoRefresh && (previousNewsCountRef.current > 0 && brandNewIds.has(item.id))
         }));
 
         previousNewsCountRef.current = allItems.length;
@@ -667,7 +658,7 @@ const MarketTerminal: React.FC<{
       isFetchingRef.current = false;
       setLoading(false);
     }
-  }, [fromDateInput, toDateInput, activeTab]);
+  }, [fromDateInput, toDateInput, activeTab, autoRefresh]);
 
   useEffect(() => {
     if (activeTab === "ALL FEEDS") {
